@@ -1,0 +1,31 @@
+﻿@model BaseConLogin.Models.Tag
+@{
+    ViewData["Title"] = "Eliminar Tag";
+}
+
+<h1>Eliminar Tag</h1>
+<hr />
+
+<div class="alert alert-danger">
+    <strong>¿Estás seguro que quieres eliminar este Tag?</strong>
+</div>
+
+<div class="card p-4 shadow-sm">
+    <dl class="row">
+        <dt class="col-sm-2">Id</dt>
+        <dd class="col-sm-10">@Model.Id</dd>
+
+        <dt class="col-sm-2">Nombre</dt>
+        <dd class="col-sm-10">
+            <span class="badge bg-info text-dark fs-6">@Model.Nombre</span>
+        </dd>
+    </dl>
+</div>
+
+<form asp-action="Delete" class="mt-3">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">
+        <i class="bi bi-trash"></i> Eliminar
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

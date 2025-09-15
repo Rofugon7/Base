@@ -1,0 +1,52 @@
+﻿@model IEnumerable<BaseConLogin.ViewModels.TagViewModel>
+@{
+    ViewData["Title"] = "Listado de Tags";
+}
+
+<h1 class="mb-4">Listado de Tags</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg"></i> Nuevo Tag
+    </a>
+</p>
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre</th>
+            <th style="width: 150px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tag in Model)
+        {
+            <tr>
+                <td>
+                    <span class="badge bg-info text-dark fs-6">@tag.Nombre</span>
+                </td>
+                <td>
+                    @* <a asp-action="Edit" asp-route-id="@tag.Id" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a asp-action="Details" asp-route-id="@tag.Id" class="btn btn-info btn-sm text-white">
+                        <i class="bi bi-eye"></i>
+                    </a> *@
+                    @if (tag.EstaEnUso)
+                    {
+                        <span title="Tag en uso">
+                        <button class="btn btn-sm btn-danger" disabled title="Tag en uso, no se puede borrar.">Borrar</button>
+                        </span>
+                    }
+                    else
+                    {
+                        <a asp-action="Delete" asp-route-id="@tag.Id" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash">Borrar</i>
+                        </a>
+                    }
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

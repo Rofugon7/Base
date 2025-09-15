@@ -1,0 +1,117 @@
+﻿@model BaseConLogin.Models.Proyectos
+
+@{
+    ViewData["Title"] = "Detalles del Proyecto";
+}
+
+<h2>@ViewData["Title"]</h2>
+<dl class="row">
+    <dt class="col-sm-2">Nombre</dt>
+    <dd class="col-sm-10">@Model.Nombre</dd>
+
+    <dt class="col-sm-2">Subtitulo</dt>
+    <dd class="col-sm-10">@Model.Subtitulo</dd>
+
+    <dt class="col-sm-2">Descripción</dt>
+    <dd class="col-sm-10">@Model.Descripcion</dd>
+
+    <dt class="col-sm-2">Aportaciones</dt>
+    <dd class="col-sm-10">@Model.Aportaciones</dd>
+
+    <dt class="col-sm-2">Fecha Inicio</dt>
+    <dd class="col-sm-10">@Model.FechaInicio</dd>
+
+    <dt class="col-sm-2">Fecha Fin</dt>
+    <dd class="col-sm-10">@Model.FechaFin</dd>
+
+    <dt class="col-sm-2">Autor</dt>
+    <dd class="col-sm-10">@ViewBag.AutorNombre ?? "Desconocido"</dd>
+
+    <dt class="col-sm-2">Categoría</dt>
+    <dd class="col-sm-10">@Model.Categoria</dd>
+
+    <dt class="col-sm-2">Ubicación</dt>
+    <dd class="col-sm-10">@Model.Ubicacion</dd>
+
+    <dt class="col-sm-2">Adelanto</dt>
+    <dd class="col-sm-10">@Model.Adelanto</dd>
+
+    <dt class="col-sm-2">Recompensa</dt>
+    <dd class="col-sm-10">@Model.Recompensa</dd>
+
+    <dt class="col-sm-2">Calendario</dt>
+    <dd class="col-sm-10">@Model.Calendario</dd>
+
+    <dt class="col-sm-2">Tags</dt>
+    <dd class="col-sm-10">
+        @if (Model.ProyectoTags != null && Model.ProyectoTags.Any())
+        {
+            @foreach (var tag in Model.ProyectoTags.Select(pt => pt.Tag.Nombre))
+            {
+                <span class="badge bg-primary me-1">@tag</span>
+            }
+        }
+        else
+        {
+            <span class="text-muted">No hay tags asociados</span>
+        }
+    </dd>
+
+
+    @if (!string.IsNullOrEmpty(Model.ImagenPortada))
+    {
+        <div class="mb-3">
+            <label class="form-label">Imagen de Portada</label>
+            <div>
+                <img src="~/@Model.ImagenPortada" alt="Imagen de portada" class="img-fluid rounded border mb-2" style="max-width: 300px;" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No hay imagen de portada.</p>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.ArchivoPdf))
+    {
+        <div class="mb-3">
+            <label class="form-label">Reglamento (PDF)</label>
+            <div>
+                <iframe src="@(Url.Content("~/" + Model.ArchivoPdf) + "#toolbar=0")" width="100%" height="400px" style="border:1px solid #ccc; border-radius:8px;"></iframe>
+
+            </div>
+            <a href="@(Url.Content("~/" + Model.ArchivoPdf) )" target="_blank" class="btn btn-outline-primary mt-2">
+                Ver PDF en grande
+            </a>
+        </div>
+    }
+    else
+    {
+        <p class="text-muted">No hay archivo PDF subido.</p>
+    }
+</dl>
+@if (Model.Autor == ViewBag.UserId)
+{
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+}
+<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+
+<style>
+    .pdf-preview-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        height: 500px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+
+    .pdf-frame {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 8px;
+    }
+</style>

@@ -1,0 +1,25 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Authorization
+
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<h2>Bienvenido a ArcoWeb</h2>
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">¡Bienvenido, @User.Identity.Name!</h5>
+            <p class="card-text">Accede directamente a la gestión de tus proyectos.</p>
+            <a asp-controller="Proyectos" asp-action="Index" class="btn btn-primary">Ir al listado de proyectos</a>
+        </div>
+    </div>
+}
+else
+{
+    <p class="mt-3">
+        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Inicia sesión para gestionar proyectos</a>
+    </p>
+}

@@ -1,0 +1,24 @@
+﻿@model BaseConLogin.Models.Tag
+@{
+    ViewData["Title"] = "Detalles del Tag";
+}
+
+<h1>Detalles del Tag</h1>
+<hr />
+
+<div class="card p-4 shadow-sm">
+    <dl class="row">
+        <dt class="col-sm-2">Id</dt>
+        <dd class="col-sm-10">@Model.Id</dd>
+
+        <dt class="col-sm-2">Nombre</dt>
+        <dd class="col-sm-10">
+            <span class="badge bg-info text-dark fs-6">@Model.Nombre</span>
+        </dd>
+    </dl>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+    <i class="bi bi-pencil-square"></i> Editar
+</a>
+<a asp-action="Index" class="btn btn-secondary">Volver</a>

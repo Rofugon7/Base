@@ -1,0 +1,26 @@
+﻿@model BaseConLogin.Models.Tag
+@{
+    ViewData["Title"] = "Crear Tag";
+}
+
+<h1>Crear Tag</h1>
+<hr />
+
+<form asp-action="Create" class="card p-4 shadow-sm">
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        <i class="bi bi-save"></i> Guardar
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">Volver</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

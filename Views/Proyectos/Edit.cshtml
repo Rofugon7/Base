@@ -1,0 +1,155 @@
+﻿@model BaseConLogin.Models.Proyectos
+
+@{
+    ViewData["Title"] = "Editar Proyecto";
+}
+
+<h2>Editar Proyecto</h2>
+
+<form asp-action="Edit" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Nombre" class="control-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Subtitulo" class="control-label"></label>
+        <input asp-for="Subtitulo" class="form-control" />
+        <span asp-validation-for="Subtitulo" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Descripcion" class="control-label"></label>
+        <textarea asp-for="Descripcion" class="form-control"></textarea>
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Aportaciones" class="control-label"></label>
+        <input asp-for="Aportaciones" class="form-control" />
+        <span asp-validation-for="Aportaciones" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="FechaInicio" class="control-label"></label>
+        <input asp-for="FechaInicio" class="form-control" type="date" />
+        <span asp-validation-for="FechaInicio" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="FechaFin" class="control-label"></label>
+        <input asp-for="FechaFin" class="form-control" type="date" />
+        <span asp-validation-for="FechaFin" class="text-danger"></span>
+    </div>
+
+    @* <div class="form-group">
+        <label asp-for="Autor" class="control-label"></label>
+        <input asp-for="Autor" class="form-control" readonly />
+        <span asp-validation-for="Autor" class="text-danger"></span>
+    </div> *@
+
+    <div class="form-group">
+        <label asp-for="Categoria" class="control-label"></label>
+        <input asp-for="Categoria" class="form-control" />
+        <span asp-validation-for="Categoria" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Ubicacion" class="control-label"></label>
+        <input asp-for="Ubicacion" class="form-control" />
+        <span asp-validation-for="Ubicacion" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Adelanto" class="control-label"></label>
+        <textarea asp-for="Adelanto" class="form-control"></textarea>
+        <span asp-validation-for="Adelanto" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Recompensa" class="control-label"></label>
+        <textarea asp-for="Recompensa" class="form-control"></textarea>
+        <span asp-validation-for="Recompensa" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Calendario" class="control-label"></label>
+        <input asp-for="Calendario" class="form-control" />
+        <span asp-validation-for="Calendario" class="text-danger"></span>
+    </div>
+
+    <!-- Mostrar imagen actual si existe -->
+    @if (!string.IsNullOrEmpty(Model.ImagenPortada))
+    {
+        <div class="mb-3">
+            <label class="form-label">Imagen de Portada actual</label>
+            <div>
+                <img src="~/@Model.ImagenPortada" alt="Imagen de portada" class="img-fluid rounded border mb-2" style="max-width: 300px;" />
+            </div>
+        </div>
+    }
+
+    <!-- Campo para subir nueva imagen opcional -->
+    <div class="mb-3">
+        <label class="form-label">Cambiar imagen de portada (opcional)</label>
+        <input type="file" name="imagenPortadaFile" class="form-control" accept="image/*" />
+    </div>
+
+    <!-- Mostrar PDF actual si existe -->
+    @if (!string.IsNullOrEmpty(Model.ArchivoPdf))
+    {
+        <div class="mb-3">
+            <label class="form-label">Reglamento actual (PDF)</label>
+            <div>
+                <iframe src="@(Url.Content("~/" + Model.ArchivoPdf) + "#toolbar=0")" width="100%" height="400px" style="border:1px solid #ccc; border-radius:8px;"></iframe>
+            </div>
+            <a href="@(Url.Content("~/" + Model.ArchivoPdf))" target="_blank" class="btn btn-outline-primary mt-2">
+                Ver PDF en grande
+            </a>
+        </div>
+    }
+
+    <!-- Campo para subir nuevo PDF opcional -->
+    <div class="mb-3">
+        <label class="form-label">Cambiar reglamento (PDF) (opcional)</label>
+        <input type="file" name="archivoPdfFile" class="form-control" accept=".pdf" />
+    </div>
+
+    <!-- Selector múltiple de tags -->
+    <div class="form-group">
+        <label>Tags</label>
+        @{
+            var tags = ViewBag.Tags as List<Tag>; // Modelo de tu clase Tag
+            var selected = ViewBag.SelectedTags as int[];
+        }
+        <select name="selectedTags" class="form-control" multiple>
+            @foreach (var tag in tags ?? new List<Tag>())
+            {
+                if (selected != null && selected.Contains(tag.Id))
+                {
+                    <option value="@tag.Id" selected="selected">@tag.Nombre</option>
+                }
+                else
+                {
+                    <option value="@tag.Id">@tag.Nombre</option>
+                }
+            }
+
+        </select>
+        <small>Puedes seleccionar varios usando Ctrl + click</small>
+    </div>
+
+    @if (Model.Autor == ViewBag.UserId)
+    {
+        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

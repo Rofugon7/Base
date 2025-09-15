@@ -1,0 +1,62 @@
+﻿@model BaseConLogin.Models.ContactMessage
+@{
+    ViewData["Title"] = "Contacto";
+}
+
+<div class="container py-5">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success text-center">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-5 mb-4">
+            <h3>Contacto</h3>
+            <p><strong>Teléfono:</strong> 658144377</p>
+            <p><strong>Email:</strong> <a href="mailto:rofugon7@hotmail.com">rofugon7@hotmail.com</a></p>
+            <p><strong>Horario:</strong> Lunes a viernes de 10:00 a 14:00 y de 17:00 a 20:00</p>
+            <a href="https://wa.me/34658144377" target="_blank" class="btn btn-success">
+                <i class="bi bi-whatsapp"></i> Enviar WhatsApp
+            </a>
+        </div>
+        <div class="col-md-7">
+            <h3>Envíanos un mensaje</h3>
+            <form asp-action="Index" method="post">
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Phone" class="form-label"></label>
+                    <input asp-for="Phone" class="form-control" />
+                    <span asp-validation-for="Phone" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Message" class="form-label"></label>
+                    <textarea asp-for="Message" class="form-control"></textarea>
+                    <span asp-validation-for="Message" class="text-danger"></span>
+                </div>
+                <div class="mb-3 form-check">
+                    <input asp-for="AcceptedPrivacyPolicy" class="form-check-input" />
+                    <label asp-for="AcceptedPrivacyPolicy" class="form-check-label">
+                        Acepto la política de privacidad
+                    </label>
+                    <span asp-validation-for="AcceptedPrivacyPolicy" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Enviar</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
