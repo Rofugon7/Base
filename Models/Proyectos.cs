@@ -47,6 +47,7 @@ namespace BaseConLogin.Models
         [MaxLength(600)]
         public string? Recompensa { get; set; }
 
+
         [MaxLength(300)]
         public string? Calendario { get; set; }
 
