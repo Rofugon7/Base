@@ -56,7 +56,7 @@ namespace BaseConLogin.Controllers
 
         // GET: Proyectos/Details/5
         public async Task<IActionResult> Details(int? id)
-        {
+        { 
             if (id == null) return NotFound();
 
             var proyecto = await _context.Proyectos
