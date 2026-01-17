@@ -1,5 +1,8 @@
 using BaseConLogin.Data;
 using BaseConLogin.Models;
+using BaseConLogin.Services.Carritos;
+using BaseConLogin.Services.Productos;
+using BaseConLogin.Services.Seguridad;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +20,15 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<IProductoService, ProductoService>();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<SessionCarritoService>();
+
+builder.Services.AddSession();
+builder.Services.AddScoped<ITiendaAuthorizationService, TiendaAuthorizationService>();
+
 
 
 if (builder.Environment.IsDevelopment())
@@ -49,6 +61,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
@@ -110,7 +124,7 @@ using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    string[] roles = new[] { "Admin", "User" };
+    string[] roles = new[] { "Admin", "User", "AdministradorTienda" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))

@@ -1,0 +1,39 @@
+﻿@model BaseConLogin.Models.Tienda
+
+@{
+    ViewData["Title"] = "Reactivar Tienda";
+
+    string TipoNegocioTexto = Model.TipoNegocio switch
+    {
+        1 => "Proyectos",
+        2 => "Productos simples",
+        3 => "Productos configurables",
+        _ => "Desconocido"
+    };
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <h4>¿Deseas reactivar la siguiente tienda?</h4>
+
+    <dl class="row">
+        <dt class="col-sm-2">Nombre</dt>
+        <dd class="col-sm-10">@Model.Nombre</dd>
+
+        <dt class="col-sm-2">Tipo de negocio</dt>
+        <dd class="col-sm-10">@TipoNegocioTexto</dd>
+
+        <dt class="col-sm-2">Dominio</dt>
+        <dd class="col-sm-10">@Model.Dominio</dd>
+
+        <dt class="col-sm-2">Activa</dt>
+        <dd class="col-sm-10">@Model.Activa</dd>
+    </dl>
+</div>
+
+<form asp-action="Reactivar" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-success">Reactivar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

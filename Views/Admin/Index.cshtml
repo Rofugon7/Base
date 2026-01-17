@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Panel de Administración";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>Bienvenido al panel de administración. Desde aquí puedes acceder a las distintas secciones de mantenimiento.</p>
+
+<div class="mb-3">
+    <!-- Botón que llama al index de tiendas -->
+    <a asp-controller="Tiendas" asp-action="Index" class="btn btn-primary btn-lg">
+        Gestionar Tiendas
+    </a>
+</div>
+
+<!-- Aquí más botones futuros -->

@@ -1,0 +1,92 @@
+﻿@model IEnumerable<BaseConLogin.Models.Tienda>
+
+@{
+    ViewData["Title"] = "Tiendas";
+    bool mostrarInactivas = ViewBag.MostrarInactivas != null && (bool)ViewBag.MostrarInactivas;
+}
+
+<h2>Tiendas</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Crear nueva tienda</a>
+</p>
+
+<hr />
+
+<!-- Filtro de tiendas inactivas -->
+<form id="formFiltroTiendas" asp-controller="Tiendas" asp-action="Index" method="get" class="mb-3">
+    <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               id="mostrarInactivas"
+               name="mostrarInactivas"
+               value="true"
+               @(mostrarInactivas ? "checked" : "") />
+        <label class="form-check-label" for="mostrarInactivas">
+            Mostrar tiendas inactivas
+        </label>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Dominio</th>
+            <th>Activa</th>
+            <th style="width: 220px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var tienda in Model)
+        {
+            <tr class="@(tienda.Activa ? "" : "table-secondary")">
+                <td>@tienda.Nombre</td>
+                <td>@tienda.Dominio</td>
+                <td>
+                    @if (tienda.Activa)
+                    {
+                        <span class="badge bg-success">Sí</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">No</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@tienda.Id" class="btn btn-sm btn-primary">Editar</a>
+
+                    @if (tienda.Activa)
+                    {
+                        <form asp-action="Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que quieres desactivar esta tienda?');">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@tienda.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">Desactivar</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form asp-action="Reactivar" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@tienda.Id" />
+                            <button type="submit" class="btn btn-sm btn-success">Reactivar</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No hay tiendas para mostrar.</div>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById("mostrarInactivas").addEventListener("change", function() {
+            document.getElementById("formFiltroTiendas").submit();
+        });
+    </script>
+}

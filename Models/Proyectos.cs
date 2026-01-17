@@ -5,17 +5,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BaseConLogin.Models
 {
-    public class Proyectos
+    public class Proyectos 
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        [MaxLength(256)]
-        public string? Nombre { get; set; }
+        [Required]
+        public int ProductoBaseId { get; set; }
 
-        [MaxLength(2000)]
-        public string? Descripcion { get; set; }
+        [ForeignKey(nameof(ProductoBaseId))]
+        public ProductoBase Producto { get; set; } = null!;
+
+        [StringLength(256)]
+        public string? ImagenPortada { get; set; } // ruta del archivo en wwwroot/uploads
 
         public int? Aportaciones { get; set; }
 
@@ -23,9 +26,6 @@ namespace BaseConLogin.Models
         public DateTime FechaInicio { get; set; }
 
         public DateTime? FechaFin { get; set; }
-
-        [StringLength(256)]
-        public string? ImagenPortada { get; set; } // ruta del archivo en wwwroot/uploads
 
         [StringLength(256)]
         public string? ArchivoPdf { get; set; } // ruta del archivo en wwwroot/uploads

@@ -25,7 +25,7 @@
                 <div class="card front">
                     @if (!string.IsNullOrEmpty(item.ImagenPortada))
                     {
-                        <img src="~/@item.ImagenPortada" class="card-img-top rounded-top" alt="@item.Nombre" style="height: 200px; object-fit: cover;" />
+                        <img src="~/@item.ImagenPortada" class="card-img-top rounded-top" alt="@item.Producto.Nombre" style="height: 200px; object-fit: cover;" />
                     }
                     else
                     {
@@ -34,13 +34,13 @@
                         </div>
                     }
                     <div class="card-body">
-                        <h5 class="card-title text-center">@item.Nombre</h5>
+                        <h5 class="card-title text-center">@item.Producto.Nombre</h5>
                     </div>
                 </div>
 
                 <div class="card back">
                     <div class="card-body d-flex flex-column justify-content-between h-100">
-                        <p class="card-text truncate-text ">@item.Descripcion</p>
+                        <p class="card-text truncate-text ">@item.Producto.Descripcion</p>
                         <div class="mt-auto d-flex justify-content-around">
                             @if (item.Autor == ViewBag.UserId)
                             {

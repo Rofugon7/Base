@@ -1,0 +1,35 @@
+﻿@model BaseConLogin.Models.Tienda
+
+@{
+    ViewData["Title"] = "Eliminar Tienda";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning">
+    ¿Estás seguro de que quieres eliminar la tienda "<strong>@Model.Nombre</strong>"?
+</div>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger">
+        @ViewBag.Error
+    </div>
+}
+else
+{
+    <form asp-action="DeleteConfirmed" method="post">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+}
+
+@if (Model.Productos.Any() || Model.UsuariosTiendas.Any())
+{
+    <div class="mt-3">
+        <small class="text-muted">
+            Nota: Esta tienda tiene productos o usuarios asociados y no se puede eliminar.
+        </small>
+    </div>
+}

@@ -1,0 +1,49 @@
+﻿@model BaseConLogin.Models.Tienda
+
+@{
+    ViewData["Title"] = "Editar Tienda";
+
+    // Lista de opciones para TipoNegocio
+    var tiposNegocio = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "1", Text = "Proyectos" },
+        new SelectListItem { Value = "2", Text = "Productos simples" },
+        new SelectListItem { Value = "3", Text = "Productos configurables" }
+    };
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TipoNegocio" class="form-label"></label>
+        <select asp-for="TipoNegocio" asp-items="tiposNegocio" class="form-select"></select>
+        <span asp-validation-for="TipoNegocio" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Dominio" class="form-label"></label>
+        <input asp-for="Dominio" class="form-control" />
+        <span asp-validation-for="Dominio" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3 form-check">
+        <input asp-for="Activa" class="form-check-input" type="checkbox" />
+        <label asp-for="Activa" class="form-check-label"></label>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+    <a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -11,9 +11,9 @@
     <input type="hidden" asp-for="Id" />
 
     <div class="form-group">
-        <label asp-for="Nombre" class="control-label"></label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
+        <label asp-for="Producto.Nombre" class="control-label"></label>
+        <input asp-for="Producto.Nombre" class="form-control" />
+        <span asp-validation-for="Producto.Nombre" class="text-danger"></span>
     </div>
 
     <div class="form-group">
@@ -23,9 +23,9 @@
     </div>
 
     <div class="form-group">
-        <label asp-for="Descripcion" class="control-label"></label>
-        <textarea asp-for="Descripcion" class="form-control"></textarea>
-        <span asp-validation-for="Descripcion" class="text-danger"></span>
+        <label asp-for="Producto.Descripcion" class="control-label"></label>
+        <textarea asp-for="Producto.Descripcion" class="form-control"></textarea>
+        <span asp-validation-for="Producto.Descripcion" class="text-danger"></span>
     </div>
 
     <div class="form-group">

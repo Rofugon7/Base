@@ -1,0 +1,43 @@
+﻿@model BaseConLogin.ViewModels.ProductoDetalleViewModel
+
+<h1>@Model.Nombre</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.Descripcion))
+{
+    <p>@Model.Descripcion</p>
+}
+
+<hr />
+
+<strong>
+    Precio: @Model.Precio.ToString("C")
+</strong>
+
+<hr />
+
+@if (Model.EsProyecto)
+{
+    <h3>Proyecto</h3>
+
+    <ul>
+        <li>Aportaciones: @Model.Aportaciones</li>
+        <li>Inicio: @Model.FechaInicio?.ToShortDateString()</li>
+        <li>Fin: @Model.FechaFin?.ToShortDateString()</li>
+    </ul>
+}
+
+@if (Model.EsSimple)
+{
+    <p>Producto simple listo para comprar.</p>
+}
+
+@if (Model.EsConfigurable)
+{
+    <p>Este producto tiene configuraciones disponibles.</p>
+}
+
+<hr />
+
+<button disabled>
+    Añadir al carrito (siguiente fase)
+</button>

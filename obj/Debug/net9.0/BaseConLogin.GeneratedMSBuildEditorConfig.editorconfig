@@ -15,6 +15,8 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v9.0
 build_property.RootNamespace = BaseConLogin
 build_property.RootNamespace = BaseConLogin
 build_property.ProjectDir = C:\Users\rofug\source\repos\BaseConLogin\
@@ -188,6 +190,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Admin/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Carritos/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2Fycml0b3NcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/rofug/source/repos/BaseConLogin/Views/Contact/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udGFjdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -250,6 +260,30 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/rofug/source/repos/BaseConLogin/Views/Tags/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGFnc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xDcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xEZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xEZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xFZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/rofug/source/repos/BaseConLogin/Views/Tiendas/Reactivar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGllbmRhc1xSZWFjdGl2YXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/rofug/source/repos/BaseConLogin/Views/_ViewImports.cshtml]

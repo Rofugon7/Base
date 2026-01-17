@@ -1,5 +1,201 @@
 ﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
+using BaseConLogin.Services.Seguridad;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BaseConLogin.Controllers
+{
+    public class ProyectosController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
+        private readonly ITiendaAuthorizationService _tiendaAuthService;
+
+        public ProyectosController(
+            ApplicationDbContext context,
+            UserManager<IdentityUser> userManager,
+            ITiendaAuthorizationService tiendaAuthService)
+        {
+            _context = context;
+            _userManager = userManager;
+            _tiendaAuthService = tiendaAuthService;
+        }
+
+        // =========================
+        // INDEX (público, solo activos)
+        // =========================
+        public async Task<IActionResult> Index()
+        {
+            var proyectos = await _context.Proyectos
+                .Include(p => p.Producto)
+                .Include(p => p.ProyectoTags)
+                    .ThenInclude(pt => pt.Tag)
+                .Where(p => p.Producto.Activo)
+                .ToListAsync();
+
+            return View(proyectos);
+        }
+
+        // =========================
+        // DETAILS (público)
+        // =========================
+        public async Task<IActionResult> Details(int id)
+        {
+            var proyecto = await _context.Proyectos
+                .Include(p => p.Producto)
+                .Include(p => p.ProyectoTags)
+                    .ThenInclude(pt => pt.Tag)
+                .FirstOrDefaultAsync(p =>
+                    p.Id == id &&
+                    p.Producto.Activo);
+
+            if (proyecto == null)
+                return NotFound();
+
+            return View(proyecto);
+        }
+
+        // =========================
+        // CREATE
+        // =========================
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> Create(int tiendaId)
+        {
+            var userId = _userManager.GetUserId(User);
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            ViewBag.Tags = await _context.Tags.ToListAsync();
+            ViewBag.TiendaId = tiendaId;
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> Create(Proyectos proyecto)
+        {
+            var userId = _userManager.GetUserId(User);
+            var tiendaId = proyecto.Producto.TiendaId;
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Tags = await _context.Tags.ToListAsync();
+                return View(proyecto);
+            }
+
+            _context.Proyectos.Add(proyecto);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // EDIT
+        // =========================
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var proyecto = await _context.Proyectos
+                .Include(p => p.Producto)
+                .Include(p => p.ProyectoTags)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (proyecto == null)
+                return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var tiendaId = proyecto.Producto.TiendaId;
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            return View(proyecto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> Edit(int id, Proyectos proyecto)
+        {
+            if (id != proyecto.Id)
+                return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var tiendaId = proyecto.Producto.TiendaId;
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            if (!ModelState.IsValid)
+                return View(proyecto);
+
+            _context.Update(proyecto);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================
+        // DELETE (SOFT DELETE)
+        // =========================
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var proyecto = await _context.Proyectos
+                .Include(p => p.Producto)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (proyecto == null)
+                return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var tiendaId = proyecto.Producto.TiendaId;
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            return View(proyecto);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var proyecto = await _context.Proyectos
+                .Include(p => p.Producto)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (proyecto == null)
+                return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var tiendaId = proyecto.Producto.TiendaId;
+
+            if (!await _tiendaAuthService.PuedeGestionarTiendaAsync(userId, tiendaId))
+                return Forbid();
+
+            proyecto.Producto.Activo = false;
+            _context.Update(proyecto.Producto);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
+
+
+/*using BaseConLogin.Data;
+using BaseConLogin.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -35,8 +231,8 @@ namespace BaseConLogin.Controllers
                     .Include(p => p.ProyectoTags)
                     .ThenInclude(pt => pt.Tag)
                     .Where(s =>
-                    (s.Nombre != null && s.Nombre.Contains(searchString)) ||
-                    (s.Descripcion != null && s.Descripcion.Contains(searchString)) ||
+                    (s.Producto.Nombre != null && s.Producto.Nombre.Contains(searchString)) ||
+                    (s.Producto.Descripcion != null && s.Producto.Descripcion.Contains(searchString)) ||
                     (s.ProyectoTags.Any(pt => pt.Tag.Nombre.Contains(searchString)))
                 );
             }
@@ -101,18 +297,34 @@ namespace BaseConLogin.Controllers
 
             if (ModelState.IsValid)
             {
-                // Obtener el usuario conectado
                 var user = await _userManager.GetUserAsync(User);
-
-                // Guardar el Id del usuario conectado en Autor
                 proyecto.Autor = user.Id;
 
-                await ProcesarArchivos(proyecto, imagenPortadaFile, archivoPdfFile);
+                // 1️⃣ Crear ProductoBase
+                var productoBase = new ProductoBase
+                {
+                    TiendaId = 1, // ⚠️ de momento fijo, luego lo sacamos dinámico
+                    Nombre = proyecto.Producto.Nombre ?? "Proyecto sin nombre",
+                    Descripcion = proyecto.Producto.Descripcion,
+                    PrecioBase = 0,
+                    TipoProducto = TipoProducto.Proyecto,
+                    Activo = true
+                };
 
-                _context.Add(proyecto);
+                _context.ProductosBase.Add(productoBase);
                 await _context.SaveChangesAsync();
 
+                // 2️⃣ Asociar ProductoBase al Proyecto
+                proyecto.ProductoBaseId = productoBase.Id;
 
+                // 3️⃣ Procesar archivos
+                await ProcesarArchivos(proyecto, imagenPortadaFile, archivoPdfFile);
+
+                // 4️⃣ Guardar proyecto
+                _context.Proyectos.Add(proyecto);
+                await _context.SaveChangesAsync();
+
+                // 5️⃣ Tags
                 foreach (var tagId in selectedTags)
                 {
                     _context.ProyectoTags.Add(new ProyectoTag
@@ -121,6 +333,7 @@ namespace BaseConLogin.Controllers
                         TagId = tagId
                     });
                 }
+
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
@@ -185,8 +398,8 @@ namespace BaseConLogin.Controllers
                     await ProcesarArchivos(proyecto, imagenPortadaFile, archivoPdfFile);
 
                     // Copiar los campos actualizables
-                    proyectoOriginal.Nombre = proyecto.Nombre;
-                    proyectoOriginal.Descripcion = proyecto.Descripcion;
+                    proyectoOriginal.Producto.Nombre = proyecto.Producto.Nombre;
+                    proyectoOriginal.Producto.Descripcion = proyecto.Producto.Descripcion;
                     proyectoOriginal.Aportaciones = proyecto.Aportaciones;
                     proyectoOriginal.FechaInicio = proyecto.FechaInicio;
                     proyectoOriginal.FechaFin = proyecto.FechaFin;
@@ -313,3 +526,4 @@ namespace BaseConLogin.Controllers
         }
     }
 }
+*/

@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BaseConLogin")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ace10466adef14d5f31e684984a4d05fde5f79e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74c83ed6c51f50ea4df42a1eb02f95ab43188b85")]
 [assembly: System.Reflection.AssemblyProductAttribute("BaseConLogin")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BaseConLogin")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
