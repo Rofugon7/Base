@@ -17,10 +17,64 @@ namespace BaseConLogin.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.7")
+                .HasAnnotation("ProductVersion", "9.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TiendaId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Carritos");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.CarritoPersistenteItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CarritoPersistenteId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductoBaseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TipoProducto")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CarritoPersistenteId");
+
+                    b.ToTable("CarritoItems");
+                });
 
             modelBuilder.Entity("BaseConLogin.Models.ContactMessage", b =>
                 {
@@ -237,6 +291,10 @@ namespace BaseConLogin.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TipoNegocio")
                         .HasColumnType("int");
 
@@ -252,6 +310,12 @@ namespace BaseConLogin.Migrations
 
                     b.Property<int>("TiendaId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("EsPrincipal")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("UserId", "TiendaId");
 
@@ -462,6 +526,17 @@ namespace BaseConLogin.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BaseConLogin.Models.CarritoPersistenteItem", b =>
+                {
+                    b.HasOne("BaseConLogin.Models.CarritoPersistente", "CarritoPersistente")
+                        .WithMany("Items")
+                        .HasForeignKey("CarritoPersistenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CarritoPersistente");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.ProductoBase", b =>
                 {
                     b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
@@ -593,6 +668,11 @@ namespace BaseConLogin.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.Proyectos", b =>

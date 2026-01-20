@@ -27,6 +27,10 @@ namespace BaseConLogin.Data
         public DbSet<ProductoConfigurable> ProductosConfigurables { get; set; }
         public DbSet<UsuarioTienda> UsuariosTiendas { get; set; }
 
+        public DbSet<CarritoPersistente> Carritos { get; set; }
+        public DbSet<CarritoPersistenteItem> CarritoItems { get; set; }
+
+
         // =========================
         // Model configuration
         // =========================
@@ -34,6 +38,9 @@ namespace BaseConLogin.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // -------------------------
+            // Configuración de precios
+            // -------------------------
             modelBuilder.Entity<ProductoBase>()
                 .Property(p => p.PrecioBase)
                 .HasPrecision(18, 2);
@@ -93,9 +100,8 @@ namespace BaseConLogin.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // -------------------------
-            // Usuario ↔ Tienda
+            // Usuario ↔ Tienda (N:N)
             // -------------------------
-
             modelBuilder.Entity<UsuarioTienda>()
                 .HasKey(ut => new { ut.UserId, ut.TiendaId });
 
@@ -111,8 +117,20 @@ namespace BaseConLogin.Data
                 .HasForeignKey(ut => ut.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // -------------------------
+            // Carrito Persistente <-> Items
+            // -------------------------
+            modelBuilder.Entity<CarritoPersistente>()
+                .HasMany(c => c.Items)
+                .WithOne(i => i.CarritoPersistente)
+                .HasForeignKey(i => i.CarritoPersistenteId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // -------------------------
+            // Filtro global de tiendas activas
+            // -------------------------
             modelBuilder.Entity<Tienda>()
-        .HasQueryFilter(t => t.Activa);
+                .HasQueryFilter(t => t.Activa);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using BaseConLogin.Models;
-using BaseConLogin.Services.Carritos;
+﻿using BaseConLogin.Services.Carritos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BaseConLogin.Controllers
@@ -13,110 +12,48 @@ namespace BaseConLogin.Controllers
             _carritoService = carritoService;
         }
 
-        // ========================
-        // Mostrar carrito
-        // ========================
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int tiendaId = 1)
         {
-            var carrito = await _carritoService.ObtenerCarritoAsync();
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
             return View(carrito);
         }
 
-        // ========================
-        // Añadir producto al carrito
-        // ========================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Añadir(int productoBaseId, int cantidad = 1, string returnUrl = null)
+        public async Task<IActionResult> Añadir(int tiendaId, int productoBaseId, int cantidad = 1)
         {
-            try
-            {
-                await _carritoService.AñadirProductoAsync(productoBaseId, cantidad);
-            }
-            catch (InvalidOperationException ex)
-            {
-                TempData["Error"] = ex.Message;
-            }
-
-            // Redirige a la página anterior o al carrito
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return RedirectToAction("Index");
+            await _carritoService.AñadirProductoAsync(tiendaId, productoBaseId, cantidad);
+            return RedirectToAction(nameof(Index), new { tiendaId });
         }
 
-        // ========================
-        // Eliminar producto del carrito
-        // ========================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Eliminar(int productoBaseId)
+        public async Task<IActionResult> EliminarAjax(int tiendaId, int productoBaseId)
         {
-            await _carritoService.EliminarProductoAsync(productoBaseId);
-            return RedirectToAction("Index");
+            await _carritoService.EliminarProductoAsync(tiendaId, productoBaseId);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
         }
 
-        // ========================
-        // Vaciar carrito
-        // ========================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Vaciar()
+        public async Task<IActionResult> VaciarAjax(int tiendaId)
         {
-            await _carritoService.VaciarAsync();
-            return RedirectToAction("Index");
+            await _carritoService.VaciarAsync(tiendaId);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
         }
 
-        // ========================
-        // Actualizar cantidad de un producto
-        // ========================
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ActualizarCantidad(int productoBaseId, int cantidad)
+        public async Task<IActionResult> ActualizarCantidadAjax(int tiendaId, int productoBaseId, int cantidad)
         {
-            await _carritoService.ActualizarCantidadAsync(productoBaseId, cantidad);
-            return RedirectToAction("Index");
+            await _carritoService.ActualizarCantidadAsync(tiendaId, productoBaseId, cantidad);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
         }
 
-        // Obtener carrito en JSON
         [HttpGet]
-        public async Task<IActionResult> ObtenerCarrito()
+        public async Task<IActionResult> ObtenerCarrito(int tiendaId)
         {
-            var carrito = await _carritoService.ObtenerCarritoAsync();
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
             return Json(carrito);
         }
-
-        // Actualizar cantidad (AJAX)        
-
-        [HttpPost]
-        public async Task<IActionResult> ActualizarCantidadAjax(int productoBaseId, int cantidad)
-        {
-            await _carritoService.ActualizarCantidadAsync(productoBaseId, cantidad);
-            var carrito = await _carritoService.ObtenerCarritoAsync();
-            return Json(carrito);
-        }
-
-
-        // Eliminar producto (AJAX)
-        [HttpPost]
-        public async Task<IActionResult> EliminarAjax(int productoBaseId)
-        {
-            await _carritoService.EliminarProductoAsync(productoBaseId);
-            var carrito = await _carritoService.ObtenerCarritoAsync();
-
-            return Json(new { carrito });
-        }
-
-
-
-        // Vaciar carrito (AJAX)
-        [HttpPost]
-        public async Task<IActionResult> VaciarAjax()
-        {
-            await _carritoService.VaciarAsync();
-            var carrito = await _carritoService.ObtenerCarritoAsync();
-            return Json(carrito);
-        }
-
     }
 }

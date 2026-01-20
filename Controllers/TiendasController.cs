@@ -1,55 +1,64 @@
 ﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
+using BaseConLogin.Services.Carritos;
+using BaseConLogin.Services.Tiendas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace BaseConLogin.Controllers
 {
-    [Authorize(Roles = "Admin")]
     public class TiendasController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ICarritoService _carritoService;
+        private readonly ITiendaContext _tiendaContext;
 
-        public TiendasController(ApplicationDbContext context)
+        public TiendasController(
+            ApplicationDbContext context,
+            ICarritoService carritoService,
+            ITiendaContext tiendaContext)
         {
             _context = context;
+            _carritoService = carritoService;
+            _tiendaContext = tiendaContext;
         }
 
         // =========================
-        // INDEX
+        // ENTRAR EN TIENDA
         // =========================
-        public async Task<IActionResult> Index(bool mostrarInactivas = false)
+        [AllowAnonymous]
+        public async Task<IActionResult> Index(string slug)
         {
-            IQueryable<Tienda> query = _context.Tiendas;
+            if (string.IsNullOrEmpty(slug))
+                return NotFound();
 
-            if (mostrarInactivas)
-            {
-                query = query.IgnoreQueryFilters();
-                
-            }
+            var tienda = await _context.Tiendas
+                .FirstOrDefaultAsync(t => t.Slug == slug);
 
-            var tiendas = await query
-                .OrderBy(t => t.Nombre)
-                .ToListAsync();
+            if (tienda == null)
+                return NotFound();
 
-            ViewBag.MostrarInactivas = mostrarInactivas;
+            // 👉 Establecer tienda activa
+            _tiendaContext.EstablecerTienda(tienda.Id);
 
-            return View(tiendas);
+            // 👉 Obtener carrito de ESA tienda
+            var carrito = await _carritoService.ObtenerCarritoAsync(tienda.Id);
+
+            return View(carrito);
         }
-
-
-
 
         // =========================
         // CREATE
         // =========================
+        [Authorize(Roles = "Admin")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Tienda tienda)
         {
@@ -59,18 +68,19 @@ namespace BaseConLogin.Controllers
             _context.Tiendas.Add(tienda);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { slug = tienda.Slug });
         }
 
         // =========================
         // EDIT
         // =========================
-        public async Task<IActionResult> Edit(int? id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
-                return NotFound();
+            var tienda = await _context.Tiendas
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id == id);
 
-            var tienda = await _context.Tiendas.FindAsync(id);
             if (tienda == null)
                 return NotFound();
 
@@ -78,6 +88,7 @@ namespace BaseConLogin.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Tienda tienda)
         {
@@ -87,48 +98,16 @@ namespace BaseConLogin.Controllers
             if (!ModelState.IsValid)
                 return View(tienda);
 
-            try
-            {
-                _context.Update(tienda);
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TiendaExists(tienda.Id))
-                    return NotFound();
-                else
-                    throw;
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-
-        // =========================
-        // REACTIVAR TIENDA
-        // =========================
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Reactivar(int id)
-        {
-            var tienda = await _context.Tiendas
-                .IgnoreQueryFilters()  // <--- ignoramos el filtro global de Activa
-                .FirstOrDefaultAsync(t => t.Id == id);
-
-            if (tienda == null)
-                return NotFound();
-
-            tienda.Activa = true;
+            _context.Update(tienda);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { slug = tienda.Slug });
         }
 
-
         // =========================
-        // DESACTIVAR TIENDA
+        // DESACTIVAR
         // =========================
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Desactivar(int id)
@@ -138,19 +117,30 @@ namespace BaseConLogin.Controllers
                 return NotFound();
 
             tienda.Activa = false;
-
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
 
-
         // =========================
-        // HELPERS
+        // REACTIVAR
         // =========================
-        private bool TiendaExists(int id)
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Reactivar(int id)
         {
-            return _context.Tiendas.Any(e => e.Id == id);
+            var tienda = await _context.Tiendas
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (tienda == null)
+                return NotFound();
+
+            tienda.Activa = true;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index), new { slug = tienda.Slug });
         }
     }
 }

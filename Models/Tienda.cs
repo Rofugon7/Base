@@ -20,6 +20,8 @@ namespace BaseConLogin.Models
 
         public bool Activa { get; set; } = true;
 
+        public string Slug { get; set; } = string.Empty;
+
         public ICollection<ProductoBase> Productos { get; set; } = new List<ProductoBase>();
         public ICollection<UsuarioTienda> UsuariosTiendas { get; set; } = new List<UsuarioTienda>();
     }

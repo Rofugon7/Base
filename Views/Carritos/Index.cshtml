@@ -12,160 +12,163 @@
 
 <!-- Modal de confirmación -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Eliminar producto</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body" id="modal-body-text"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" id="confirm-delete-btn">Eliminar</button>
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modal-body-text"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">Eliminar</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 @section Scripts {
-<script>
-let productoAEliminar = null;
-let debounceTimers = {};
+    <script>
+        let productoAEliminar = null;
+        let debounceTimers = {};
 
-// =====================
-// Cargar carrito desde servidor
-// =====================
-async function cargarCarrito() {
-    const res = await fetch('@Url.Action("ObtenerCarrito", "Carrito")');
-    const carrito = await res.json();
-    renderCarrito(carrito);
-}
+        // =====================
+        // Cargar carrito desde servidor
+        // =====================
+        async function cargarCarrito() {
+            const res = await fetch('@Url.Action("ObtenerCarrito", "Carrito")?tiendaId=@Model.TiendaId');
+            const carrito = await res.json();
+            renderCarrito(carrito);
+        }
 
-// =====================
-// Renderizar tabla del carrito
-// =====================
-function renderCarrito(carrito) {
-    const container = document.getElementById('carrito-container');
-    if (!carrito.items || carrito.items.length === 0) {
-        container.innerHTML = `<p>Tu carrito está vacío.</p>`;
-        return;
-    }
+        // =====================
+        // Renderizar tabla del carrito
+        // =====================
+        function renderCarrito(carrito) {
+            const container = document.getElementById('carrito-container');
+            if (!carrito.items || carrito.items.length === 0) {
+                container.innerHTML = `<p>Tu carrito está vacío.</p>`;
+                return;
+            }
 
-    let html = `<table class="table table-striped align-middle">
-        <thead>
-            <tr>
-                <th>Producto</th>
-                <th>Tipo</th>
-                <th>Precio unitario</th>
-                <th>Cantidad</th>
-                <th>Subtotal</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>`;
+            let html = `<table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Tipo</th>
+                        <th>Precio unitario</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>`;
 
-    carrito.items.forEach(item => {
-        html += `<tr id="row-${item.productoBaseId}">
-            <td>${item.nombre}</td>
-            <td>${item.tipoProducto}</td>
-            <td>${item.precioUnitario.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</td>
-            <td>
-                <input type="number" min="1" value="${item.cantidad}" 
-                    onchange="debounceActualizar(${item.productoBaseId}, this.value)" 
-                    style="width:70px;" class="form-control"/>
-            </td>
-            <td id="subtotal-${item.productoBaseId}">${(item.precioUnitario * item.cantidad).toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</td>
-            <td>
-                <button class="btn btn-sm btn-danger" onclick="abrirModal(${item.productoBaseId}, '${item.nombre}')">Eliminar</button>
-            </td>
-        </tr>`;
-    });
+            carrito.items.forEach(item => {
+                html += `<tr id="row-${item.productoBaseId}">
+                    <td>${item.nombre}</td>
+                    <td>${item.tipoProducto}</td>
+                    <td>${item.precioUnitario.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</td>
+                    <td>
+                        <input type="number" min="1" value="${item.cantidad}"
+                            onchange="debounceActualizar(${item.productoBaseId}, this.value)"
+                            style="width:70px;" class="form-control"/>
+                    </td>
+                    <td id="subtotal-${item.productoBaseId}">${(item.precioUnitario * item.cantidad).toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="abrirModal(${item.productoBaseId}, '${item.nombre}')">Eliminar</button>
+                    </td>
+                </tr>`;
+            });
 
-    const total = carrito.items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0);
+            const total = carrito.items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0);
 
-    html += `</tbody>
-        <tfoot>
-            <tr>
-                <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                <td colspan="2" id="total-carrito"><strong>${total.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</strong></td>
-            </tr>
-        </tfoot>
-    </table>
-    <button class="btn btn-warning" onclick="vaciarCarrito()">Vaciar carrito</button>`;
+            html += `</tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                        <td colspan="2" id="total-carrito"><strong>${total.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <button class="btn btn-warning" onclick="vaciarCarrito()">Vaciar carrito</button>`;
 
-    container.innerHTML = html;
-}
+            container.innerHTML = html;
+        }
 
-// =====================
-// Debounce para actualizar cantidad mientras se escribe
-// =====================
-function debounceActualizar(productoId, cantidad) {
-    if (debounceTimers[productoId]) clearTimeout(debounceTimers[productoId]);
-    debounceTimers[productoId] = setTimeout(() => actualizarCantidad(productoId, cantidad), 500);
-}
+        // =====================
+        // Debounce para actualizar cantidad
+        // =====================
+        function debounceActualizar(productoId, cantidad) {
+            if (debounceTimers[productoId]) clearTimeout(debounceTimers[productoId]);
+            debounceTimers[productoId] = setTimeout(() => actualizarCantidad(productoId, cantidad), 500);
+        }
 
-// =====================
-// Actualizar cantidad en servidor
-// =====================
-async function actualizarCantidad(productoId, cantidad) {
-    const res = await fetch('@Url.Action("ActualizarCantidadAjax", "Carrito")', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: `productoBaseId=${productoId}&cantidad=${cantidad}`
-    });
+        // =====================
+        // Actualizar cantidad en servidor
+        // =====================
+        async function actualizarCantidad(productoId, cantidad) {
+            const res = await fetch('@Url.Action("ActualizarCantidadAjax", "Carrito")', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: `productoBaseId=${productoId}&cantidad=${cantidad}&tiendaId=@Model.TiendaId`
+            });
 
-    const carrito = await res.json();
+            const carrito = await res.json();
 
-    // Actualizar subtotal y total dinámicamente
-    const item = carrito.items.find(i => i.productoBaseId === productoId);
-    if(item){
-        const subtotalEl = document.getElementById(`subtotal-${productoId}`);
-        subtotalEl.innerText = (item.precioUnitario * item.cantidad).toLocaleString('es-ES', {style:'currency', currency:'EUR'});
-    }
+            const item = carrito.items.find(i => i.productoBaseId === productoId);
+            if(item){
+                const subtotalEl = document.getElementById(`subtotal-${productoId}`);
+                subtotalEl.innerText = (item.precioUnitario * item.cantidad).toLocaleString('es-ES', {style:'currency', currency:'EUR'});
+            }
 
-    const total = carrito.items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0);
-    document.getElementById('total-carrito').innerHTML = `<strong>${total.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</strong>`;
-}
+            const total = carrito.items.reduce((acc, i) => acc + i.precioUnitario * i.cantidad, 0);
+            document.getElementById('total-carrito').innerHTML = `<strong>${total.toLocaleString('es-ES', {style:'currency', currency:'EUR'})}</strong>`;
+        }
 
-// =====================
-// Modal de confirmación para eliminar producto
-// =====================
-function abrirModal(productoId, nombre) {
-    productoAEliminar = productoId;
-    document.getElementById('modal-body-text').innerText = `¿Deseas eliminar el producto "${nombre}" del carrito?`;
-    const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-    modal.show();
-}
+        // =====================
+        // Modal de confirmación
+        // =====================
+        function abrirModal(productoId, nombre) {
+            productoAEliminar = productoId;
+            document.getElementById('modal-body-text').innerText = `¿Deseas eliminar el producto "${nombre}" del carrito?`;
+            const modal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+            modal.show();
+        }
 
-document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-    if (productoAEliminar === null) return;
-    const res = await fetch('@Url.Action("EliminarAjax", "Carrito")', {
-        method: 'POST',
-        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-        body: `productoBaseId=${productoAEliminar}`
-    });
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (productoAEliminar === null) return;
+            const res = await fetch('@Url.Action("EliminarAjax", "Carrito")', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: `productoBaseId=${productoAEliminar}&tiendaId=@Model.TiendaId`
+            });
 
-    const data = await res.json();
-    productoAEliminar = null;
-    const modalEl = document.getElementById('confirmDeleteModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    modal.hide();
+            const data = await res.json();
+            productoAEliminar = null;
+            const modalEl = document.getElementById('confirmDeleteModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
 
-    renderCarrito(data.carrito);
-});
+            renderCarrito(data);
+        });
 
-// =====================
-// Vaciar carrito
-// =====================
-async function vaciarCarrito() {
-    const res = await fetch('@Url.Action("VaciarAjax", "Carrito")', {method:'POST'});
-    const carrito = await res.json();
-    renderCarrito(carrito);
-}
+        // =====================
+        // Vaciar carrito
+        // =====================
+        async function vaciarCarrito() {
+            const res = await fetch('@Url.Action("VaciarAjax", "Carrito")', {
+                method:'POST',
+                headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                body: `tiendaId=@Model.TiendaId`
+            });
+            const carrito = await res.json();
+            renderCarrito(carrito);
+        }
 
-// =====================
-// Inicializar
-// =====================
-cargarCarrito();
-</script>
+        // =====================
+        // Inicializar
+        // =====================
+        cargarCarrito();
+    </script>
 }
