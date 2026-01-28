@@ -2,7 +2,10 @@
 
 @{
     ViewData["Title"] = "Detalles del Proyecto";
+    ViewData["Description"] = Model.Producto.Descripcion;
 }
+
+
 
 <h2>@ViewData["Title"]</h2>
 <dl class="row">
@@ -115,3 +118,25 @@
         border-radius: 8px;
     }
 </style>
+@{
+    var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var proyectoUrl = siteUrl + Context.Request.Path;
+}
+
+<script type="application/ld+json">
+@Html.Raw($@"{{
+  ""@context"": ""https://schema.org"",
+  ""@type"": ""CreativeWork"",
+  ""name"": ""{Model.Producto.Nombre}"",
+  ""description"": ""{Model.Producto.Descripcion}"",
+  ""url"": ""{proyectoUrl}"",
+  ""datePublished"": ""{Model.FechaInicio:yyyy-MM-dd}"",
+  ""dateModified"": ""{Model.FechaFin:yyyy-MM-dd}"",
+  ""author"": {{
+    ""@type"": ""Person"",
+    ""name"": ""{(ViewBag.AutorNombre ?? "Desconocido")}""
+  }}
+}}")
+</script>
+
+

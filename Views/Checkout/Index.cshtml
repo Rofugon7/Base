@@ -1,0 +1,60 @@
+﻿@model BaseConLogin.Models.CarritoSession
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<h2>Finalizar compra</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Nombre</td>
+                <td>@item.PrecioUnitario.ToString("C")</td>
+                <td>@item.Cantidad</td>
+                <td>@(item.Cantidad* item.PrecioUnitario).ToString("C")</td>
+            </tr>
+        }
+
+    </tbody>
+</table>
+
+<hr />
+
+<div class="text-end">
+
+    <h4>
+        Total:
+        <strong>@Model.Total.ToString("C")</strong>
+    </h4>
+
+</div>
+
+<hr />
+
+<form asp-controller="Checkout" asp-action="Confirmar" method="post">
+
+    @Html.AntiForgeryToken()
+
+    <button type="submit" class="btn btn-success btn-lg">
+        Proceder al pago
+    </button>
+
+    <a asp-controller="Carrito"
+       asp-action="Index"
+       class="btn btn-secondary ms-2">
+        Volver al carrito
+    </a>
+
+</form>

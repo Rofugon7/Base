@@ -12,6 +12,8 @@ namespace BaseConLogin.Models
         [MaxLength(100)]
         public string Nombre { get; set; } = string.Empty;
 
+        public string Slug { get; set; }
+
         // Relación inversa con Proyectos
         public ICollection<ProyectoTag> ProyectoTags { get; set; } = new List<ProyectoTag>();
     }

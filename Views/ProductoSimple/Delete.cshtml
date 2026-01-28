@@ -1,0 +1,53 @@
+﻿@model BaseConLogin.Models.ProductoSimple
+
+@{
+    ViewData["Title"] = "Eliminar Producto";
+}
+
+<h2>Eliminar Producto</h2>
+
+<div class="alert alert-danger">
+
+    ¿Seguro que quieres eliminar este producto?
+
+</div>
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <img src="@Model.Producto.ImagenPrincipal"
+             class="img-fluid rounded" />
+
+    </div>
+
+    <div class="col-md-8">
+
+        <h4>@Model.Producto.Nombre</h4>
+
+        <p>
+            Precio: <strong>@Model.Producto.PrecioBase €</strong>
+        </p>
+
+        <p>
+            Stock: <strong>@Model.Stock</strong>
+        </p>
+
+    </div>
+
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+
+    <input type="hidden" name="id" value="@Model.ProductoBaseId" />
+
+
+    <button type="submit" class="btn btn-danger">
+        Eliminar
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancelar
+    </a>
+
+</form>

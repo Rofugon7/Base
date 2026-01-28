@@ -1,14 +1,23 @@
 ﻿using BaseConLogin.Models;
+using BaseConLogin.Models.interfaces;
+using BaseConLogin.Services.Tiendas;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace BaseConLogin.Data
 {
     public class ApplicationDbContext : IdentityDbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+       
+
+        private readonly ITiendaContext _tiendaContext;
+        public ITiendaContext TiendaContext => _tiendaContext;
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, ITiendaContext tiendaContext)
+       : base(options)
         {
+            _tiendaContext = tiendaContext ?? throw new ArgumentNullException(nameof(tiendaContext));
         }
 
         // =========================
@@ -23,12 +32,17 @@ namespace BaseConLogin.Data
         public DbSet<Tienda> Tiendas { get; set; }
 
         public DbSet<ProductoBase> ProductosBase { get; set; }
-        public DbSet<ProductoSimple> ProductosSimples { get; set; }
+
+        public DbSet<ProductoSimple> ProductoSimples { get; set; } = null!;
+
         public DbSet<ProductoConfigurable> ProductosConfigurables { get; set; }
         public DbSet<UsuarioTienda> UsuariosTiendas { get; set; }
 
         public DbSet<CarritoPersistente> Carritos { get; set; }
         public DbSet<CarritoPersistenteItem> CarritoItems { get; set; }
+
+        public DbSet<Pedido> Pedidos { get; set; }
+        public DbSet<PedidoItem> PedidoItems { get; set; }
 
 
         // =========================
@@ -37,6 +51,22 @@ namespace BaseConLogin.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
+                {
+                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+                    var tiendaContext = Expression.Constant(this.TiendaContext, typeof(ITiendaContext));
+                    var body = Expression.Equal(
+                        Expression.Property(parameter, nameof(ITenantEntity.TiendaId)),
+                        Expression.Property(tiendaContext, nameof(ITiendaContext.TiendaId))
+                    );
+
+                    var lambda = Expression.Lambda(body, parameter);
+                    modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
+                }
+            }
 
             // -------------------------
             // Configuración de precios
@@ -127,10 +157,23 @@ namespace BaseConLogin.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             // -------------------------
-            // Filtro global de tiendas activas
+            // Filtros globales multi-tienda
             // -------------------------
+
             modelBuilder.Entity<Tienda>()
                 .HasQueryFilter(t => t.Activa);
+
+            modelBuilder.Entity<ProductoBase>()
+                .HasQueryFilter(p => p.Tienda.Activa);
+
+            modelBuilder.Entity<CarritoPersistente>()
+                .HasQueryFilter(c => c.Tienda.Activa);
+
+            modelBuilder.Entity<UsuarioTienda>()
+                .HasQueryFilter(u => u.Tienda.Activa);
+
+            modelBuilder.Entity<ProductoSimple>()
+        .ToTable("productosSimples");
         }
     }
 }

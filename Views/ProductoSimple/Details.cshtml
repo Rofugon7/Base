@@ -1,0 +1,52 @@
+﻿@model BaseConLogin.Models.ProductoSimple
+
+@{
+    ViewData["Title"] = "Detalle Producto";
+}
+
+<h2>@Model.Producto.Nombre</h2>
+
+<div class="row">
+
+    <div class="col-md-4">
+
+        <img src="@Model.Producto.ImagenPrincipal"
+             class="img-fluid rounded border" />
+
+    </div>
+
+    <div class="col-md-8">
+
+        <dl class="row">
+
+            <dt class="col-sm-4">Nombre</dt>
+            <dd class="col-sm-8">@Model.Producto.Nombre</dd>
+
+            <dt class="col-sm-4">Descripción</dt>
+            <dd class="col-sm-8">@Model.Producto.Descripcion</dd>
+
+            <dt class="col-sm-4">Precio</dt>
+            <dd class="col-sm-8">@Model.Producto.PrecioBase €</dd>
+
+            <dt class="col-sm-4">Stock</dt>
+            <dd class="col-sm-8">@Model.Stock</dd>
+
+            <dt class="col-sm-4">Activo</dt>
+            <dd class="col-sm-8">
+                @(Model.Producto.Activo ? "Sí" : "No")
+            </dd>
+
+        </dl>
+
+    </div>
+
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.ProductoBaseId"
+   class="btn btn-primary">
+    Editar
+</a>
+
+<a asp-action="Index" class="btn btn-secondary">
+    Volver
+</a>

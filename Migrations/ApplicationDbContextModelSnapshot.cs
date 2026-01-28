@@ -39,6 +39,8 @@ namespace BaseConLogin.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TiendaId");
+
                     b.ToTable("Carritos");
                 });
 
@@ -56,22 +58,14 @@ namespace BaseConLogin.Migrations
                     b.Property<int>("CarritoPersistenteId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("ProductoBaseId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TipoProducto")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CarritoPersistenteId");
+
+                    b.HasIndex("ProductoBaseId");
 
                     b.ToTable("CarritoItems");
                 });
@@ -107,6 +101,67 @@ namespace BaseConLogin.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ContactMessages");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.Pedido", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Estado")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Fecha")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TiendaId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pedidos");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.PedidoItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NombreProducto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PedidoId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ProductoBaseId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PedidoId");
+
+                    b.ToTable("PedidoItems");
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.ProductoBase", b =>
@@ -237,6 +292,10 @@ namespace BaseConLogin.Migrations
                     b.Property<bool>("Revisado")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Subtitulo")
                         .IsRequired()
                         .HasMaxLength(350)
@@ -265,6 +324,10 @@ namespace BaseConLogin.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -526,6 +589,17 @@ namespace BaseConLogin.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
+                {
+                    b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
+                        .WithMany()
+                        .HasForeignKey("TiendaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tienda");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.CarritoPersistenteItem", b =>
                 {
                     b.HasOne("BaseConLogin.Models.CarritoPersistente", "CarritoPersistente")
@@ -534,7 +608,26 @@ namespace BaseConLogin.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("BaseConLogin.Models.ProductoBase", "ProductoBase")
+                        .WithMany()
+                        .HasForeignKey("ProductoBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("CarritoPersistente");
+
+                    b.Navigation("ProductoBase");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.PedidoItem", b =>
+                {
+                    b.HasOne("BaseConLogin.Models.Pedido", "Pedido")
+                        .WithMany("Items")
+                        .HasForeignKey("PedidoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pedido");
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.ProductoBase", b =>
@@ -671,6 +764,11 @@ namespace BaseConLogin.Migrations
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.Pedido", b =>
                 {
                     b.Navigation("Items");
                 });

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using BaseConLogin.Models.interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace BaseConLogin.Models
 {
@@ -9,7 +10,7 @@ namespace BaseConLogin.Models
         Configurable = 3
     }
 
-    public class ProductoBase
+    public class ProductoBase : ITenantEntity
     {
         public int Id { get; set; }
 

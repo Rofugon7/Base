@@ -1,9 +1,12 @@
-using BaseConLogin.Data;
+﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
 using BaseConLogin.Services.Carritos;
+using BaseConLogin.Services.Pedidos;
 using BaseConLogin.Services.Productos;
 using BaseConLogin.Services.Seguridad;
+using BaseConLogin.Services.Seo;
 using BaseConLogin.Services.Tiendas;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,15 +44,31 @@ builder.Services.AddRazorPages();
  * Servicios de dominio
  * ========================= */
 
+
+
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ITiendaAuthorizationService, TiendaAuthorizationService>();
-
+builder.Services.AddScoped<ITiendaMenuService, TiendaMenuService>();
 builder.Services.AddScoped<ICarritoService, DbCarritoService>();
 
-builder.Services.AddScoped<ITiendaContext, TiendaContext>();
+
 
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
+
+builder.Services.AddScoped<ITiendaContext, TiendaContext>();
+builder.Services.AddScoped<ICanonicalService, CanonicalService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
+builder.Services.AddScoped<IClaimsTransformation, TiendaClaimsTransformation>();
+
+
+builder.Services.AddScoped<ApplicationDbContext>(provider =>
+{
+    var options = provider.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
+    var tiendaContext = provider.GetRequiredService<ITiendaContext>();
+    return new ApplicationDbContext(options, tiendaContext);
+});
 
 /* =========================
  * Hosting
@@ -60,10 +79,12 @@ if (!builder.Environment.IsDevelopment())
     builder.WebHost.UseUrls("http://0.0.0.0:80");
 }
 
+builder.Services.AddResponseCompression();
+
 var app = builder.Build();
 
 /* =========================
- * Inicializaci�n del sistema
+ * Inicialización del sistema
  * ========================= */
 
 using (var scope = app.Services.CreateScope())
@@ -80,18 +101,66 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+    app.UseHsts();
+}
+
 app.UseStaticFiles();
+app.UseResponseCompression();
+
+app.Use(async (context, next) =>
+{
+    var request = context.Request;
+
+    // 🔒 Forzar HTTPS SOLO en producción
+    if (!app.Environment.IsDevelopment() && !request.IsHttps)
+    {
+        var httpsUrl = "https://" + request.Host + request.Path + request.QueryString;
+        context.Response.Redirect(httpsUrl, true);
+        return;
+    }
+
+    // Quitar www (en todos los entornos)
+    if (request.Host.Host.StartsWith("www."))
+    {
+        var newHost = request.Host.Host.Replace("www.", "");
+        var scheme = request.Scheme;
+        var newUrl = $"{scheme}://{newHost}{request.Path}{request.QueryString}";
+        context.Response.Redirect(newUrl, true);
+        return;
+    }
+
+    await next();
+});
+
+
+app.UseRouting();
+
+
+app.UseStaticFiles();
+
+app.UseResponseCompression();
+
+
 
 app.UseRouting();
 
 app.UseSession();           // SIEMPRE antes de auth
+app.UseMiddleware<TiendaResolutionMiddleware>();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 /* =========================
  * Rutas
  * ========================= */
+app.MapControllerRoute(
+    name: "tienda",
+    pattern: "t/{slug}/{controller=Home}/{action=Index}/{id?}");
+
+
 
 app.MapControllerRoute(
     name: "default",
@@ -102,7 +171,7 @@ app.MapRazorPages();
 app.Run();
 
 /* =========================
- * Inicializaci�n (roles, admin, tags, carpetas)
+ * Inicialización (roles, admin, tags, carpetas)
  * ========================= */
 
 async Task InicializarSistemaAsync(IServiceProvider services)

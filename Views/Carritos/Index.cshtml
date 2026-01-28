@@ -1,7 +1,8 @@
-﻿@model BaseConLogin.Models.Carrito
+﻿@model BaseConLogin.Models.CarritoSession
 
 @{
     ViewData["Title"] = "Carrito de Compras";
+    var tiendaIdConst = Model.TiendaId; // ✅ dinámico desde el modelo
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -9,6 +10,18 @@
 <div id="carrito-container"></div>
 
 <a class="btn btn-primary mt-3" href="/">Continuar comprando</a>
+
+<form asp-controller="Checkout"
+      asp-action="Confirmar"
+      method="post">
+
+    <button type="submit" class="btn btn-success">
+        Finalizar pedido
+    </button>
+
+</form>
+
+
 
 <!-- Modal de confirmación -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
@@ -31,12 +44,13 @@
     <script>
         let productoAEliminar = null;
         let debounceTimers = {};
+        const tiendaId = @tiendaIdConst; // ✅ ahora seguro para MVC
 
         // =====================
         // Cargar carrito desde servidor
         // =====================
         async function cargarCarrito() {
-            const res = await fetch('@Url.Action("ObtenerCarrito", "Carrito")?tiendaId=@Model.TiendaId');
+            const res = await fetch(`/Carrito/ObtenerCarrito?tiendaId=${tiendaId}`);
             const carrito = await res.json();
             renderCarrito(carrito);
         }
@@ -108,10 +122,10 @@
         // Actualizar cantidad en servidor
         // =====================
         async function actualizarCantidad(productoId, cantidad) {
-            const res = await fetch('@Url.Action("ActualizarCantidadAjax", "Carrito")', {
+            const res = await fetch('/Carrito/ActualizarCantidadAjax', {
                 method: 'POST',
                 headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                body: `productoBaseId=${productoId}&cantidad=${cantidad}&tiendaId=@Model.TiendaId`
+                body: `productoBaseId=${productoId}&cantidad=${cantidad}&tiendaId=${tiendaId}`
             });
 
             const carrito = await res.json();
@@ -127,7 +141,7 @@
         }
 
         // =====================
-        // Modal de confirmación
+        // Modal eliminar producto
         // =====================
         function abrirModal(productoId, nombre) {
             productoAEliminar = productoId;
@@ -138,10 +152,10 @@
 
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             if (productoAEliminar === null) return;
-            const res = await fetch('@Url.Action("EliminarAjax", "Carrito")', {
+            const res = await fetch('/Carrito/EliminarAjax', {
                 method: 'POST',
                 headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                body: `productoBaseId=${productoAEliminar}&tiendaId=@Model.TiendaId`
+                body: `productoBaseId=${productoAEliminar}&tiendaId=${tiendaId}`
             });
 
             const data = await res.json();
@@ -150,17 +164,17 @@
             const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
 
-            renderCarrito(data);
+            renderCarrito(data.carrito);
         });
 
         // =====================
         // Vaciar carrito
         // =====================
         async function vaciarCarrito() {
-            const res = await fetch('@Url.Action("VaciarAjax", "Carrito")', {
+            const res = await fetch('/Carrito/VaciarAjax', {
                 method:'POST',
-                headers:{'Content-Type':'application/x-www-form-urlencoded'},
-                body: `tiendaId=@Model.TiendaId`
+                headers: {'Content-Type':'application/x-www-form-urlencoded'},
+                body: `tiendaId=${tiendaId}`
             });
             const carrito = await res.json();
             renderCarrito(carrito);

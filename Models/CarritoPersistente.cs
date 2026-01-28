@@ -1,46 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using BaseConLogin.Models.interfaces;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BaseConLogin.Models
 {
-    public class CarritoPersistente
+    public class CarritoPersistente : ITenantEntity
     {
         [Key]
         public int Id { get; set; }
 
         [Required]
-        public string UserId { get; set; } = string.Empty; // Usuario propietario del carrito
+        public string UserId { get; set; }  // FK a IdentityUser
 
         [Required]
-        public int TiendaId { get; set; } // Carrito por tienda
+        public int TiendaId { get; set; }   // FK a Tienda
 
-        // Relación 1:N con los items
-        public ICollection<CarritoPersistenteItem> Items { get; set; } = new List<CarritoPersistenteItem>();
+        // Relación con Items
+        public virtual ICollection<CarritoPersistenteItem> Items { get; set; } = new List<CarritoPersistenteItem>();
+
+        public Tienda Tienda { get; set; } = null!;
     }
 
-    public class CarritoPersistenteItem
-    {
-        [Key]
-        public int Id { get; set; }
 
-        [Required]
-        public int CarritoPersistenteId { get; set; } // FK hacia CarritoPersistente
-
-        public CarritoPersistente CarritoPersistente { get; set; } = null!;
-
-        [Required]
-        public int ProductoBaseId { get; set; }
-
-        [Required]
-        public string Nombre { get; set; } = string.Empty;
-
-        [Required]
-        public decimal PrecioUnitario { get; set; }
-
-        [Required]
-        public int Cantidad { get; set; }
-
-        [Required]
-        public TipoProducto TipoProducto { get; set; }
-    }
 }

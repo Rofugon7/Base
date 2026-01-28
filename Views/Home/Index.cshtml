@@ -1,25 +1,72 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Authorization
+﻿@model List<BaseConLogin.Models.Proyectos>
 
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Proyectos Destacados";
 }
 
-<h2>Bienvenido a ArcoWeb</h2>
+<h2 class="mb-4">@ViewData["Title"]</h2>
 
-@if (User.Identity != null && User.Identity.IsAuthenticated)
+@if (!Model.Any())
 {
-    <div class="card mt-4">
-        <div class="card-body">
-            <h5 class="card-title">¡Bienvenido, @User.Identity.Name!</h5>
-            <p class="card-text">Accede directamente a la gestión de tus proyectos.</p>
-            <a asp-controller="Proyectos" asp-action="Index" class="btn btn-primary">Ir al listado de proyectos</a>
-        </div>
-    </div>
+    <p>No hay proyectos disponibles en este momento.</p>
 }
 else
 {
-    <p class="mt-3">
-        <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-success">Inicia sesión para gestionar proyectos</a>
-    </p>
+    <div id="proyectosCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            @{
+                int itemsPerSlide = 3;
+                int totalSlides = (int)Math.Ceiling(Model.Count / (double)itemsPerSlide);
+            }
+
+            @for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
+            {
+                var activeClass = slideIndex == 0 ? "active" : "";
+                <div class="carousel-item @activeClass">
+                    <div class="row">
+                        @for (int i = 0; i < itemsPerSlide; i++)
+                        {
+                            int itemIndex = slideIndex * itemsPerSlide + i;
+                            if (itemIndex >= Model.Count) break;
+
+                            var proyecto = Model[itemIndex];
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100 shadow-sm">
+                                    @if (!string.IsNullOrEmpty(proyecto.ImagenPortada))
+                                    {
+                                        <img src="~/uploads/@proyecto.ImagenPortada" class="card-img-top" style="height:200px; object-fit:cover;" alt="@proyecto.Subtitulo">
+                                    }
+                                    <div class="card-body d-flex flex-column">
+                                        <h5 class="card-title">@proyecto.Subtitulo</h5>
+                                        @if (!string.IsNullOrEmpty(proyecto.Adelanto))
+                                        {
+                                            <p class="card-text">@proyecto.Adelanto</p>
+                                        }
+                                        <p class="mt-auto"><small>Iniciado: @proyecto.FechaInicio.ToShortDateString()</small></p>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#proyectosCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Anterior</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#proyectosCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Siguiente</span>
+        </button>
+
+        <div class="carousel-indicators mt-3">
+            @for (int i = 0; i < totalSlides; i++)
+            {
+                var activeClass = i == 0 ? "active" : "";
+                <button type="button" data-bs-target="#proyectosCarousel" data-bs-slide-to="@i" class="@activeClass" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+            }
+        </div>
+    </div>
 }

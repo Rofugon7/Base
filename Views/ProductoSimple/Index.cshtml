@@ -1,0 +1,56 @@
+﻿@model IEnumerable<BaseConLogin.Models.ProductoSimple>
+
+@{
+    ViewData["Title"] = "Productos Simples";
+}
+
+<h2>Productos Simples</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">
+    ➕ Nuevo Producto
+</a>
+
+<table class="table table-bordered table-striped">
+
+    <thead>
+        <tr>
+            <th>Imagen</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Activo</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    <img src="@item.Producto.ImagenPrincipal"
+                         style="width:60px;height:60px;object-fit:cover" />
+                </td>
+
+                <td>@item.Producto.Nombre</td>
+
+                <td>@item.Producto.PrecioBase €</td>
+
+                <td>@item.Stock</td>
+
+                <td>
+                    @(item.Producto.Activo ? "Sí" : "No")
+                </td>
+
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.ProductoBaseId">Ver</a> |
+                    <a asp-action="Edit" asp-route-id="@item.ProductoBaseId">Editar</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ProductoBaseId">Eliminar</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+
+</table>

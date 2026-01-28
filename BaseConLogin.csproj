@@ -8,23 +8,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="9.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.7">
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.12" />
-    <PackageReference Include="X.PagedList" Version="10.5.7" />
-    <PackageReference Include="X.PagedList.Mvc.Core" Version="10.5.7" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="10.0.2" />
+    <PackageReference Include="X.PagedList" Version="10.5.9" />
+    <PackageReference Include="X.PagedList.Mvc.Core" Version="10.5.9" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Services\Checkout\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Views\ProductoSimple\Create.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Views\ProductoSimple\Delete.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Views\ProductoSimple\Details.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Views\ProductoSimple\Edit.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Views\ProductoSimple\Index.cshtml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

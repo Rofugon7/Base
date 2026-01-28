@@ -5,7 +5,7 @@ namespace BaseConLogin.Services.Carritos
 {
     public interface ICarritoService
     {
-        Task<Carrito> ObtenerCarritoAsync(int tiendaId);
+        Task<CarritoSession> ObtenerCarritoAsync(int tiendaId);
 
         Task AñadirProductoAsync(int tiendaId, int productoBaseId, int cantidad = 1);
 
@@ -16,5 +16,9 @@ namespace BaseConLogin.Services.Carritos
         Task VaciarAsync(int tiendaId);
 
         Task FusionarCarritoSesionAsync(int tiendaId);
+
+        Task<int> ObtenerCantidadItemsAsync(int tiendaId);
+
+        Task<int> ObtenerCantidadItemsAsync(string userId);
     }
 }

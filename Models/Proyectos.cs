@@ -35,6 +35,8 @@ namespace BaseConLogin.Models
         [MaxLength(350)]
         public string Subtitulo { get; set; } = string.Empty;
 
+        public string Slug { get; set; }
+
         public string? Autor { get; set; }
 
         public int? Categoria { get; set; } // FK opcional
