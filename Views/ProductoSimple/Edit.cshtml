@@ -6,7 +6,7 @@
 
 <h2>Editar Producto</h2>
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="ProductoBaseId" />
 
     <div class="mb-3">
@@ -28,14 +28,32 @@
     </div>
 
     <div class="mb-3">
-        <label asp-for="ImagenPrincipal" class="form-label">URL de imagen</label>
-        <input asp-for="ImagenPrincipal" class="form-control" />
-        <span asp-validation-for="ImagenPrincipal" class="text-danger"></span>
-        @if (!string.IsNullOrWhiteSpace(Model.ImagenPrincipal))
+        <label asp-for="ImagenActual" class="form-label">URL de imagen</label>
+        <input asp-for="ImagenActual" class="form-control" />
+        <span asp-validation-for="ImagenActual" class="text-danger"></span>
+        @if (!string.IsNullOrWhiteSpace(Model.ImagenActual))
         {
-            <img src="@Model.ImagenPrincipal" style="width:100px;height:100px;object-fit:cover;margin-top:10px;" />
+            <img src="@Model.ImagenActual" style="width:100px;height:100px;object-fit:cover;margin-top:10px;" />
         }
     </div>
+
+    <input type="hidden" asp-for="ImagenActual" />
+
+    <div class="mb-3">
+        <label>Imagen actual</label><br />
+        <img src="@Model.ImagenActual"
+             style="max-width:150px"
+             class="mb-2" />
+    </div>
+
+    <div class="mb-3">
+        <label>Nueva imagen</label>
+        <input asp-for="NuevaImagen"
+               type="file"
+               class="form-control"
+               accept="image/*" />
+    </div>
+
 
     <div class="form-check mb-3">
         <input asp-for="Activo" class="form-check-input" />

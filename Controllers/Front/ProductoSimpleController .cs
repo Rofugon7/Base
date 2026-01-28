@@ -5,16 +5,21 @@ using BaseConLogin.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 
 namespace BaseConLogin.Controllers
 {
     public class ProductoSimpleController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ProductoSimpleController(ApplicationDbContext context)
+        public ProductoSimpleController(
+    ApplicationDbContext context,
+    IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // =========================
@@ -61,57 +66,90 @@ namespace BaseConLogin.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin,AdministradorTienda")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            string nombre,
-            string? descripcion,
-            decimal precioBase,
-            string? imagenPrincipal,
-            int stock)
+        public async Task<IActionResult> Create(ProductoSimpleCreateVM vm)
         {
-            if (string.IsNullOrWhiteSpace(nombre))
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            string rutaImagen = "/imagenes/ProductoSinImagen.png";
+
+            // =============================
+            // PROCESAR IMAGEN
+            // =============================
+            if (vm.Imagen != null && vm.Imagen.Length > 0)
             {
-                ModelState.AddModelError("", "El nombre es obligatorio");
-                return View();
+                // Validar tamaño (2MB)
+                if (vm.Imagen.Length > 2 * 1024 * 1024)
+                {
+                    ModelState.AddModelError("Imagen", "Máx 2MB");
+                    return View(vm);
+                }
+
+                // Validar tipo
+                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+                var extension = Path.GetExtension(vm.Imagen.FileName).ToLower();
+
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError("Imagen", "Formato no válido");
+                    return View(vm);
+                }
+
+                // Generar nombre único
+                var nombreArchivo = Guid.NewGuid() + extension;
+
+                // Ruta física
+                var rutaFisica = Path.Combine(
+                    _env.WebRootPath,
+                    "uploads",
+                    "productos",
+                    nombreArchivo
+                );
+
+                // Guardar archivo
+                using (var stream = new FileStream(rutaFisica, FileMode.Create))
+                {
+                    await vm.Imagen.CopyToAsync(stream);
+                }
+
+                // Ruta para BD
+                rutaImagen = "/uploads/productos/" + nombreArchivo;
             }
 
-            // Imagen por defecto
-            var imagenFinal = string.IsNullOrWhiteSpace(imagenPrincipal)
-                ? "/imagenes/ProductoSinImagen.png"
-                : imagenPrincipal;
-
+            // =============================
+            // GUARDAR PRODUCTO
+            // =============================
 
             var tiendaId = ObtenerTiendaIdUsuario();
 
-
-            // Producto base
             var productoBase = new ProductoBase
             {
-                Nombre = nombre,
-                Descripcion = descripcion,
-                PrecioBase = precioBase,
+                Nombre = vm.Nombre,
+                Descripcion = vm.Descripcion,
+                PrecioBase = vm.PrecioBase,
                 TipoProducto = TipoProducto.Simple,
                 Activo = true,
-                ImagenPrincipal = imagenFinal,
+                ImagenPrincipal = rutaImagen,
                 TiendaId = tiendaId
             };
 
             _context.ProductosBase.Add(productoBase);
             await _context.SaveChangesAsync();
 
-
-            // Producto simple
             var productoSimple = new ProductoSimple
             {
                 ProductoBaseId = productoBase.Id,
-                Stock = stock
+                Stock = vm.Stock
             };
 
             _context.ProductoSimples.Add(productoSimple);
             await _context.SaveChangesAsync();
 
-
             return RedirectToAction(nameof(Index));
         }
+
+
 
 
         // =========================
@@ -128,7 +166,7 @@ namespace BaseConLogin.Controllers
                 return NotFound();
 
             // Seguridad: solo su tienda (excepto Admin)
-            if (!EsAdmin() && producto.Producto.TiendaId != ObtenerTiendaIdUsuario())
+            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
                 return Forbid();
 
             var vm = new ProductoSimpleEditVM
@@ -137,7 +175,7 @@ namespace BaseConLogin.Controllers
                 Nombre = producto.Producto.Nombre,
                 Descripcion = producto.Producto.Descripcion,
                 PrecioBase = producto.Producto.PrecioBase,
-                ImagenPrincipal = producto.Producto.ImagenPrincipal,
+                ImagenActual = producto.Producto.ImagenPrincipal,
                 Activo = producto.Producto.Activo,
                 Stock = producto.Stock
             };
@@ -163,21 +201,68 @@ namespace BaseConLogin.Controllers
             if (producto == null)
                 return NotFound();
 
-            if (!EsAdmin() && producto.Producto.TiendaId != ObtenerTiendaIdUsuario())
+            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
                 return Forbid();
 
-            // Actualizar campos
+            // ===============================
+            // GESTIÓN IMAGEN
+            // ===============================
+
+            string rutaImagen = vm.ImagenActual;
+
+            if (vm.NuevaImagen != null && vm.NuevaImagen.Length > 0)
+            {
+                // 1️⃣ Borrar anterior
+                if (!string.IsNullOrEmpty(vm.ImagenActual) &&
+                    !vm.ImagenActual.Contains("ProductoSinImagen"))
+                {
+                    var rutaVieja = Path.Combine(
+                        _env.WebRootPath,
+                        vm.ImagenActual.TrimStart('/'));
+
+                    if (System.IO.File.Exists(rutaVieja))
+                        System.IO.File.Delete(rutaVieja);
+                }
+
+                // 2️⃣ Guardar nueva
+                var carpeta = Path.Combine(
+                    _env.WebRootPath,
+                    "imagenes",
+                    "productos");
+
+                if (!Directory.Exists(carpeta))
+                    Directory.CreateDirectory(carpeta);
+
+                var nombreArchivo = Guid.NewGuid().ToString()
+                                    + Path.GetExtension(vm.NuevaImagen.FileName);
+
+                var rutaFisica = Path.Combine(carpeta, nombreArchivo);
+
+                using (var stream = new FileStream(rutaFisica, FileMode.Create))
+                {
+                    await vm.NuevaImagen.CopyToAsync(stream);
+                }
+
+                rutaImagen = "/imagenes/productos/" + nombreArchivo;
+            }
+
+            // ===============================
+            // ACTUALIZAR DATOS
+            // ===============================
+
             producto.Producto.Nombre = vm.Nombre;
             producto.Producto.Descripcion = vm.Descripcion;
             producto.Producto.PrecioBase = vm.PrecioBase;
-            producto.Producto.ImagenPrincipal = vm.ImagenPrincipal;
             producto.Producto.Activo = vm.Activo;
+            producto.Producto.ImagenPrincipal = rutaImagen;
+
             producto.Stock = vm.Stock;
 
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
+
 
 
 
@@ -195,7 +280,7 @@ namespace BaseConLogin.Controllers
                 return NotFound();
 
 
-            if (!EsAdmin() && producto.Producto.TiendaId != ObtenerTiendaIdUsuario())
+            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
                 return Forbid();
 
 
@@ -216,8 +301,22 @@ namespace BaseConLogin.Controllers
                 return NotFound();
 
 
-            if (!EsAdmin() && producto.Producto.TiendaId != ObtenerTiendaIdUsuario())
+            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
                 return Forbid();
+
+            // BORRAR IMAGEN
+            var ruta = producto.Producto.ImagenPrincipal;
+
+            if (!string.IsNullOrEmpty(ruta) &&
+                !ruta.Contains("ProductoSinImagen"))
+            {
+                var path = Path.Combine(
+                    _env.WebRootPath,
+                    ruta.TrimStart('/'));
+
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+            }
 
 
             _context.ProductoSimples.Remove(producto);
@@ -244,9 +343,19 @@ namespace BaseConLogin.Controllers
         }
 
 
-        private bool EsAdmin()
+   
+
+        private bool PuedeGestionarProducto(int tiendaIdProducto)
         {
-            return User.IsInRole("Admin");
+            // Admin → todo
+            if (User.IsInRole("Admin"))
+                return true;
+
+            // Admin tienda → solo su tienda
+            if (User.IsInRole("AdministradorTienda"))
+                return tiendaIdProducto == ObtenerTiendaIdUsuario();
+
+            return false;
         }
     }
 }

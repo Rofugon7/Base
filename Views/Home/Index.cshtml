@@ -1,72 +1,101 @@
-﻿@model List<BaseConLogin.Models.Proyectos>
+﻿@model BaseConLogin.ViewModel.HomeIndexVM
 
 @{
-    ViewData["Title"] = "Proyectos Destacados";
+    ViewData["Title"] = "Inicio";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<h1 class="mb-4">Bienvenido a nuestra tienda</h1>
 
-@if (!Model.Any())
+@if (Model.Destacados.Any())
 {
-    <p>No hay proyectos disponibles en este momento.</p>
-}
-else
-{
-    <div id="proyectosCarousel" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner">
-            @{
-                int itemsPerSlide = 3;
-                int totalSlides = (int)Math.Ceiling(Model.Count / (double)itemsPerSlide);
-            }
-
-            @for (int slideIndex = 0; slideIndex < totalSlides; slideIndex++)
-            {
-                var activeClass = slideIndex == 0 ? "active" : "";
-                <div class="carousel-item @activeClass">
-                    <div class="row">
-                        @for (int i = 0; i < itemsPerSlide; i++)
+    <h2>Destacados</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        @foreach (var p in Model.Destacados)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@p.Nombre</h5>
+                        <p class="card-text text-truncate">@p.Descripcion</p>
+                        <p class="fw-bold">@p.PrecioBase €</p>
+                        @if (p.EsNuevo)
                         {
-                            int itemIndex = slideIndex * itemsPerSlide + i;
-                            if (itemIndex >= Model.Count) break;
-
-                            var proyecto = Model[itemIndex];
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100 shadow-sm">
-                                    @if (!string.IsNullOrEmpty(proyecto.ImagenPortada))
-                                    {
-                                        <img src="~/uploads/@proyecto.ImagenPortada" class="card-img-top" style="height:200px; object-fit:cover;" alt="@proyecto.Subtitulo">
-                                    }
-                                    <div class="card-body d-flex flex-column">
-                                        <h5 class="card-title">@proyecto.Subtitulo</h5>
-                                        @if (!string.IsNullOrEmpty(proyecto.Adelanto))
-                                        {
-                                            <p class="card-text">@proyecto.Adelanto</p>
-                                        }
-                                        <p class="mt-auto"><small>Iniciado: @proyecto.FechaInicio.ToShortDateString()</small></p>
-                                    </div>
-                                </div>
-                            </div>
+                            <span class="badge bg-success mb-2">Nuevo</span>
                         }
+                        @if (p.EsOferta)
+                        {
+                            <span class="badge bg-warning text-dark mb-2">Oferta</span>
+                        }
+                        <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
+                            Ver Detalles
+                        </a>
                     </div>
                 </div>
-            }
-        </div>
-
-        <button class="carousel-control-prev" type="button" data-bs-target="#proyectosCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#proyectosCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
-
-        <div class="carousel-indicators mt-3">
-            @for (int i = 0; i < totalSlides; i++)
-            {
-                var activeClass = i == 0 ? "active" : "";
-                <button type="button" data-bs-target="#proyectosCarousel" data-bs-slide-to="@i" class="@activeClass" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
-            }
-        </div>
+            </div>
+        }
     </div>
 }
+
+@if (Model.UltimasUnidades.Any())
+{
+    <h2>Últimas Unidades</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+        @foreach (var p in Model.UltimasUnidades)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-danger">
+                    <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@p.Nombre</h5>
+                        <p class="card-text text-truncate">@p.Descripcion</p>
+                        <p class="fw-bold">@p.PrecioBase €</p>
+                        <span class="badge bg-danger mb-2">¡Últimas unidades!</span>
+                        <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
+                            Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<h2>Todos los productos</h2>
+<div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+    @foreach (var p in Model.Productos)
+    {
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@p.Nombre</h5>
+                    <p class="card-text text-truncate">@p.Descripcion</p>
+                    <p class="fw-bold">@p.PrecioBase €</p>
+                    @if (p.EsNuevo)
+                    {
+                        <span class="badge bg-success mb-2">Nuevo</span>
+                    }
+                    @if (p.EsOferta)
+                    {
+                        <span class="badge bg-warning text-dark mb-2">Oferta</span>
+                    }
+                    <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
+                        Ver Detalles
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<nav>
+    <ul class="pagination justify-content-center">
+        @for (int i = 1; i <= Model.TotalPaginas; i++)
+        {
+            <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

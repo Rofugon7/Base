@@ -29,31 +29,31 @@ public class ProductoSimplesController : Controller
         // 🔹 Obtener TiendaId del usuario
         var tiendaId = ObtenerTiendaIdUsuario();
 
-        // 1️⃣ ProductoBase
-        var productoBase = new ProductoBase
-        {
-            TiendaId = tiendaId,
-            Nombre = model.Nombre,
-            Descripcion = model.Descripcion,
-            PrecioBase = model.PrecioBase,
-            TipoProducto = TipoProducto.Simple,
-            Activo = true,
-            ImagenPrincipal = model.ImagenPrincipal
-        };
+        //// 1️⃣ ProductoBase
+        //var productoBase = new ProductoBase
+        //{
+        //    TiendaId = tiendaId,
+        //    Nombre = model.Nombre,
+        //    Descripcion = model.Descripcion,
+        //    PrecioBase = model.PrecioBase,
+        //    TipoProducto = TipoProducto.Simple,
+        //    Activo = true,
+        //    ImagenPrincipal = model.ImagenPrincipal
+        //};
 
-        _context.ProductosBase.Add(productoBase);
-        await _context.SaveChangesAsync();
+        //_context.ProductosBase.Add(productoBase);
+        //await _context.SaveChangesAsync();
 
 
-        // 2️⃣ ProductoSimple
-        var productoSimple = new ProductoSimple
-        {
-            ProductoBaseId = productoBase.Id,
-            Stock = model.Stock
-        };
+        //// 2️⃣ ProductoSimple
+        //var productoSimple = new ProductoSimple
+        //{
+        //    ProductoBaseId = productoBase.Id,
+        //    Stock = model.Stock
+        //};
 
-        _context.ProductoSimples.Add(productoSimple);
-        await _context.SaveChangesAsync();
+        //_context.ProductoSimples.Add(productoSimple);
+        //await _context.SaveChangesAsync();
 
         return RedirectToAction("Index");
     }

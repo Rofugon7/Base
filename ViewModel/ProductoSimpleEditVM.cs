@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace BaseConLogin.Models.ViewModels
 {
@@ -6,20 +6,24 @@ namespace BaseConLogin.Models.ViewModels
     {
         public int ProductoBaseId { get; set; }
 
-        [Required, MaxLength(256)]
-        public string Nombre { get; set; } = string.Empty;
-
-        [MaxLength(2000)]
+        public string Nombre { get; set; }
         public string? Descripcion { get; set; }
-
-        [Required]
         public decimal PrecioBase { get; set; }
 
-        public string? ImagenPrincipal { get; set; }
-
         public bool Activo { get; set; }
-
-        [Required]
         public int Stock { get; set; }
+
+        // =========================
+        // IMAGEN ACTUAL (STRING)
+        // =========================
+        public string ImagenActual { get; set; } = "";
+
+        // =========================
+        // NUEVA IMAGEN (FILE)
+        // =========================
+        public IFormFile? NuevaImagen { get; set; }
+
+        public bool EsNuevo { get; set; }
+        public bool EsOferta { get; set; }
     }
 }

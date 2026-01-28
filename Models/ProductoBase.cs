@@ -34,6 +34,10 @@ namespace BaseConLogin.Models
 
         [MaxLength(256)]
         public string? ImagenPrincipal { get; set; }
+
+        public DateTime FechaAlta { get; set; } = DateTime.UtcNow;
+
+        public bool Oferta { get; set; } = false;
     }
 
 }

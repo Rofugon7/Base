@@ -26,6 +26,8 @@
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
     <Folder Include="Services\Checkout\" />
+    <Folder Include="wwwroot\uploads\productos\" />
+    <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
 
   <ItemGroup>

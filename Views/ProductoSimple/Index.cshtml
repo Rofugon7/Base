@@ -27,28 +27,27 @@
         @foreach (var item in Model)
         {
             <tr>
-
                 <td>
                     <img src="@item.Producto.ImagenPrincipal"
                          style="width:60px;height:60px;object-fit:cover" />
                 </td>
-
                 <td>@item.Producto.Nombre</td>
-
                 <td>@item.Producto.PrecioBase €</td>
-
                 <td>@item.Stock</td>
-
+                <td>@(item.Producto.Activo ? "Sí" : "No")</td>
                 <td>
-                    @(item.Producto.Activo ? "Sí" : "No")
+                    <a asp-action="Details" asp-route-id="@item.ProductoBaseId">Ver</a>
+                    @* Solo mostrar Editar y Eliminar si es admin o administrador de su tienda *@
+                    @if (User.IsInRole("Admin") ||
+                                    (User.IsInRole("AdministradorTienda") &&
+                                    item.Producto.TiendaId == int.Parse(User.FindFirst("TiendaId")!.Value)))
+                    {
+                        <text>
+                            | <a asp-action="Edit" asp-route-id="@item.ProductoBaseId">Editar</a>
+                            | <a asp-action="Delete" asp-route-id="@item.ProductoBaseId">Eliminar</a>
+                        </text>
+                    }
                 </td>
-
-                <td>
-                    <a asp-action="Details" asp-route-id="@item.ProductoBaseId">Ver</a> |
-                    <a asp-action="Edit" asp-route-id="@item.ProductoBaseId">Editar</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ProductoBaseId">Eliminar</a>
-                </td>
-
             </tr>
         }
     </tbody>
