@@ -4,7 +4,75 @@
     ViewData["Title"] = "Inicio";
 }
 
-<h1 class="mb-4">Bienvenido a nuestra tienda</h1>
+
+
+
+<div class="row"> 
+    <br />
+    <br />
+
+</div>
+
+<div class="row">
+
+    @foreach (var p in Model.Productos)
+    {
+        <div class="col-md-4 mb-4">
+
+            <div class="card h-100 shadow-sm">
+
+                <img src="@p.ImagenPrincipal"
+                     class="card-img-top"
+                     style="height:220px;object-fit:cover" />
+
+                <div class="card-body">
+
+                    <h5>@p.Nombre</h5>
+
+                    <p class="text-muted small">
+                        @p.Descripcion
+                    </p>
+
+                    <h4 class="text-success">
+                        @p.PrecioBase €
+                    </h4>
+
+
+                    @if (p.EsOferta)
+                    {
+                        <span class="badge bg-danger">
+                            Oferta
+                        </span>
+                    }
+
+                    @if (p.EsNuevo)
+                    {
+                        <span class="badge bg-success">
+                            Nuevo
+                        </span>
+                    }
+
+                </div>
+
+                <div class="card-footer bg-white">
+
+                    <a asp-controller="ProductoSimple"
+                       asp-action="Details"
+                       asp-route-id="@p.ProductoBaseId"
+                       class="btn btn-outline-primary w-100">
+
+                        Ver producto
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+    }
+</div>
+
 
 @if (Model.Destacados.Any())
 {

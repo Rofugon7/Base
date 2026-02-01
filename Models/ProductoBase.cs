@@ -38,6 +38,17 @@ namespace BaseConLogin.Models
         public DateTime FechaAlta { get; set; } = DateTime.UtcNow;
 
         public bool Oferta { get; set; } = false;
+
+        public int CategoriaId { get; set; }  // nullable si quieres permitir productos sin categoría
+        public Categoria? Categoria { get; set; }
+
+        //public ProductoSimple? ProductoSimple { get; set; }
+        //public ProductoVariable? ProductoVariable { get; set; }
+
+        public string? SKU { get; set; }
+        public ICollection<ProductoImagen> Imagenes { get; set; } = new List<ProductoImagen>();
+
+
     }
 
 }

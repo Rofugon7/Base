@@ -1,56 +1,126 @@
-﻿@model BaseConLogin.Models.ViewModels.ProductoSimpleCreateVM
+﻿@model BaseConLogin.Models.ViewModels.ProductoSimpleVM
 
 @{
-    ViewData["Title"] = "Crear Producto";
+    ViewData["Title"] = Model.ProductoBaseId == 0 ? "Crear Producto" : "Editar Producto";
 }
 
-<h2>Nuevo Producto Simple</h2>
+<h2>@ViewData["Title"]</h2>
 
-<form asp-action="Create"
-      method="post"
-      enctype="multipart/form-data">
+<form asp-action="@((Model.ProductoBaseId == 0) ? "Create" : "Edit")"
+      method="post" enctype="multipart/form-data">
+
+    <input type="hidden" asp-for="ProductoBaseId" />
 
     <div class="mb-3">
         <label>Nombre</label>
-        <input asp-for="Nombre" class="form-control" required />
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label>Descripción</label>
-        <textarea asp-for="Descripcion" class="form-control"></textarea>
+        <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Descripcion" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label>Precio (€)</label>
+            <input asp-for="PrecioBase" type="number" step="0.01" class="form-control" />
+            <span asp-validation-for="PrecioBase" class="text-danger"></span>
+        </div>
+        <div class="col">
+            <label>Stock</label>
+            <input asp-for="Stock" type="number" class="form-control" />
+            <span asp-validation-for="Stock" class="text-danger"></span>
+        </div>
     </div>
 
     <div class="mb-3">
-        <label>Precio (€)</label>
-        <input asp-for="PrecioBase"
-               type="number"
-               step="0.01"
-               class="form-control"
-               required />
+        <label>SKU</label>
+        <input asp-for="SKU" class="form-control" />
+        <span asp-validation-for="SKU" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
-        <label>Imagen</label>
-        <input asp-for="Imagen"
-               type="file"
-               class="form-control"
-               accept="image/*" />
+        <label>Categoría</label>
+        <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-control">
+            <option value="">-- Selecciona categoría --</option>
+        </select>
     </div>
 
     <div class="mb-3">
-        <label>Stock</label>
-        <input asp-for="Stock"
-               type="number"
-               class="form-control"
-               required />
+        <label>Producto activo</label>
+        <input asp-for="Activo" type="checkbox" />
     </div>
 
-    <button type="submit" class="btn btn-success">
-        Guardar
-    </button>
+    <div class="row g-2">
 
-    <a asp-action="Index" class="btn btn-secondary">
-        Cancelar
-    </a>
+        @for (int i = 0; i < 4; i++)
+        {
+            <div class="col-3 text-center">
+                <input type="file"
+                       name="Imagenes[@i]"
+                       class="form-control imagen-input"
+                       data-index="@i"
+                       accept="image/*" />
 
+                <div class="form-check mt-1">
+                    <input class="form-check-input" type="radio"
+                           name="PrincipalIndex" value="@i"
+                           @(i == 0 ? "checked" : "") />
+                    <label class="small">Principal</label>
+                </div>
+
+                <img id="preview_@i" src="/imagenes/ProductoSinImagen.png" class="preview-img" />
+            </div>
+        }
+
+    </div>
+
+
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
 </form>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        document.querySelectorAll(".imagen-input").forEach(input => {
+
+            input.addEventListener("change", e => {
+
+                const file = e.target.files[0];
+                const index = e.target.dataset.index;
+
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+                    alert("Solo imágenes");
+                    e.target.value = "";
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (ev) {
+
+                    const img = document.getElementById("preview_" + index);
+
+                    if (img) {
+                        img.src = ev.target.result;
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            });
+
+        });
+
+    </script>
+}
+

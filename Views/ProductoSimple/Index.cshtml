@@ -10,6 +10,68 @@
     ➕ Nuevo Producto
 </a>
 
+<!-- ========================= -->
+<!-- FILTROS -->
+<!-- ========================= -->
+
+<form method="get" class="mb-3">
+
+    <div class="input-group">
+
+        <!-- Nombre -->
+        <input type="text"
+               name="nombre"
+               value="@ViewBag.FilterNombre"
+               class="form-control"
+               placeholder="Nombre" />
+
+        <!-- Precio mínimo -->
+        <input type="number"
+               name="precioMin"
+               value="@ViewBag.FilterPrecioMin"
+               class="form-control"
+               placeholder="Precio min" />
+
+        <!-- Precio máximo -->
+        <input type="number"
+               name="precioMax"
+               value="@ViewBag.FilterPrecioMax"
+               class="form-control"
+               placeholder="Precio max" />
+
+        <!-- Estado -->
+        <select name="activo" class="form-select">
+        @foreach (var item in ViewBag.Estados as List<SelectListItem>)
+        {
+            if (item.Value == (string)ViewBag.EstadoSeleccionado)
+            {
+                <option value="@item.Value" selected="selected">@item.Text</option>
+            }
+            else
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
+        }
+        </select>
+
+        <!-- Botón filtrar -->
+        <button type="submit" class="btn btn-primary">
+            Filtrar
+        </button>
+
+        <!-- Botón limpiar -->
+        <a href="@Url.Action("Index", "ProductoSimple")" class="btn btn-secondary">
+            Limpiar
+        </a>
+
+    </div>
+
+</form>
+
+
+<!-- ========================= -->
+<!-- TABLA DE PRODUCTOS -->
+<!-- ========================= -->
 <table class="table table-bordered table-striped">
 
     <thead>
@@ -37,10 +99,8 @@
                 <td>@(item.Producto.Activo ? "Sí" : "No")</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@item.ProductoBaseId">Ver</a>
-                    @* Solo mostrar Editar y Eliminar si es admin o administrador de su tienda *@
-                    @if (User.IsInRole("Admin") ||
-                                    (User.IsInRole("AdministradorTienda") &&
-                                    item.Producto.TiendaId == int.Parse(User.FindFirst("TiendaId")!.Value)))
+                    @if (User.IsInRole("Admin") || (User.IsInRole("AdministradorTienda") &&
+                        item.Producto.TiendaId == int.Parse(User.FindFirst("TiendaId")!.Value)))
                     {
                         <text>
                             | <a asp-action="Edit" asp-route-id="@item.ProductoBaseId">Editar</a>
@@ -51,5 +111,4 @@
             </tr>
         }
     </tbody>
-
 </table>

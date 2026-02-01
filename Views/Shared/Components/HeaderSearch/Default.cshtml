@@ -1,0 +1,40 @@
+﻿@model List<BaseConLogin.Models.Categoria>
+
+@{
+    var selectedCategoria = Context.Request.Query["categoria"].ToString();
+    var queryTexto = Context.Request.Query["q"].ToString();
+}
+
+<div class="header-search">
+    <form method="get" asp-controller="Home" asp-action="Search" class="search-bar">
+        <select name="categoria" class="search-category">
+            <option value="">Todas las categorías</option>
+            @{
+                var selectedCategoria = Context.Request.Query["categoria"].ToString();
+            }
+
+            @foreach (var cat in Model)
+            {
+                if (cat.Id.ToString() == selectedCategoria)
+                {
+                    <option value="@cat.Id" selected>
+                        @cat.Nombre
+                    </option>
+                }
+                else
+                {
+                    <option value="@cat.Id">
+                        @cat.Nombre
+                    </option>
+                }
+            }
+
+        </select>
+
+        <input type="text" name="q" placeholder="Buscar productos..." class="search-input" value="@queryTexto" />
+
+        <button type="submit" class="search-button">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </form>
+</div>

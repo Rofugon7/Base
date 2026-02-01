@@ -1,0 +1,19 @@
+﻿@model BaseConLogin.Models.Categoria
+@{
+    ViewData["Title"] = "Eliminar Categoría";
+}
+
+<h2>Eliminar Categoría</h2>
+
+<div class="alert alert-danger">
+    ¿Seguro que quieres eliminar esta categoría?
+</div>
+
+<h4>@Model.Nombre</h4>
+<p>@Model.Descripcion</p>
+
+<form asp-action="Delete" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Eliminar</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>

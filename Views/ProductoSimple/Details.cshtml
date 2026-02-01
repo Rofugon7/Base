@@ -1,52 +1,163 @@
 ﻿@model BaseConLogin.Models.ProductoSimple
 
 @{
-    ViewData["Title"] = "Detalle Producto";
+    ViewData["Title"] = Model.Producto.Nombre;
+    var imagenes = Model.Producto.Imagenes.OrderByDescending(i => i.EsPrincipal).ToList();
 }
 
-<h2>@Model.Producto.Nombre</h2>
+<div class="container mt-5">
+    <div class="card shadow-lg border-0 overflow-hidden">
+        <div class="row g-0">
+            <div class="col-md-6 bg-light p-4">
+                <div class="main-img-container shadow-sm rounded mb-3 bg-white">
+                    <img id="mainImage" src="@Model.Producto.ImagenPrincipal" alt="@Model.Producto.Nombre" class="img-fluid main-display">
+                </div>
 
-<div class="row">
+                <div class="d-flex gap-2 justify-content-center overflow-auto pb-2">
+                    @foreach (var img in imagenes)
+                    {
+                        <div class="thumb-container @(img.EsPrincipal ? "active" : "")">
+                            <img src="/@img.Ruta"
+                                 class="img-thumbnail thumb-img"
+                                 onclick="changeImage(this.src, this)"
+                                 role="button">
+                        </div>
+                    }
+                </div>
+            </div>
 
-    <div class="col-md-4">
+            <div class="col-md-6 p-5 d-flex flex-column justify-content-center">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item text-uppercase small text-muted">Producto Simple</li>
+                        <li class="breadcrumb-item active text-uppercase small" aria-current="page">@Model.Producto.Nombre</li>
+                    </ol>
+                </nav>
 
-        <img src="@Model.Producto.ImagenPrincipal"
-             class="img-fluid rounded border" />
+                <h1 class="display-5 fw-bold mb-3 text-dark">@Model.Producto.Nombre</h1>
 
+                <div class="mb-4">
+                    <span class="h2 fw-light text-primary">@Model.Producto.PrecioBase.ToString("C2")</span>
+                    <span class="text-muted ms-2 small">IVA incluido</span>
+                </div>
+
+                <p class="text-secondary mb-4 lh-lg">
+                    @Model.Producto.Descripcion
+                </p>
+
+                <div class="mb-4">
+                    @if (Model.Stock > 0)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success px-3 py-2 rounded-pill">
+                            <i class="bi bi-check-circle-fill me-1"></i> Stock disponible: @Model.Stock unidades
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger-subtle text-danger border border-danger px-3 py-2 rounded-pill">
+                            <i class="bi bi-x-circle-fill me-1"></i> Agotado temporalmente
+                        </span>
+                    }
+                </div>
+
+                <hr class="my-4 text-muted opacity-25">
+
+                <div class="d-grid gap-2 d-md-flex">
+                    <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-sm @(Model.Stock <= 0 ? "disabled" : "")">
+                        <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-pill">
+                        Volver a la tienda
+                    </a>
+                </div>
+
+                @if (User.IsInRole("Admin") || User.IsInRole("AdministradorTienda"))
+                {
+                    <div class="mt-4 pt-3 border-top border-dashed">
+                        <a asp-action="Edit" asp-route-id="@Model.ProductoBaseId" class="text-decoration-none text-warning small">
+                            <i class="bi bi-pencil-square"></i> Editar como administrador
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
-
-    <div class="col-md-8">
-
-        <dl class="row">
-
-            <dt class="col-sm-4">Nombre</dt>
-            <dd class="col-sm-8">@Model.Producto.Nombre</dd>
-
-            <dt class="col-sm-4">Descripción</dt>
-            <dd class="col-sm-8">@Model.Producto.Descripcion</dd>
-
-            <dt class="col-sm-4">Precio</dt>
-            <dd class="col-sm-8">@Model.Producto.PrecioBase €</dd>
-
-            <dt class="col-sm-4">Stock</dt>
-            <dd class="col-sm-8">@Model.Stock</dd>
-
-            <dt class="col-sm-4">Activo</dt>
-            <dd class="col-sm-8">
-                @(Model.Producto.Activo ? "Sí" : "No")
-            </dd>
-
-        </dl>
-
-    </div>
-
 </div>
 
-<a asp-action="Edit" asp-route-id="@Model.ProductoBaseId"
-   class="btn btn-primary">
-    Editar
-</a>
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
 
-<a asp-action="Index" class="btn btn-secondary">
-    Volver
-</a>
+        .main-img-container {
+            height: 450px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .main-display {
+            max-height: 100%;
+            width: auto;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+        }
+
+        .thumb-container {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            opacity: 0.6;
+        }
+
+            .thumb-container:hover, .thumb-container.active {
+                opacity: 1;
+                border-color: #0d6efd;
+                transform: translateY(-2px);
+            }
+
+        .thumb-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border: none !important;
+        }
+
+        .bg-success-subtle {
+            background-color: #e1f6eb !important;
+        }
+
+        .bg-danger-subtle {
+            background-color: #fbe9e9 !important;
+        }
+
+        .border-dashed {
+            border-style: dashed !important;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function changeImage(src, element) {
+            // Cambiar imagen principal con efecto suave
+            const mainImg = document.getElementById('mainImage');
+            mainImg.style.opacity = '0';
+
+            setTimeout(() => {
+                mainImg.src = src;
+                mainImg.style.opacity = '1';
+            }, 200);
+
+            // Actualizar borde activo en miniaturas
+            document.querySelectorAll('.thumb-container').forEach(el => el.classList.remove('active'));
+            element.parentElement.classList.add('active');
+        }
+    </script>
+}

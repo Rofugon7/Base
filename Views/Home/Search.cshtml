@@ -1,0 +1,64 @@
+﻿@model BaseConLogin.ViewModel.SearchResultVM
+
+@{
+    ViewData["Title"] = "Resultados de búsqueda";
+}
+
+<div class="search-results-container">
+    <div class="search-header">
+        <h2>
+            Resultados
+            @if (!string.IsNullOrEmpty(Model.Query))
+            {
+                <span>para "@Model.Query"</span>
+            }
+        </h2>
+        <p>Página @Model.PaginaActual de @Model.TotalPaginas</p>
+    </div>
+
+    <div class="products-grid">
+        @if (!Model.Productos.Any())
+        {
+            <div class="no-results">No se encontraron productos</div>
+        }
+
+        @foreach (var p in Model.Productos)
+        {
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="@p.Imagen" />
+                </div>
+                <div class="product-info">
+                    <h5>@p.Nombre</h5>
+                    <p class="price">@p.Precio €</p>
+                    <div class="badges">
+                        @if (p.EsNuevo)
+                        {
+                            <span class="badge new">Nuevo</span>
+                        }
+
+                        @if (p.EsOferta)
+                        {
+                            <span class="badge offer">Oferta</span>
+                        }
+                    </div>
+                    <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.Id" class="btn-view">Ver producto</a>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.TotalPaginas > 1)
+    {
+        <nav class="pagination-wrapper">
+            <ul class="pagination">
+                @for (int i = 1; i <= Model.TotalPaginas; i++)
+                {
+                    <li class="@(i == Model.PaginaActual ? "active" : "")">
+                        <a asp-action="Search" asp-route-q="@Model.Query" asp-route-categoria="@Model.CategoriaId" asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

@@ -70,6 +70,38 @@ namespace BaseConLogin.Migrations
                     b.ToTable("CarritoItems");
                 });
 
+            modelBuilder.Entity("BaseConLogin.Models.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activa")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Descripcion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("FechaAlta")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TiendaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TiendaId");
+
+                    b.ToTable("Categorias");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.ContactMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -175,6 +207,9 @@ namespace BaseConLogin.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("bit");
 
+                    b.Property<int>("CategoriaId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Descripcion")
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
@@ -198,6 +233,9 @@ namespace BaseConLogin.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("SKU")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("TiendaId")
                         .HasColumnType("int");
 
@@ -205,6 +243,8 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CategoriaId");
 
                     b.HasIndex("TiendaId");
 
@@ -595,6 +635,31 @@ namespace BaseConLogin.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ProductoImagen", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("EsPrincipal")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ProductoBaseId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Ruta")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductoBaseId");
+
+                    b.ToTable("ProductoImagenes");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
                 {
                     b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
@@ -625,6 +690,17 @@ namespace BaseConLogin.Migrations
                     b.Navigation("ProductoBase");
                 });
 
+            modelBuilder.Entity("BaseConLogin.Models.Categoria", b =>
+                {
+                    b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
+                        .WithMany()
+                        .HasForeignKey("TiendaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tienda");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.PedidoItem", b =>
                 {
                     b.HasOne("BaseConLogin.Models.Pedido", "Pedido")
@@ -638,11 +714,19 @@ namespace BaseConLogin.Migrations
 
             modelBuilder.Entity("BaseConLogin.Models.ProductoBase", b =>
                 {
+                    b.HasOne("BaseConLogin.Models.Categoria", "Categoria")
+                        .WithMany("Productos")
+                        .HasForeignKey("CategoriaId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
+
                     b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
                         .WithMany("Productos")
                         .HasForeignKey("TiendaId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Categoria");
 
                     b.Navigation("Tienda");
                 });
@@ -769,14 +853,35 @@ namespace BaseConLogin.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProductoImagen", b =>
+                {
+                    b.HasOne("BaseConLogin.Models.ProductoBase", "ProductoBase")
+                        .WithMany("Imagenes")
+                        .HasForeignKey("ProductoBaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductoBase");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>
                 {
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("BaseConLogin.Models.Categoria", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
             modelBuilder.Entity("BaseConLogin.Models.Pedido", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("BaseConLogin.Models.ProductoBase", b =>
+                {
+                    b.Navigation("Imagenes");
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.Proyectos", b =>

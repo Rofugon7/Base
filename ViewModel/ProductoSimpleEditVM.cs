@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace BaseConLogin.Models.ViewModels
 {
@@ -25,5 +26,12 @@ namespace BaseConLogin.Models.ViewModels
 
         public bool EsNuevo { get; set; }
         public bool EsOferta { get; set; }
+
+        public int CategoriaId { get; set; }
+        public List<SelectListItem> Categorias { get; set; } = new();
+
+        public string SKU { get; set; }
+
+        public List<string> ImagenesActuales { get; set; } = new List<string>();
     }
 }

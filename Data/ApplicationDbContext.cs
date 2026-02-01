@@ -40,9 +40,10 @@ namespace BaseConLogin.Data
 
         public DbSet<CarritoPersistente> Carritos { get; set; }
         public DbSet<CarritoPersistenteItem> CarritoItems { get; set; }
-
+        public DbSet<Categoria> Categorias { get; set; } = null!;
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<PedidoItem> PedidoItems { get; set; }
+        public DbSet<ProductoImagen> ProductoImagenes { get; set; }
 
 
         // =========================
@@ -174,6 +175,16 @@ namespace BaseConLogin.Data
 
             modelBuilder.Entity<ProductoSimple>()
         .ToTable("productosSimples");
+
+            // -------------------------
+            // Categorias
+            // -------------------------
+
+            modelBuilder.Entity<ProductoBase>()
+          .HasOne(p => p.Categoria)
+          .WithMany(c => c.Productos)
+          .HasForeignKey(p => p.CategoriaId)
+          .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

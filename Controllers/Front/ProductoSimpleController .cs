@@ -1,184 +1,252 @@
 ﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
 using BaseConLogin.Models.ViewModels;
-using BaseConLogin.ViewModel;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
-namespace BaseConLogin.Controllers
+namespace BaseConLogin.Controllers.Front
 {
     public class ProductoSimpleController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _env;
 
-        public ProductoSimpleController(
-    ApplicationDbContext context,
-    IWebHostEnvironment env)
+        public ProductoSimpleController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
             _env = env;
         }
 
         // =========================
-        // LISTAR (PÚBLICO)
+        // INDEX
         // =========================
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public IActionResult Index(string nombre, decimal? precioMin, decimal? precioMax, string estado)
         {
-            var productos = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .Where(p => p.Producto.Activo)
-                .ToListAsync();
+            var productos = _context.ProductoSimples.Include(p => p.Producto).AsQueryable();
 
-            return View(productos);
+            if (!string.IsNullOrEmpty(nombre))
+                productos = productos.Where(p => p.Producto.Nombre.Contains(nombre));
+
+            if (precioMin.HasValue)
+                productos = productos.Where(p => p.Producto.PrecioBase >= precioMin.Value);
+
+            if (precioMax.HasValue)
+                productos = productos.Where(p => p.Producto.PrecioBase <= precioMax.Value);
+
+            if (!string.IsNullOrEmpty(estado))
+            {
+                bool activo = estado == "true";
+                productos = productos.Where(p => p.Producto.Activo == activo);
+            }
+
+            ViewBag.NombreFiltro = nombre;
+            ViewBag.PrecioMinFiltro = precioMin?.ToString("0.##");
+            ViewBag.PrecioMaxFiltro = precioMax?.ToString("0.##");
+            ViewBag.EstadoSeleccionado = estado;
+            ViewBag.Estados = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "", Text = "Todos" },
+                new SelectListItem { Value = "true", Text = "Activo" },
+                new SelectListItem { Value = "false", Text = "Inactivo" }
+            };
+
+            return View(productos.ToList());
         }
 
         // =========================
-        // DETALLE (PÚBLICO)
+        // DETAILS
         // =========================
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             var producto = await _context.ProductoSimples
                 .Include(p => p.Producto)
-                .FirstOrDefaultAsync(p =>
-                    p.ProductoBaseId == id &&
-                    p.Producto.Activo);
+                .ThenInclude(p => p.Imagenes) // <-- Importante incluir las imágenes
+                .FirstOrDefaultAsync(p => p.ProductoBaseId == id && p.Producto.Activo);
 
-            if (producto == null)
-                return NotFound();
+            if (producto == null) return NotFound();
 
             return View(producto);
         }
 
         // =========================
-        // CREAR (ADMIN)
+        // CREATE
         // =========================
         [Authorize(Roles = "Admin,AdministradorTienda")]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var vm = new ProductoSimpleVM
+            {
+                Categorias = await GetCategoriasAsync(),
+                Imagenes = new List<IFormFile> { null, null, null, null },
+                ImagenesActuales = new(),
+
+        PrincipalIndex = 0
+            };
+            return View(vm);
         }
+
+
 
         [HttpPost]
         [Authorize(Roles = "Admin,AdministradorTienda")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductoSimpleCreateVM vm)
+        public async Task<IActionResult> Create(ProductoSimpleVM vm)
         {
+            ModelState.Remove("ImagenPrincipal");
             if (!ModelState.IsValid)
-                return View(vm);
-
-            string rutaImagen = "/imagenes/ProductoSinImagen.png";
-
-            // =============================
-            // PROCESAR IMAGEN
-            // =============================
-            if (vm.Imagen != null && vm.Imagen.Length > 0)
             {
-                // Validar tamaño (2MB)
-                if (vm.Imagen.Length > 2 * 1024 * 1024)
-                {
-                    ModelState.AddModelError("Imagen", "Máx 2MB");
-                    return View(vm);
-                }
-
-                // Validar tipo
-                var extensionesPermitidas = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-
-                var extension = Path.GetExtension(vm.Imagen.FileName).ToLower();
-
-                if (!extensionesPermitidas.Contains(extension))
-                {
-                    ModelState.AddModelError("Imagen", "Formato no válido");
-                    return View(vm);
-                }
-
-                // Generar nombre único
-                var nombreArchivo = Guid.NewGuid() + extension;
-
-                // Ruta física
-                var rutaFisica = Path.Combine(
-                    _env.WebRootPath,
-                    "uploads",
-                    "productos",
-                    nombreArchivo
-                );
-
-                // Guardar archivo
-                using (var stream = new FileStream(rutaFisica, FileMode.Create))
-                {
-                    await vm.Imagen.CopyToAsync(stream);
-                }
-
-                // Ruta para BD
-                rutaImagen = "/uploads/productos/" + nombreArchivo;
+                vm.Categorias = await GetCategoriasAsync();
+                return View(vm);
             }
 
-            // =============================
-            // GUARDAR PRODUCTO
-            // =============================
-
-            var tiendaId = ObtenerTiendaIdUsuario();
-
-            var productoBase = new ProductoBase
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                Nombre = vm.Nombre,
-                Descripcion = vm.Descripcion,
-                PrecioBase = vm.PrecioBase,
-                TipoProducto = TipoProducto.Simple,
-                Activo = true,
-                ImagenPrincipal = rutaImagen,
-                TiendaId = tiendaId
-            };
+                var tiendaId = ObtenerTiendaIdUsuario();
 
-            _context.ProductosBase.Add(productoBase);
-            await _context.SaveChangesAsync();
+                // 1. Crear el ProductoBase primero
+                var productoBase = new ProductoBase
+                {
+                    Nombre = vm.Nombre,
+                    Descripcion = vm.Descripcion,
+                    PrecioBase = vm.PrecioBase,
+                    TipoProducto = TipoProducto.Simple,
+                    Activo = vm.Activo,
+                    TiendaId = tiendaId,
+                    CategoriaId = vm.CategoriaId,
+                    SKU = vm.SKU,
+                    ImagenPrincipal = "/imagenes/ProductoSinImagen.png"
+                };
 
-            var productoSimple = new ProductoSimple
+                _context.ProductosBase.Add(productoBase);
+                await _context.SaveChangesAsync();
+
+                // 2. Procesar SOLO las imágenes que vienen en el Request
+                // Usamos Request.Form.Files para identificar exactamente qué slot envió qué archivo
+                var archivos = Request.Form.Files;
+                string principalPath = "/imagenes/ProductoSinImagen.png";
+
+                for (int i = 0; i < 4; i++)
+                {
+                    // Buscamos el archivo que tenga el nombre exacto "Imagenes[0]", "Imagenes[1]", etc.
+                    var file = archivos.GetFile($"Imagenes[{i}]");
+
+                    if (file != null && file.Length > 0)
+                    {
+                        // Guardar archivo físico
+                        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                        var path = Path.Combine(_env.WebRootPath, "uploads", fileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        var rutaRelativa = "uploads/" + fileName;
+                        bool esEstaPrincipal = (i == vm.PrincipalIndex);
+
+                        // Insertar en ProductoImagenes
+                        var nuevaImagen = new ProductoImagen
+                        {
+                            ProductoBaseId = productoBase.Id,
+                            Ruta = rutaRelativa,
+                            EsPrincipal = esEstaPrincipal
+                        };
+                        _context.ProductoImagenes.Add(nuevaImagen);
+
+                        if (esEstaPrincipal)
+                        {
+                            principalPath = "/" + rutaRelativa;
+                        }
+                    }
+                }
+
+                // 3. Asignar la imagen principal al producto base y crear el ProductoSimple
+                productoBase.ImagenPrincipal = principalPath;
+
+                var productoSimple = new ProductoSimple
+                {
+                    ProductoBaseId = productoBase.Id,
+                    Stock = vm.Stock
+                };
+                _context.ProductoSimples.Add(productoSimple);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
             {
-                ProductoBaseId = productoBase.Id,
-                Stock = vm.Stock
-            };
-
-            _context.ProductoSimples.Add(productoSimple);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+                await transaction.RollbackAsync();
+                ModelState.AddModelError("", "Error: " + ex.Message);
+                vm.Categorias = await GetCategoriasAsync();
+                return View(vm);
+            }
         }
 
-
-
-
         // =========================
-        // EDITAR (ADMIN)
+        // EDIT
         // =========================
         [Authorize(Roles = "Admin,AdministradorTienda")]
         public async Task<IActionResult> Edit(int id)
         {
             var producto = await _context.ProductoSimples
                 .Include(p => p.Producto)
+                .Include(p => p.Producto.Imagenes)
                 .FirstOrDefaultAsync(p => p.ProductoBaseId == id);
 
             if (producto == null)
                 return NotFound();
 
-            // Seguridad: solo su tienda (excepto Admin)
             if (!PuedeGestionarProducto(producto.Producto.TiendaId))
                 return Forbid();
 
-            var vm = new ProductoSimpleEditVM
+            var imagenes = producto.Producto.Imagenes
+                .OrderBy(i => i.Id)
+                .ToList();
+
+            var vm = new ProductoSimpleVM
             {
-                ProductoBaseId = producto.ProductoBaseId,
+                ProductoBaseId = id,
+
                 Nombre = producto.Producto.Nombre,
                 Descripcion = producto.Producto.Descripcion,
                 PrecioBase = producto.Producto.PrecioBase,
-                ImagenActual = producto.Producto.ImagenPrincipal,
                 Activo = producto.Producto.Activo,
-                Stock = producto.Stock
+                CategoriaId = producto.Producto.CategoriaId,
+                SKU = producto.Producto.SKU,
+                Stock = producto.Stock,
+
+                Categorias = await GetCategoriasAsync(),
+
+                ImagenesActuales = imagenes,
+                SlotsIds = new List<int?>(),
+                Imagenes = new List<IFormFile> { null, null, null, null }
             };
+
+            // Rellenar slots (4 fijos)
+            for (int i = 0; i < 4; i++)
+            {
+                if (i < imagenes.Count)
+                    vm.SlotsIds.Add(imagenes[i].Id);
+                else
+                    vm.SlotsIds.Add(null);
+            }
+
+            vm.PrincipalIndex = imagenes.FindIndex(i => i.EsPrincipal);
+            if (vm.PrincipalIndex < 0)
+                vm.PrincipalIndex = 0;
+
+            while (vm.SlotsIds.Count < 4)
+            {
+                vm.SlotsIds.Add(null);
+            }
 
             return View(vm);
         }
@@ -189,173 +257,169 @@ namespace BaseConLogin.Controllers
         [HttpPost]
         [Authorize(Roles = "Admin,AdministradorTienda")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ProductoSimpleEditVM vm)
+        public async Task<IActionResult> Edit(ProductoSimpleVM vm)
         {
+            ModelState.Remove("ImagenPrincipal");
             if (!ModelState.IsValid)
+            {
+                vm.Categorias = await GetCategoriasAsync();
                 return View(vm);
+            }
 
-            var producto = await _context.ProductoSimples
-                .Include(p => p.Producto)
+            var productoBase = await _context.ProductosBase
+                .Include(p => p.Imagenes)
+                .FirstOrDefaultAsync(p => p.Id == vm.ProductoBaseId);
+
+            var productoSimple = await _context.ProductoSimples
                 .FirstOrDefaultAsync(p => p.ProductoBaseId == vm.ProductoBaseId);
 
-            if (producto == null)
-                return NotFound();
+            if (productoBase == null || productoSimple == null) return NotFound();
 
-            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
-                return Forbid();
-
-            // ===============================
-            // GESTIÓN IMAGEN
-            // ===============================
-
-            string rutaImagen = vm.ImagenActual;
-
-            if (vm.NuevaImagen != null && vm.NuevaImagen.Length > 0)
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                // 1️⃣ Borrar anterior
-                if (!string.IsNullOrEmpty(vm.ImagenActual) &&
-                    !vm.ImagenActual.Contains("ProductoSinImagen"))
-                {
-                    var rutaVieja = Path.Combine(
-                        _env.WebRootPath,
-                        vm.ImagenActual.TrimStart('/'));
+                // 1. Actualizar datos básicos
+                productoBase.Nombre = vm.Nombre;
+                productoBase.Descripcion = vm.Descripcion;
+                productoBase.PrecioBase = vm.PrecioBase;
+                productoBase.SKU = vm.SKU;
+                productoBase.CategoriaId = vm.CategoriaId;
+                productoBase.Activo = vm.Activo;
+                productoSimple.Stock = vm.Stock;
 
-                    if (System.IO.File.Exists(rutaVieja))
-                        System.IO.File.Delete(rutaVieja);
+                // 2. Ejecutar Borrado explícito (Checkbox "Borrar")
+                if (vm.ImagenesBorrar != null && vm.ImagenesBorrar.Any())
+                {
+                    foreach (var imgId in vm.ImagenesBorrar)
+                    {
+                        var img = productoBase.Imagenes.FirstOrDefault(x => x.Id == imgId);
+                        if (img != null)
+                        {
+                            BorrarArchivoFisico(img.Ruta);
+                            _context.ProductoImagenes.Remove(img);
+                        }
+                    }
                 }
 
-                // 2️⃣ Guardar nueva
-                var carpeta = Path.Combine(
-                    _env.WebRootPath,
-                    "imagenes",
-                    "productos");
+                // 3. Procesar Slots (Sustituir o Añadir)
+                var archivos = Request.Form.Files;
 
-                if (!Directory.Exists(carpeta))
-                    Directory.CreateDirectory(carpeta);
-
-                var nombreArchivo = Guid.NewGuid().ToString()
-                                    + Path.GetExtension(vm.NuevaImagen.FileName);
-
-                var rutaFisica = Path.Combine(carpeta, nombreArchivo);
-
-                using (var stream = new FileStream(rutaFisica, FileMode.Create))
+                for (int i = 0; i < 4; i++)
                 {
-                    await vm.NuevaImagen.CopyToAsync(stream);
+                    var file = archivos.GetFile($"Imagenes[{i}]");
+
+                    if (file != null && file.Length > 0)
+                    {
+                        // ¿Había una imagen en este slot? (Sustitución)
+                        if (i < vm.SlotsIds.Count && vm.SlotsIds[i].HasValue)
+                        {
+                            int idVieja = vm.SlotsIds[i].Value;
+                            // Solo borramos si no estaba ya en la lista de ImagenesBorrar (para no duplicar delete)
+                            var vieja = productoBase.Imagenes.FirstOrDefault(x => x.Id == idVieja);
+                            if (vieja != null)
+                            {
+                                BorrarArchivoFisico(vieja.Ruta);
+                                _context.ProductoImagenes.Remove(vieja);
+                            }
+                        }
+
+                        // Guardar la nueva imagen
+                        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                        var path = Path.Combine(_env.WebRootPath, "uploads", fileName);
+
+                        using (var stream = new FileStream(path, FileMode.Create))
+                        {
+                            await file.CopyToAsync(stream);
+                        }
+
+                        _context.ProductoImagenes.Add(new ProductoImagen
+                        {
+                            ProductoBaseId = productoBase.Id,
+                            Ruta = "uploads/" + fileName,
+                            EsPrincipal = false // Se define al final
+                        });
+                    }
                 }
 
-                rutaImagen = "/imagenes/productos/" + nombreArchivo;
+                // Guardamos cambios intermedios para tener la lista de imágenes actualizada en BD
+                await _context.SaveChangesAsync();
+
+                // 4. Recalcular Imagen Principal
+                // Recargamos de BD para asegurar que tenemos la lista real tras borrados y adiciones
+                var imagenesFinales = await _context.ProductoImagenes
+                    .Where(x => x.ProductoBaseId == productoBase.Id)
+                    .OrderBy(x => x.Id)
+                    .ToListAsync();
+
+                foreach (var img in imagenesFinales) img.EsPrincipal = false;
+
+                if (imagenesFinales.Any())
+                {
+                    // Intentamos usar el PrincipalIndex enviado
+                    int pIdx = vm.PrincipalIndex ?? 0;
+
+                    // Si el índice es mayor a lo que tenemos (ej. borraste imágenes), usamos la primera
+                    if (pIdx < 0 || pIdx >= imagenesFinales.Count) pIdx = 0;
+
+                    imagenesFinales[pIdx].EsPrincipal = true;
+                    productoBase.ImagenPrincipal = "/" + imagenesFinales[pIdx].Ruta;
+                }
+                else
+                {
+                    productoBase.ImagenPrincipal = "/imagenes/ProductoSinImagen.png";
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction(nameof(Index));
             }
-
-            // ===============================
-            // ACTUALIZAR DATOS
-            // ===============================
-
-            producto.Producto.Nombre = vm.Nombre;
-            producto.Producto.Descripcion = vm.Descripcion;
-            producto.Producto.PrecioBase = vm.PrecioBase;
-            producto.Producto.Activo = vm.Activo;
-            producto.Producto.ImagenPrincipal = rutaImagen;
-
-            producto.Stock = vm.Stock;
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-
-
-
-        // =========================
-        // ELIMINAR (ADMIN)
-        // =========================
-        [Authorize(Roles = "Admin,AdministradorTienda")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var producto = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .FirstOrDefaultAsync(p => p.ProductoBaseId == id);
-
-            if (producto == null)
-                return NotFound();
-
-
-            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
-                return Forbid();
-
-
-            return View(producto);
-        }
-
-
-        [HttpPost, ActionName("DeleteConfirmed")]
-        [Authorize(Roles = "Admin,AdministradorTienda")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var producto = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .FirstOrDefaultAsync(p => p.ProductoBaseId == id);
-
-            if (producto == null)
-                return NotFound();
-
-
-            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
-                return Forbid();
-
-            // BORRAR IMAGEN
-            var ruta = producto.Producto.ImagenPrincipal;
-
-            if (!string.IsNullOrEmpty(ruta) &&
-                !ruta.Contains("ProductoSinImagen"))
+            catch (Exception ex)
             {
-                var path = Path.Combine(
-                    _env.WebRootPath,
-                    ruta.TrimStart('/'));
-
-                if (System.IO.File.Exists(path))
-                    System.IO.File.Delete(path);
+                await transaction.RollbackAsync();
+                ModelState.AddModelError("", "Error al actualizar: " + ex.Message);
+                vm.Categorias = await GetCategoriasAsync();
+                return View(vm);
             }
-
-
-            _context.ProductoSimples.Remove(producto);
-            _context.ProductosBase.Remove(producto.Producto);
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
         }
+
+
+        private void BorrarArchivoFisico(string ruta)
+        {
+            var path = Path.Combine(_env.WebRootPath, ruta.TrimStart('/'));
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+        }
+
+
 
 
         // =========================
         // HELPERS
         // =========================
-
         private int ObtenerTiendaIdUsuario()
         {
-            var claim = User.FindFirst("TiendaId");
-
-            if (claim == null)
-                throw new Exception("Usuario sin tienda asociada");
-
+            var claim = User.FindFirst("TiendaId") ?? throw new Exception("Usuario sin tienda");
             return int.Parse(claim.Value);
         }
 
-
-   
-
         private bool PuedeGestionarProducto(int tiendaIdProducto)
         {
-            // Admin → todo
-            if (User.IsInRole("Admin"))
-                return true;
-
-            // Admin tienda → solo su tienda
-            if (User.IsInRole("AdministradorTienda"))
-                return tiendaIdProducto == ObtenerTiendaIdUsuario();
-
+            if (User.IsInRole("Admin")) return true;
+            if (User.IsInRole("AdministradorTienda") && tiendaIdProducto == ObtenerTiendaIdUsuario()) return true;
             return false;
+        }
+
+        private async Task<List<SelectListItem>> GetCategoriasAsync()
+        {
+            var tiendaId = ObtenerTiendaIdUsuario();
+            return await _context.Categorias
+                .Where(c => c.TiendaId == tiendaId)
+                .Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Nombre
+                })
+                .ToListAsync();
         }
     }
 }

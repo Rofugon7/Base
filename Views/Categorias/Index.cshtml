@@ -1,0 +1,58 @@
+﻿@model IEnumerable<BaseConLogin.Models.Categoria>
+
+@{
+    ViewData["Title"] = "Categorías";
+}
+
+<h2>Categorías</h2>
+
+<a asp-action="Create" class="btn btn-success mb-3">➕ Nueva Categoría</a>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Activa</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Nombre</td>
+                <td>@c.Descripcion</td>
+                <td>@(c.Activa ? "Sí" : "No")</td>
+                <td>
+                    @{
+                        // Variable para indicar si puede editar/borrar
+                        bool puedeGestionar = User.IsInRole("Admin");
+                        if (!puedeGestionar && User.IsInRole("AdministradorTienda"))
+                        {
+                            var claimTienda = User.FindFirst("TiendaId");
+                            if (claimTienda != null)
+                            {
+                                int tiendaIdUsuario = int.Parse(claimTienda.Value);
+                                puedeGestionar = c.TiendaId == tiendaIdUsuario;
+                            }
+                        }
+                    }
+
+                    @* Mostrar enlaces solo si puede gestionar *@
+
+                    @if (User.IsInRole("Admin") ||
+                                    (User.IsInRole("AdministradorTienda") &&
+                                    c.TiendaId == int.Parse(User.FindFirst("TiendaId")!.Value)))
+                    {
+                        <text>
+                            | <a asp-action="Edit" asp-route-id="@c.Id">Editar</a>
+                            | <a asp-action="Delete" asp-route-id="@c.Id">Eliminar</a>
+                        </text>
+                    }
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
