@@ -180,15 +180,17 @@ namespace BaseConLogin.Controllers.Front
 
         private int ObtenerTiendaId()
         {
+            // 1. Intentar obtenerlo de los Claims (si está logueado)
             var claim = User.FindFirst("TiendaId");
+            if (claim != null && int.TryParse(claim.Value, out int tiendaIdFromClaim))
+            {
+                return tiendaIdFromClaim;
+            }
 
-            if (claim == null)
-                throw new Exception("El usuario no tiene TiendaId en los claims");
-
-            if (!int.TryParse(claim.Value, out int tiendaId))
-                throw new Exception("TiendaId inválido en claims");
-
-            return tiendaId;
+            // 2. Si es invitado (o el claim no existe), devolver un ID por defecto
+            // Aquí puedes poner el ID de tu tienda principal (ejemplo: 1)
+            // Lo ideal es que esto venga de un servicio de contexto de tienda o configuración
+            return 1;
         }
 
     }

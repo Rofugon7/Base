@@ -63,8 +63,11 @@
                 <hr class="my-4 text-muted opacity-25">
 
                 <div class="d-grid gap-2 d-md-flex">
-                    <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill fw-bold shadow-sm @(Model.Stock <= 0 ? "disabled" : "")">
-                        <i class="bi bi-cart-plus me-2"></i> Añadir al carrito
+                    <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm btn-agregar"
+                            data-id="@Model.ProductoBaseId"
+                            data-url="/carrito/añadir"
+                            onclick="comprarProducto(@Model.ProductoBaseId)">
+                        <i class="bi bi-cart-plus-fill me-2"></i> Añadir al carrito
                     </button>
                     <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-pill">
                         Volver a la tienda
@@ -158,6 +161,36 @@
             // Actualizar borde activo en miniaturas
             document.querySelectorAll('.thumb-container').forEach(el => el.classList.remove('active'));
             element.parentElement.classList.add('active');
+        }
+
+                            function comprarProducto(id) {
+            const params = new URLSearchParams();
+            params.append('productoBaseId', id);
+            params.append('cantidad', 1);
+
+            // IMPORTANTE: La URL debe coincidir con el [HttpPost("añadir")] del controlador
+            fetch('/carrito/añadir', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: params
+            })
+            .then(response => response.json()) // Cambiamos a .json() para leer el total
+            .then(data => {
+                if (data.success) {
+                    // Actualizamos el número del badge usando el total que devuelve el controlador
+                    const badge = document.getElementById('cart-count') || document.querySelector('.badge');
+                    if (badge) {
+                        badge.innerText = data.total;
+                    }
+
+                    alert("¡Producto añadido al carrito!");
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(err => console.error("Error al añadir producto:", err));
         }
     </script>
 }

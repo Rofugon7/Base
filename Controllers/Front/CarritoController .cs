@@ -23,113 +23,108 @@ namespace BaseConLogin.Controllers.Front
             _canonical = canonical;
         }
 
-        // =========================
-        // Mostrar carrito (NO INDEX)
-        // =========================
-        [HttpGet("")]
-        public async Task<IActionResult> Index()
+        //[HttpGet("")]
+        //public async Task<IActionResult> Index()
+        //{
+        //    var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+        //    var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+
+        //    ViewData["Canonical"] = _canonical.Build("carrito");
+        //    ViewData["Title"] = "Carrito de compra";
+        //    ViewData["Description"] = "Revisa los productos añadidos antes de finalizar tu compra.";
+        //    ViewData["Robots"] = "noindex, nofollow";
+        //    ViewBag.TiendaId = tiendaId;
+
+        //    return View(carrito);
+        //}
+
+
+        // 1. El Index suele ser la vista (página del carrito)
+        [HttpGet]
+        public async Task<IActionResult> Index(int tiendaId)
         {
-            var tiendaId =
-                _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
 
-            var carrito =
-                await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            // === CANONICAL ===
-            ViewData["Canonical"] =
-                _canonical.Build("carrito");
-
-            // === SEO ===
-            ViewData["Title"] =
-                "Carrito de compra";
-
-            ViewData["Description"] =
-                "Revisa los productos añadidos antes de finalizar tu compra.";
-
-            // === BLOQUEAR INDEXACIÓN ===
-            ViewData["Robots"] =
-                "noindex, nofollow";
-
+            ViewData["Canonical"] = _canonical.Build("carrito");
+            ViewData["Title"] = "Carrito de compra";
+            ViewData["Description"] = "Revisa los productos añadidos antes de finalizar tu compra.";
+            ViewData["Robots"] = "noindex, nofollow";
+            ViewBag.TiendaId = tiendaId;
             return View(carrito);
         }
 
-        // =========================
-        // AJAX: obtener carrito
-        // =========================
-        [HttpGet("obtener")]
-        public async Task<JsonResult> ObtenerCarrito(int tiendaId)
+        // 2. El Obtener debe tener su propia "sub-ruta" para el JSON
+        [HttpGet("Obtener")] // Esto hace que la URL sea /Carrito/Obtener
+        public async Task<IActionResult> Obtener(int tiendaId)
         {
-            var carrito =
-                await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            return Json(carrito);
+            try
+            {
+                var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+                return Json(carrito);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
-        // =========================
-        // AJAX: actualizar cantidad
-        // =========================
-        [HttpPost("actualizar")]
-        public async Task<JsonResult> ActualizarCantidadAjax(
-            int productoBaseId,
-            int cantidad,
-            int tiendaId)
+        // ==========================================
+        // MÉTODO PARA AÑADIR (CORREGIDO Y RENOMBRADO)
+        // ==========================================
+        [HttpPost("añadir")] // Ahora la URL es /carrito/añadir
+        public async Task<IActionResult> Añadir(int productoBaseId, int cantidad = 1)
         {
-            await _carritoService
-                .ActualizarCantidadAsync(
-                    tiendaId,
-                    productoBaseId,
-                    cantidad);
+            var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
 
-            var carrito =
-                await _carritoService.ObtenerCarritoAsync(tiendaId);
+            try
+            {
+                await _carritoService.AñadirProductoAsync(tiendaId, productoBaseId, cantidad);
 
-            return Json(carrito);
-        }
+                // Obtenemos el nuevo total para que el JS actualice el badge
+                int nuevoTotal = await _carritoService.ObtenerCantidadItemsAsync(tiendaId);
 
-        // =========================
-        // AJAX: eliminar producto
-        // =========================
-        [HttpPost("eliminar")]
-        public async Task<JsonResult> EliminarAjax(
-            int productoBaseId,
-            int tiendaId)
-        {
-            await _carritoService
-                .EliminarProductoAsync(
-                    tiendaId,
-                    productoBaseId);
-
-            var carrito =
-                await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            return Json(new { carrito });
-        }
-
-        // =========================
-        // AJAX: vaciar carrito
-        // =========================
-        [HttpPost("vaciar")]
-        public async Task<JsonResult> VaciarAjax(int tiendaId)
-        {
-            await _carritoService.VaciarAsync(tiendaId);
-
-            var carrito =
-                await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            return Json(carrito);
+                return Json(new { success = true, total = nuevoTotal });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet("cantidad")]
         public async Task<JsonResult> Cantidad()
         {
             var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
-
-            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            var total = carrito?.Items?.Sum(i => i.Cantidad) ?? 0;
-
-            return Json(new { total });
+            int conteo = await _carritoService.ObtenerCantidadItemsAsync(tiendaId);
+            return Json(new { total = conteo });
         }
 
+        // Resto de métodos AJAX (Actualizar, Eliminar, Vaciar) se mantienen igual...
+
+        [HttpPost("actualizar")]
+        public async Task<JsonResult> ActualizarCantidadAjax(int productoBaseId, int cantidad, int tiendaId)
+        {
+            await _carritoService.ActualizarCantidadAsync(tiendaId, productoBaseId, cantidad);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
+        }
+
+        [HttpPost("eliminar")]
+        public async Task<JsonResult> EliminarAjax(int productoBaseId, int tiendaId)
+        {
+            await _carritoService.EliminarProductoAsync(tiendaId, productoBaseId);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
+        }
+
+        [HttpPost("vaciar")]
+        public async Task<JsonResult> VaciarAjax(int tiendaId)
+        {
+            await _carritoService.VaciarAsync(tiendaId);
+            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+            return Json(carrito);
+        }
+
+        
     }
 }

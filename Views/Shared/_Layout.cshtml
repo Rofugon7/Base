@@ -13,6 +13,8 @@
     int carritoCount = 0;
     bool isAdmin = false;
 
+    int tiendaId = TiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+
     if (SignInManager.IsSignedIn(User))
     {
         var user = await UserManager.GetUserAsync(User);
@@ -20,87 +22,176 @@
         {
             usuarioConectado = user.Email ?? "";
             isAdmin = await UserManager.IsInRoleAsync(user, "Admin");
-            carritoCount = await CarritoService.ObtenerCantidadItemsAsync(user.Id);
         }
     }
+
+    // Conteo inicial al cargar la página (Server-side)
+    carritoCount = await CarritoService.ObtenerCantidadItemsAsync(tiendaId);
 }
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BaseConLogin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link rel="stylesheet" asp-append-version="true" href="~/css/site.css" />
+
     @RenderSection("Styles", required: false)
+    <link rel="stylesheet" asp-append-version="true" href="~/css/site.css" />
+
+    <style>
+        .cart-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        #cart-badge {
+            font-size: 0.65rem;
+            padding: 0.25em 0.45em;
+            transform: translate(25%, -25%);
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav>
-            <ul>
-                <li><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-                <li><a asp-controller="Proyectos" asp-action="Index">Proyectos</a></li>
-                @if (TiendaContext.HayTienda)
-                {
-                    <li>
-                        <a href="#">Tienda</a>
-                        <ul>
-                            <li><a asp-controller="Productos" asp-action="Index">Productos</a></li>
-                            <li><a asp-controller="Pedidos" asp-action="Index">Pedidos</a></li>
-                            <li><a asp-controller="Configuracion" asp-action="Index">Configuración</a></li>
-                        </ul>
-                    </li>
-                }
-                @if (isAdmin)
-                {
-                    <li>
-                        <a href="#">Administración</a>
-                        <ul>
-                            <li><a asp-controller="Tiendas" asp-action="Index">Tiendas</a></li>
-                            <li><a asp-controller="Categorias" asp-action="Index">Categorias</a></li>
-                            <li><a asp-controller="ProductoSimple" asp-action="Index">Productos Sencillos</a></li>
-                        </ul>
-                    </li>
-                }
-                <li><a asp-controller="Home" asp-action="Contacto">Contacto</a></li>
-            </ul>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow-sm">
+            <div class="container-fluid">
+                <ul class="navbar-nav me-auto flex-row gap-3">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Proyectos" asp-action="Index">Proyectos</a></li>
 
-            <!-- BUSCADOR CENTRAL -->
-            @await Component.InvokeAsync("HeaderSearch")
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Administración</a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Tiendas" asp-action="Index">Tiendas</a></li>
+                                <li><a class="dropdown-item" asp-controller="ProductoSimple" asp-action="Index">Productos</a></li>
+                            </ul>
+                        </li>
+                    }
+                </ul>
 
-            <!-- MENÚ DERECHA -->
-            <ul class="right-menu">
-                @if (SignInManager.IsSignedIn(User))
-                {
-                    <li><span>@usuarioConectado</span></li>
-                    <li>
-                        <a asp-controller="Carrito" asp-action="Index" class="nav-link position-relative" id="cart-link">
-                            <i class="fa-solid fa-cart-shopping"></i>
-                            <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="display:none;">0</span>
+                <div class="d-none d-md-block mx-auto" style="width: 40%;">
+                    @await Component.InvokeAsync("HeaderSearch")
+                </div>
+
+                <ul class="navbar-nav ms-auto flex-row align-items-center gap-3">
+                    <li class="nav-item">
+                        <a asp-controller="Carrito" asp-action="Index" class="nav-link cart-wrapper p-2">
+                            <i class="fa-solid fa-cart-shopping fs-5 text-white"></i>
+                            <span id="cart-badge" class="position-absolute top-0 start-50 badge rounded-pill bg-danger"
+                                  style="@(carritoCount > 0 ? "" : "display:none;")">
+                                @carritoCount
+                            </span>
                         </a>
                     </li>
-                    <li>
-                        <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-link nav-link p-0">Cerrar sesión</button>
-                        </form>
-                    </li>
-                }
-                else
-                {
-                    <li><a asp-area="Identity" asp-page="/Account/Login">Iniciar sesión</a></li>
-                }
-            </ul>
+
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item d-none d-sm-block">
+                            <span class="text-light opacity-75 small">@usuarioConectado</span>
+                        </li>
+                        <li class="nav-item">
+                            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0">Cerrar sesión</button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
+                    }
+                </ul>
+            </div>
         </nav>
     </header>
 
-    <main role="main">
+    <main role="main" class="container mt-4">
         @RenderBody()
     </main>
 
-    <footer>
-        &copy; @DateTime.Now.Year - BaseConLogin
-    </footer>
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="cartToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage">Acción realizada con éxito</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Función para actualizar el badge visualmente
+        function actualizarContadorCarrito() {
+            fetch('/carrito/cantidad')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        badge.innerText = data.total;
+                        badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+                    }
+                })
+                .catch(err => console.error("Error actualizando contador:", err));
+        }
+
+        // Función para mostrar notificaciones Toast
+        function mostrarNotificacion(mensaje, esError = false) {
+            const toastEl = document.getElementById('cartToast');
+            const toastMessage = document.getElementById('toastMessage');
+
+            toastMessage.innerText = mensaje;
+            toastEl.classList.remove('bg-success', 'bg-danger');
+            toastEl.classList.add(esError ? 'bg-danger' : 'bg-success');
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        $(document).ready(function () {
+            // Manejador global para botones de añadir al carrito
+            $(document).on('click', '.btn-agregar', function (e) {
+                e.preventDefault();
+
+                const btn = $(this);
+                const productoId = btn.data('id');
+                // Intentar obtener URL del data-url o usar la ruta por defecto
+                const urlAction = btn.data('url') || '/carrito/añadir';
+
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: urlAction,
+                    type: 'POST',
+                    data: { productoBaseId: productoId, cantidad: 1 },
+                    success: function (response) {
+                        if (response.success) {
+                            // Actualizamos el badge con el dato que viene del servidor
+                            const badge = $('#cart-badge');
+                            badge.text(response.total);
+                            badge.show();
+
+                            mostrarNotificacion("¡Producto añadido!");
+                        } else {
+                            mostrarNotificacion("Error: " + response.message, true);
+                        }
+                    },
+                    error: function () {
+                        mostrarNotificacion("Error al conectar con el servidor", true);
+                    },
+                    complete: function () {
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
 
     @RenderSection("Scripts", required: false)
 </body>

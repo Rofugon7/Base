@@ -13,9 +13,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 /* =========================
- * Base de datos
+ * Base de Datos
  * ========================= */
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -25,7 +24,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 /* =========================
  * Identity
  * ========================= */
-
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -36,33 +34,34 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 /* =========================
  * MVC + Razor Pages
  * ========================= */
-
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 /* =========================
- * Servicios de dominio
+ * Configuración de Sesión (CORREGIDO)
  * ========================= */
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true; // Crucial para carritos de invitados
+});
 
-
-
+/* =========================
+ * Servicios de Dominio
+ * ========================= */
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IProductoService, ProductoService>();
 builder.Services.AddScoped<ITiendaAuthorizationService, TiendaAuthorizationService>();
 builder.Services.AddScoped<ITiendaMenuService, TiendaMenuService>();
 builder.Services.AddScoped<ICarritoService, DbCarritoService>();
-
-
-
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSession();
-
 builder.Services.AddScoped<ITiendaContext, TiendaContext>();
 builder.Services.AddScoped<ICanonicalService, CanonicalService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IClaimsTransformation, TiendaClaimsTransformation>();
 
-
+// Inyección personalizada de ApplicationDbContext si es necesaria para Multi-tenancy
 builder.Services.AddScoped<ApplicationDbContext>(provider =>
 {
     var options = provider.GetRequiredService<DbContextOptions<ApplicationDbContext>>();
@@ -71,37 +70,32 @@ builder.Services.AddScoped<ApplicationDbContext>(provider =>
 });
 
 /* =========================
- * Hosting
+ * Hosting & Optimización
  * ========================= */
-
 if (!builder.Environment.IsDevelopment())
 {
     builder.WebHost.UseUrls("http://0.0.0.0:80");
 }
-
 builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 
 /* =========================
- * Inicialización del sistema
+ * Inicialización del Sistema
  * ========================= */
-
 using (var scope = app.Services.CreateScope())
 {
     await InicializarSistemaAsync(scope.ServiceProvider);
 }
 
 /* =========================
- * Middleware
+ * Pipeline de Middleware (ORDEN CORREGIDO)
  * ========================= */
-
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
-
-if (!app.Environment.IsDevelopment())
+else
 {
     app.UseHttpsRedirection();
     app.UseHsts();
@@ -110,46 +104,31 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseResponseCompression();
 
+// Lógica de redirección (WWW y HTTPS)
 app.Use(async (context, next) =>
 {
     var request = context.Request;
-
-    // 🔒 Forzar HTTPS SOLO en producción
     if (!app.Environment.IsDevelopment() && !request.IsHttps)
     {
         var httpsUrl = "https://" + request.Host + request.Path + request.QueryString;
         context.Response.Redirect(httpsUrl, true);
         return;
     }
-
-    // Quitar www (en todos los entornos)
     if (request.Host.Host.StartsWith("www."))
     {
         var newHost = request.Host.Host.Replace("www.", "");
-        var scheme = request.Scheme;
-        var newUrl = $"{scheme}://{newHost}{request.Path}{request.QueryString}";
+        var newUrl = $"{request.Scheme}://{newHost}{request.Path}{request.QueryString}";
         context.Response.Redirect(newUrl, true);
         return;
     }
-
-    await next(); 
+    await next();
 });
 
-
 app.UseRouting();
 
-
-app.UseStaticFiles();
-
-app.UseResponseCompression();
-
-
-
-app.UseRouting();
-
-app.UseSession();           // SIEMPRE antes de auth
+// El orden de estos 4 es vital para el funcionamiento del Carrito y la Tienda
+app.UseSession();
 app.UseMiddleware<TiendaResolutionMiddleware>();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -160,8 +139,6 @@ app.MapControllerRoute(
     name: "tienda",
     pattern: "t/{slug}/{controller=Home}/{action=Index}/{id?}");
 
-
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -171,9 +148,8 @@ app.MapRazorPages();
 app.Run();
 
 /* =========================
- * Inicialización (roles, admin, tags, carpetas)
+ * Método de Inicialización
  * ========================= */
-
 async Task InicializarSistemaAsync(IServiceProvider services)
 {
     var context = services.GetRequiredService<ApplicationDbContext>();
@@ -181,69 +157,35 @@ async Task InicializarSistemaAsync(IServiceProvider services)
     var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
     var configuration = services.GetRequiredService<IConfiguration>();
 
-    // -------------------------
-    // Roles
-    // -------------------------
     string[] roles = { "Admin", "User", "AdministradorTienda" };
-
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
-        {
             await roleManager.CreateAsync(new IdentityRole(role));
-        }
     }
 
-    // -------------------------
-    // Usuario admin por defecto
-    // -------------------------
     const string adminEmail = "admin@admin.com";
-    const string adminPassword = "Admin123!";
-
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-    if (adminUser == null)
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
-        adminUser = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        var result = await userManager.CreateAsync(adminUser, adminPassword);
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(adminUser, "Admin");
-        }
+        var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        var result = await userManager.CreateAsync(adminUser, "Admin123!");
+        if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
     }
 
-    // -------------------------
-    // Tags por defecto
-    // -------------------------
     if (!context.Tags.Any())
     {
-        context.Tags.AddRange(new List<Tag>
-        {
-            new Tag { Nombre = "Ameritrash" },
-            new Tag { Nombre = "eurogame" },
-            new Tag { Nombre = "rol" },
-            new Tag { Nombre = "wargame" },
-            new Tag { Nombre = "miniaturas" },
-            new Tag { Nombre = "preventa" }
+        context.Tags.AddRange(new List<Tag> {
+            new Tag { Nombre = "Ameritrash" }, new Tag { Nombre = "eurogame" },
+            new Tag { Nombre = "rol" }, new Tag { Nombre = "wargame" },
+            new Tag { Nombre = "miniaturas" }, new Tag { Nombre = "preventa" }
         });
-
         await context.SaveChangesAsync();
     }
 
-    // -------------------------
-    // Carpetas configuradas
-    // -------------------------
     var rutas = configuration.GetSection("RutasArchivos").GetChildren();
     foreach (var ruta in rutas)
     {
         if (!string.IsNullOrWhiteSpace(ruta.Value) && !Directory.Exists(ruta.Value))
-        {
             Directory.CreateDirectory(ruta.Value);
-        }
     }
 }
