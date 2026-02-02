@@ -1,0 +1,60 @@
+﻿@model BaseConLogin.Models.Pedido
+@{
+    ViewData["Title"] = "Detalle del Pedido #" + Model.Id;
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="MisPedidos">Mis Pedidos</a></li>
+            <li class="breadcrumb-item active">Detalle #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-dark text-white p-3 d-flex justify-content-between">
+            <h4 class="mb-0">Pedido #@Model.Id</h4>
+            <span class="badge bg-warning text-dark fs-6">@Model.Estado</span>
+        </div>
+        <div class="card-body p-4">
+            <div class="row mb-4 text-center">
+                <div class="col-6 col-md-3 border-end">
+                    <p class="text-muted small mb-0">FECHA</p>
+                    <p class="fw-bold">@Model.Fecha.ToShortDateString()</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <p class="text-muted small mb-0">TOTAL</p>
+                    <p class="fw-bold">@Model.Total.ToString("C")</p>
+                </div>
+            </div>
+
+            <table class="table align-middle">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Producto</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Precio</th>
+                        <th class="text-end">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.NombreProducto</td>
+                            <td class="text-center">@item.Cantidad</td>
+                            <td class="text-end">@item.PrecioUnitario.ToString("C")</td>
+                            <td class="text-end fw-bold">@item.Total.ToString("C")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="text-end mt-4">
+                <button onclick="window.print()" class="btn btn-outline-secondary">
+                    <i class="bi bi-printer me-2"></i>Imprimir Factura
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

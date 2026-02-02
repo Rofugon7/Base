@@ -24,7 +24,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 /* =========================
  * Identity
  * ========================= */
-builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDefaultIdentity<ApplicationUser>(options => // <-- CAMBIO AQUÍ
 {
     options.SignIn.RequireConfirmedAccount = false;
 })
@@ -154,7 +154,7 @@ async Task InicializarSistemaAsync(IServiceProvider services)
 {
     var context = services.GetRequiredService<ApplicationDbContext>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
     var configuration = services.GetRequiredService<IConfiguration>();
 
     string[] roles = { "Admin", "User", "AdministradorTienda" };
@@ -167,7 +167,15 @@ async Task InicializarSistemaAsync(IServiceProvider services)
     const string adminEmail = "admin@admin.com";
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
-        var adminUser = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+        // CAMBIO AQUÍ: Crear un ApplicationUser en lugar de IdentityUser
+        var adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true,
+            NombreCompleto = "Administrador Sistema" // Ahora puedes llenar esto
+        };
+
         var result = await userManager.CreateAsync(adminUser, "Admin123!");
         if (result.Succeeded) await userManager.AddToRoleAsync(adminUser, "Admin");
     }

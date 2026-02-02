@@ -1,60 +1,82 @@
-﻿@model BaseConLogin.Models.CarritoSession
-
+﻿@model BaseConLogin.Models.ViewModels.CheckoutViewModel
 @{
-    ViewData["Title"] = "Checkout";
+    ViewData["Title"] = "Finalizar Pedido";
 }
 
-<h2>Finalizar compra</h2>
+<div class="container py-4">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-credit-card me-2"></i>Finalizar Compra</h2>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Total</th>
-        </tr>
-    </thead>
-    <tbody>
+    <form asp-action="Confirmar" asp-route-tiendaId="@Model.TiendaId" method="post">
+        @Html.AntiForgeryToken()
 
-        @foreach (var item in Model.Items)
-        {
-            <tr>
-                <td>@item.Nombre</td>
-                <td>@item.PrecioUnitario.ToString("C")</td>
-                <td>@item.Cantidad</td>
-                <td>@(item.Cantidad* item.PrecioUnitario).ToString("C")</td>
-            </tr>
-        }
+        <input type="hidden" asp-for="TiendaId" value="@Model.Carrito.TiendaId" />
+        <div class="row g-5">
+            <div class="col-md-7">
+                <div class="card shadow-sm border-0 p-4">
+                    <h4 class="mb-3">Datos de Entrega</h4>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Nombre Completo</label>
+                            <input asp-for="NombreCompleto" class="form-control" placeholder="Juan Pérez" />
+                            <span asp-validation-for="NombreCompleto" class="text-danger small"></span>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Dirección de Envío</label>
+                            <input asp-for="Direccion" class="form-control" placeholder="Calle Ejemplo 123" />
+                            <span asp-validation-for="Direccion" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Ciudad</label>
+                            <input asp-for="Ciudad" class="form-control" />
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="CodigoPostal" class="form-label"></label>
+                            <input asp-for="CodigoPostal" class="form-control" />
+                            <span asp-validation-for="CodigoPostal" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Teléfono</label>
+                            <input asp-for="Telefono" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    </tbody>
-</table>
+            <div class="col-md-5">
+                <div class="card shadow-sm border-0 bg-light p-4">
+                    <h4 class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Tu Pedido</span>
+                        <span class="badge bg-primary rounded-pill">@Model.Carrito.Items.Count</span>
+                    </h4>
+                    <ul class="list-group list-group-flush mb-3">
+                        @foreach (var item in Model.Carrito.Items)
+                        {
+                            <li class="list-group-item d-flex justify-content-between lh-sm bg-transparent">
+                                <div>
+                                    <h6 class="my-0">@item.Nombre</h6>
+                                    <small class="text-muted">Cantidad: @item.Cantidad</small>
+                                </div>
+                                <span class="text-muted">@((item.PrecioUnitario * item.Cantidad).ToString("C"))</span>
+                            </li>
+                        }
+                        <li class="list-group-item d-flex justify-content-between bg-transparent">
+                            <strong class="fs-5">Total</strong>
+                            <strong class="fs-5 text-success">@Model.Carrito.Total.ToString("C")</strong>
+                        </li>
+                    </ul>
 
-<hr />
-
-<div class="text-end">
-
-    <h4>
-        Total:
-        <strong>@Model.Total.ToString("C")</strong>
-    </h4>
-
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success btn-lg shadow" type="submit">
+                            <i class="bi bi-lock-fill me-2"></i>Confirmar y Pagar
+                        </button>
+                        <a asp-controller="Carrito" asp-action="Index" class="btn btn-link text-muted">Editar carrito</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
 
-<hr />
-
-<form asp-controller="Checkout" asp-action="Confirmar" method="post">
-
-    @Html.AntiForgeryToken()
-
-    <button type="submit" class="btn btn-success btn-lg">
-        Proceder al pago
-    </button>
-
-    <a asp-controller="Carrito"
-       asp-action="Index"
-       class="btn btn-secondary ms-2">
-        Volver al carrito
-    </a>
-
-</form>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

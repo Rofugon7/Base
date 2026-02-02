@@ -1,88 +1,127 @@
-﻿using BaseConLogin.Services.Carritos;
+﻿using BaseConLogin.Models;
+using BaseConLogin.Models.ViewModels;
+using BaseConLogin.Services.Carritos;
 using BaseConLogin.Services.Pedidos;
 using BaseConLogin.Services.Tiendas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace BaseConLogin.Controllers.Front
+[Authorize]
+[Route("checkout")]
+public class CheckoutController : Controller
 {
-    [Authorize]
-    [Route("checkout")]
-    public class CheckoutController : Controller
+    private readonly ICarritoService _carritoService;
+    private readonly ITiendaContext _tiendaContext;
+    private readonly IPedidoService _pedidoService;
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public CheckoutController(
+        IPedidoService pedidoService,
+        ITiendaContext tiendaContext,
+        UserManager<ApplicationUser> userManager,
+        ICarritoService carritoService)
     {
-        private readonly ICarritoService _carritoService;
-        private readonly ITiendaContext _tiendaContext;
-        private readonly IPedidoService _pedidoService;
-        private readonly UserManager<IdentityUser> _userManager;
+        _pedidoService = pedidoService;
+        _tiendaContext = tiendaContext;
+        _userManager = userManager;
+        _carritoService = carritoService;
+    }
 
-        public CheckoutController(
-            IPedidoService pedidoService,
-            ITiendaContext tiendaContext,
-            UserManager<IdentityUser> userManager,
-            ICarritoService carritoService)
+    [HttpGet("")]
+    public async Task<IActionResult> Index()
+    {
+        var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+        var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+
+        if (carrito == null || !carrito.Items.Any())
+            return RedirectToAction("Index", "Carrito");
+
+        var model = new CheckoutViewModel
         {
-            _pedidoService = pedidoService;
-            _tiendaContext = tiendaContext;
-            _userManager = userManager;
-            _carritoService = carritoService;                   
-        }
+            Carrito = carrito,
+            TiendaId = tiendaId // <-- ESTO ES VITAL: Asignarlo aquí para que la vista lo reciba
+        };
+        return View(model);
+    }
 
-        public CheckoutController(
-            ICarritoService carritoService,
-            ITiendaContext tiendaContext)
+    [HttpPost("confirmar")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Confirmar(CheckoutViewModel model)
+    {
+        // 1. Intentamos obtener el carrito de cualquier forma posible
+        // Primero probamos con el ID que viene (aunque sea 0)
+        var carrito = await _carritoService.ObtenerCarritoAsync(model.TiendaId);
+
+        // 2. TRUCO DE SEGURIDAD: Si el carrito está vacío y el ID era 0, 
+        // es muy probable que el ID real esté en la sesión pero bajo otro nombre.
+        // Muchos sistemas guardan la tienda actual en una cookie o Claim.
+        if (carrito == null || !carrito.Items.Any())
         {
-            _carritoService = carritoService;
-            _tiendaContext = tiendaContext;
-        }
-
-        // =========================
-        // Página checkout
-        // =========================
-        [HttpGet("")]
-        public async Task<IActionResult> Index()
-        {
-            var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
-
-            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            if (carrito == null || !carrito.Items.Any())
+            // Si el TiendaContext funciona en otros lados, lo usamos aquí
+            int tiendaIdRecuperada = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+            if (tiendaIdRecuperada > 0)
             {
-                return RedirectToAction("Index", "Carrito");
+                carrito = await _carritoService.ObtenerCarritoAsync(tiendaIdRecuperada);
+                model.TiendaId = tiendaIdRecuperada;
             }
-
-            return View(carrito);
         }
 
-        // =========================
-        // Confirmar checkout
-        // =========================
-        [HttpPost("confirmar")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Confirmar()
+        // 3. Verificación final
+        if (carrito == null || !carrito.Items.Any())
         {
-            var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
-
-            var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
-
-            if (carrito == null || !carrito.Items.Any())
-            {
-                return RedirectToAction("Index", "Carrito");
-            }
-
-            // Aquí en la siguiente fase:
-            // -> Crear Pedido
-            // -> Redirigir a pago
-
-            return RedirectToAction("Index", "Pago");
+            return RedirectToAction("Index", "Carrito");
         }
 
-        [HttpGet("gracias/{id}")]
-        public IActionResult Gracias(int id)
+        // Si el ID del modelo era 0 pero el carrito traía el ID correcto (porque lo recuperamos de sesión)
+        if (model.TiendaId == 0 && carrito.TiendaId > 0)
         {
-            ViewBag.PedidoId = id;
-            return View();
+            model.TiendaId = carrito.TiendaId.Value;
         }
 
+        if (!ModelState.IsValid)
+        {
+            model.Carrito = carrito;
+            return View("Index", model);
+        }
+
+        try
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Usamos model.TiendaId que ya debería estar reparado arriba
+            int pedidoId = await _pedidoService.CrearPedidoDesdeCarritoAsync(user.Id, model.TiendaId, carrito, model);
+
+            await _carritoService.LimpiarCarritoAsync(model.TiendaId);
+
+            return RedirectToAction("Gracias", new { id = pedidoId });
+        }
+        catch (Exception ex)
+        {
+            ModelState.AddModelError("", "Error al procesar: " + ex.Message);
+            model.Carrito = carrito;
+            return View("Index", model);
+        }
+    }
+
+    [HttpGet("gracias/{id}")]
+    public async Task<IActionResult> Gracias(int id)
+    {
+        // Usamos el servicio para traer el pedido con sus items
+        var pedido = await _pedidoService.ObtenerPedidoPorIdAsync(id);
+
+        if (pedido == null)
+        {
+            return NotFound();
+        }
+
+        // Opcional: Verificar que el pedido pertenezca al usuario conectado por seguridad
+        var user = await _userManager.GetUserAsync(User);
+        if (pedido.UserId != user.Id)
+        {
+            return Forbid();
+        }
+
+        return View(pedido);
     }
 }

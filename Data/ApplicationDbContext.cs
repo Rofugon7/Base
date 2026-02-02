@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace BaseConLogin.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
        
 
@@ -55,6 +55,9 @@ namespace BaseConLogin.Data
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
+                // IGNORAR entidades de Identity para evitar el error de "Derived Type"
+                if (entityType.ClrType.Namespace != null && entityType.ClrType.Namespace.Contains("Microsoft.AspNetCore.Identity"))
+                    continue;
                 if (typeof(ITenantEntity).IsAssignableFrom(entityType.ClrType))
                 {
                     var parameter = Expression.Parameter(entityType.ClrType, "e");

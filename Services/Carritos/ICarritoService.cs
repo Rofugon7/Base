@@ -20,5 +20,7 @@ namespace BaseConLogin.Services.Carritos
         // Métodos de conteo (para el Badge del menú)
         Task<int> ObtenerCantidadItemsAsync(int tiendaId);
         Task<int> ObtenerCantidadItemsAsync(string userId);
+
+        Task LimpiarCarritoAsync(int tiendaId);
     }
 }

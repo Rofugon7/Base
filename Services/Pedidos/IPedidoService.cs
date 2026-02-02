@@ -1,8 +1,11 @@
-﻿namespace BaseConLogin.Services.Pedidos
+﻿using BaseConLogin.Models;
+using BaseConLogin.Models.ViewModels;
+
+namespace BaseConLogin.Services.Pedidos
 {
     public interface IPedidoService
     {
-        Task<int> CrearPedidoDesdeCarritoAsync(int tiendaId, string userId);
+        Task<int> CrearPedidoDesdeCarritoAsync(string userId, int tiendaId, CarritoSession carrito, CheckoutViewModel datosEnvio);
+        Task<Pedido> ObtenerPedidoPorIdAsync(int id);
     }
-
 }

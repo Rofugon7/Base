@@ -11,10 +11,10 @@ namespace BaseConLogin.Services.Carritos
     {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private const string SessionKey = "CARRITO_TIENDA_";
 
-        public DbCarritoService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<IdentityUser> userManager)
+        public DbCarritoService(ApplicationDbContext context, IHttpContextAccessor httpContextAccessor, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -108,6 +108,14 @@ namespace BaseConLogin.Services.Carritos
                 }
                 GuardarCarritoSesion(tiendaId, carrito);
             }
+        }
+
+        public async Task LimpiarCarritoAsync(int tiendaId)
+        {
+            // Asumiendo que usas Session y una clave basada en el tiendaId
+            string sessionKey = $"Carrito_{tiendaId}";
+            _httpContextAccessor.HttpContext.Session.Remove(sessionKey);
+            await Task.CompletedTask;
         }
 
         public async Task<CarritoSession> ObtenerCarritoAsync(int tiendaId)

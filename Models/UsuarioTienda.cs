@@ -6,7 +6,7 @@ namespace BaseConLogin.Models
     public class UsuarioTienda
     {
         public string UserId { get; set; } = null!;
-        public IdentityUser User { get; set; } = null!;
+        public ApplicationUser User { get; set; } = null!;
 
         public int TiendaId { get; set; }
         public Tienda Tienda { get; set; } = null!;

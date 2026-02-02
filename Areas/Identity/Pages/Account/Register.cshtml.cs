@@ -1,100 +1,106 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading;
 using System.Threading.Tasks;
-using BaseConLogin.Services.Carritos;
-using BaseConLogin.Services.Tiendas;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using BaseConLogin.Models; // Asegúrate de que esta sea la ruta de tu ApplicationUser
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
 namespace BaseConLogin.Areas.Identity.Pages.Account
 {
-    [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserStore<ApplicationUser> _userStore;
+        private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly ITiendaContext _tiendaContext;
-        private readonly ICarritoService _carritoService;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            ILogger<RegisterModel> logger,
-            ITiendaContext tiendaContext,
-            ICarritoService carritoService)
+            UserManager<ApplicationUser> userManager,
+            IUserStore<ApplicationUser> userStore,
+            SignInManager<ApplicationUser> signInManager,
+            ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
+            _userStore = userStore;
+            _emailStore = (IUserEmailStore<ApplicationUser>)_userStore; // Esto soluciona el error de GetEmailStore
             _signInManager = signInManager;
             _logger = logger;
-            _tiendaContext = tiendaContext;
-            _carritoService = carritoService;
         }
 
         [BindProperty]
-        public InputModel Input { get; set; } = new();
+        public InputModel Input { get; set; }
 
-        public string? ReturnUrl { get; set; }
-        public int? TiendaId { get; set; }
+        public string ReturnUrl { get; set; }
 
         public class InputModel
         {
             [Required]
             [EmailAddress]
-            [Display(Name = "Correo electrónico")]
-            public string Email { get; set; } = string.Empty;
+            [Display(Name = "Email")]
+            public string Email { get; set; }
 
             [Required]
+            [StringLength(100, ErrorMessage = "El {0} debe tener al menos {2} caracteres.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Contraseña")]
-            public string Password { get; set; } = string.Empty;
+            [Display(Name = "Password")]
+            public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirmar contraseña")]
-            [Compare("Password", ErrorMessage = "La contraseña y la confirmación no coinciden.")]
-            public string ConfirmPassword { get; set; } = string.Empty;
+            [Display(Name = "Confirm password")]
+            [Compare("Password", ErrorMessage = "Las contraseñas no coinciden.")]
+            public string ConfirmPassword { get; set; }
+
+            // AÑADIMOS EL NOMBRE PARA EL REGISTRO
+            [Required]
+            [Display(Name = "Nombre Completo")]
+            public string NombreCompleto { get; set; }
         }
 
-        public void OnGet(string? returnUrl = null)
+        public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            TiendaId = _tiendaContext.ObtenerTiendaIdOpcional();
         }
 
-        public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-            TiendaId = _tiendaContext.ObtenerTiendaIdOpcional();
-
-            if (!ModelState.IsValid)
-                return Page();
-
-            var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
-            var result = await _userManager.CreateAsync(user, Input.Password);
-
-            if (result.Succeeded)
+            if (ModelState.IsValid)
             {
-                _logger.LogInformation("Usuario creado correctamente.");
-
-                // Loguear automáticamente
-                await _signInManager.SignInAsync(user, isPersistent: false);
-
-                // 🔹 Fusionar carrito de sesión con persistente si hay tienda
-                if (TiendaId.HasValue)
+                var user = new ApplicationUser
                 {
-                    await _carritoService.FusionarCarritoSesionAsync(TiendaId.Value);
+                    UserName = Input.Email,
+                    Email = Input.Email,
+                    NombreCompleto = Input.NombreCompleto // Guardamos el nombre
+                };
+
+                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                var result = await _userManager.CreateAsync(user, Input.Password);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("Usuario creado con éxito.");
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return LocalRedirect(returnUrl);
                 }
-
-                return LocalRedirect(returnUrl);
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
             return Page();
         }
     }

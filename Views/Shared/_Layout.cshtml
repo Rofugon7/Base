@@ -4,8 +4,8 @@
 @inherits Microsoft.AspNetCore.Mvc.Razor.RazorPage<dynamic>
 
 @inject ITiendaContext TiendaContext
-@inject UserManager<IdentityUser> UserManager
-@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @inject ICarritoService CarritoService
 
 @{
@@ -41,7 +41,7 @@
 
     @RenderSection("Styles", required: false)
     <link rel="stylesheet" asp-append-version="true" href="~/css/site.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <style>
         .cart-wrapper {
             position: relative;
@@ -86,10 +86,12 @@
                     @if (isAdmin)
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Administración</a>
+                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Panel de control</a>
                             <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" asp-controller="Pedidos" asp-action="Gestion">📦 Gestionar Pedidos</a></li>
+                                <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" asp-controller="Tiendas" asp-action="Index">Tiendas</a></li>
-                                <li><a class="dropdown-item" asp-controller="Categorias" asp-action="Index"><i class="bi bi-tags me-2"></i>Categorías</a></li>
+                                <li><a class="dropdown-item" asp-controller="Categorias" asp-action="Index">Categorías</a></li>
                                 <li><a class="dropdown-item" asp-controller="ProductoSimple" asp-action="Index">Productos</a></li>
                             </ul>
                         </li>
@@ -111,21 +113,57 @@
                         </a>
                     </li>
 
-                    @if (SignInManager.IsSignedIn(User))
-                    {
-                        <li class="nav-item d-none d-sm-block">
-                            <span class="text-light opacity-75 small">@usuarioConectado</span>
-                        </li>
-                        <li class="nav-item">
-                            <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger border-0">Cerrar sesión</button>
-                            </form>
-                        </li>
-                    }
-                    else
-                    {
-                        <li class="nav-item"><a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a></li>
-                    }
+                    <ul class="navbar-nav">
+                        @using Microsoft.AspNetCore.Identity
+                        @inject SignInManager<ApplicationUser> SignInManager
+                        @inject UserManager<ApplicationUser> UserManager
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            @* OBTENEMOS EL USUARIO PARA MOSTRAR SU NOMBRE PERSONALIZADO *@
+                            var user = await UserManager.GetUserAsync(User);
+                            var nombreAMostrar = user?.NombreCompleto ?? User.Identity?.Name;
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle btn btn-outline-primary border-0 px-3" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle me-1"></i> @nombreAMostrar
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Perfil" asp-action="Index">
+                                            <i class="bi bi-person me-2"></i> Mi Perfil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Pedidos" asp-action="MisPedidos">
+                                            <i class="bi bi-bag-check me-2"></i> Mis Pedidos
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                            <button type="submit" class="dropdown-item py-2 text-danger">
+                                                <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-primary text-white px-3 ms-lg-2" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Iniciar Sesión
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-primary text-white px-3 ms-lg-2" asp-area="Identity" asp-page="/Account/Register">
+                                    Registrarse
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </ul>
             </div>
         </nav>

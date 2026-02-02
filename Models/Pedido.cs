@@ -14,6 +14,12 @@
 
         public string Estado { get; set; } // Pendiente, Pagado, Cancelado
 
+        public string NombreCompleto { get; set; }
+        public string Direccion { get; set; }
+        public string Ciudad { get; set; }
+        public string CodigoPostal { get; set; }
+        public string Telefono { get; set; }
+
         public ICollection<PedidoItem> Items { get; set; }
     }
 }
