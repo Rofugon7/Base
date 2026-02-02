@@ -50,6 +50,17 @@ namespace BaseConLogin.Services.Carritos
             if (producto == null) return;
             if (tiendaId <= 0) tiendaId = producto.TiendaId;
 
+            // 1. Buscamos el ProductoSimple para comprobar el Stock real
+            var productoSimple = await _context.ProductoSimples
+                .Include(ps => ps.Producto)
+                .FirstOrDefaultAsync(ps => ps.ProductoBaseId == productoBaseId);
+
+            // Si el producto no existe o no tiene stock, cancelamos la operación
+            if (productoSimple == null || productoSimple.Stock <= 0) return;
+
+            // Si el usuario pide más de lo que hay, limitamos a lo disponible
+            if (cantidad > productoSimple.Stock) cantidad = productoSimple.Stock;
+
             var user = _httpContextAccessor.HttpContext?.User;
             if (user != null && user.Identity!.IsAuthenticated)
             {

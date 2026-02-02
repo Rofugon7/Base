@@ -877,4 +877,139 @@ footer {
 }
 
 
+/* Estilo para el Dropdown del Menú de Categorías */
+
+/* 1. Hacer que el menú se abra suavemente al pasar el ratón (opcional) */
+@media (min-width: 992px) {
+    .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+        margin-top: 0;
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .nav-item.dropdown .dropdown-menu {
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        transform: translateY(10px); /* Efecto de subida */
+    }
+}
+
+/* 2. Diseño de la caja del menú */
+.dropdown-menu.shadow {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    min-width: 200px;
+}
+
+/* 3. Estilo de cada enlace de categoría */
+.dropdown-item {
+    padding: 8px 20px;
+    font-weight: 500;
+    color: #444;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+    /* 4. Efecto al pasar el ratón sobre una categoría */
+    .dropdown-item:hover {
+        background-color: #f8f9fa;
+        color: #0d6efd; /* Color azul de Bootstrap o el que prefieras */
+        padding-left: 25px; /* Pequeño desplazamiento a la derecha */
+    }
+
+/* 5. Estilo para el separador y la opción "Ver Todo" */
+.dropdown-divider {
+    opacity: 0.1;
+}
+
+.dropdown-item strong {
+    color: #222;
+}
+
+/* 6. Ajuste del icono si lo pusiste */
+.nav-link i {
+    color: #666;
+    transition: color 0.3s;
+}
+
+.nav-link:hover i {
+    color: #0d6efd;
+}
+
+.breadcrumb-container {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    padding: 0 8px;
+    color: #6c757d;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+    color: #0d6efd;
+}
+
+.breadcrumb-item.active {
+    color: #6c757d;
+    pointer-events: none;
+}
+
+.product-card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .product-card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+    }
+
+.related-products-section h3 {
+    font-weight: 700;
+    color: #333;
+    position: relative;
+    padding-bottom: 10px;
+}
+
+    .related-products-section h3::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 50px;
+        height: 3px;
+        background-color: #0d6efd;
+    }
+
+/* Estilo para productos agotados */
+.product-out-of-stock {
+    filter: grayscale(0.8);
+    opacity: 0.7;
+    position: relative;
+}
+
+.badge-out-of-stock {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background-color: rgba(220, 53, 69, 0.9);
+    color: white;
+    padding: 10px 20px;
+    font-weight: bold;
+    border: 2px solid white;
+    z-index: 10;
+    pointer-events: none;
 }

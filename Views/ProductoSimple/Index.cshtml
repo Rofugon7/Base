@@ -98,7 +98,8 @@
                 <td>@item.Stock</td>
                 <td>@(item.Producto.Activo ? "Sí" : "No")</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@item.ProductoBaseId">Ver</a>
+                    <a asp-action="Details" asp-route-id="@item.ProductoBaseId"
+                       asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">Ver</a>
                     @if (User.IsInRole("Admin") || (User.IsInRole("AdministradorTienda") &&
                         item.Producto.TiendaId == int.Parse(User.FindFirst("TiendaId")!.Value)))
                     {
@@ -112,3 +113,24 @@
         }
     </tbody>
 </table>
+@if (ViewBag.TotalPaginas > 1)
+{
+    <nav aria-label="Navegación de productos">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+            {
+                <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-nombre="@ViewBag.FilterNombre"
+                       asp-route-precioMin="@ViewBag.FilterPrecioMin"
+                       asp-route-precioMax="@ViewBag.FilterPrecioMax"
+                       asp-route-activo="@ViewBag.EstadoSeleccionado">
+                        @i
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+}

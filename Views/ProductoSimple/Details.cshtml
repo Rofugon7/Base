@@ -3,7 +3,46 @@
 @{
     ViewData["Title"] = Model.Producto.Nombre;
     var imagenes = Model.Producto.Imagenes.OrderByDescending(i => i.EsPrincipal).ToList();
+    // Si no hay returnUrl, por defecto mandamos al Index o Home
+    var urlRegreso = ViewBag.ReturnUrl ?? Url.Action("Index", "Home");
+
+    // Detectamos el origen para el texto de la miga de pan
+    string origenTexto = "Inicio";
+    string origenUrl = Url.Action("Index", "Home");
+
+    if (!string.IsNullOrEmpty(urlRegreso))
+    {
+        if (urlRegreso.Contains("ProductoSimple"))
+        {
+            origenTexto = "Administración de Productos";
+            origenUrl = urlRegreso;
+        }
+        else if (urlRegreso.Contains("Search"))
+        {
+            origenTexto = "Resultados de Búsqueda";
+            origenUrl = urlRegreso;
+        }
+    }
 }
+
+<nav aria-label="breadcrumb">
+    <div class="breadcrumb-container">
+        <div class="breadcrumb-item">
+            <a asp-controller="Home" asp-action="Index">Inicio</a>
+        </div>
+
+        @if (origenTexto != "Inicio")
+        {
+            <div class="breadcrumb-item">
+                <a href="@origenUrl">@origenTexto</a>
+            </div>
+        }
+
+        <div class="breadcrumb-item active">
+            @Model.Producto.Nombre
+        </div>
+    </div>
+</nav>
 
 <div class="container mt-5">
     <div class="card shadow-lg border-0 overflow-hidden">
@@ -63,14 +102,32 @@
                 <hr class="my-4 text-muted opacity-25">
 
                 <div class="d-grid gap-2 d-md-flex">
-                    <button class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm btn-agregar"
-                            data-id="@Model.ProductoBaseId"
-                            data-url="/carrito/añadir"
-                            onclick="comprarProducto(@Model.ProductoBaseId)">
-                        <i class="bi bi-cart-plus-fill me-2"></i> Añadir al carrito
-                    </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-3 rounded-pill">
-                        Volver a la tienda
+                    @if (Model.Stock > 0)
+                    {
+                        <form id="formAñadirCarrito" method="post" asp-controller="Carrito" asp-action="Añadir">
+                            <input type="hidden" name="productoBaseId" value="@Model.ProductoBaseId" />
+                            <input type="hidden" name="tiendaId" value="@Model.Producto.TiendaId" />
+
+                            <div class="input-group mb-3" style="max-width: 250px;">
+                                <input type="number" name="cantidad" value="1" min="1" max="@Model.Stock" class="form-control" />
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fa-solid fa-cart-plus"></i> Añadir
+                                </button>
+                            </div>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning d-inline-block">
+                            <i class="fa-solid fa-circle-exclamation"></i> <strong>Agotado temporalmente</strong>
+                            <br />
+                            <button class="btn btn-secondary mt-2" disabled>
+                                Sin existencias
+                            </button>
+                        </div>
+                    }
+                    <a href="@urlRegreso" class="btn btn-outline-secondary px-4 d-inline-flex align-items-center" style="height: 43px;">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Volver
                     </a>
                 </div>
 
@@ -84,6 +141,43 @@
                 }
             </div>
         </div>
+    </div>
+</div>
+
+
+<hr class="my-5" />
+
+<div class="related-products-section">
+    <h3 class="mb-4">También te podría gustar</h3>
+
+    <div class="row">
+        @if (ViewBag.Relacionados is List<BaseConLogin.Models.ProductoSimple> relacionados && relacionados.Any())
+        {
+            @foreach (var item in relacionados)
+            {
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm border-0 product-card-hover">
+                        <img src="@item.Producto.ImagenPrincipal" class="card-img-top"
+                             style="height: 180px; object-fit: cover;" alt="@item.Producto.Nombre">
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="card-title text-truncate">@item.Producto.Nombre</h6>
+                            <p class="text-primary fw-bold">@item.Producto.PrecioBase €</p>
+
+                            @* IMPORTANTE: Pasamos el returnUrl actual para que el hilo de navegación no se rompa *@
+                            <a asp-action="Details" asp-route-id="@item.ProductoBaseId"
+                               asp-route-returnUrl="@ViewBag.ReturnUrl"
+                               class="btn btn-outline-primary btn-sm mt-auto">
+                                Ver más
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="text-muted">No hay productos relacionados en este momento.</p>
+        }
     </div>
 </div>
 
@@ -149,48 +243,55 @@
 @section Scripts {
     <script>
         function changeImage(src, element) {
-            // Cambiar imagen principal con efecto suave
             const mainImg = document.getElementById('mainImage');
             mainImg.style.opacity = '0';
-
             setTimeout(() => {
                 mainImg.src = src;
                 mainImg.style.opacity = '1';
             }, 200);
-
-            // Actualizar borde activo en miniaturas
             document.querySelectorAll('.thumb-container').forEach(el => el.classList.remove('active'));
             element.parentElement.classList.add('active');
         }
 
-                            function comprarProducto(id) {
-            const params = new URLSearchParams();
-            params.append('productoBaseId', id);
-            params.append('cantidad', 1);
+        document.getElementById('formAñadirCarrito')?.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const form = this;
+            const formData = new FormData(form);
 
-            // IMPORTANTE: La URL debe coincidir con el [HttpPost("añadir")] del controlador
-            fetch('/carrito/añadir', {
+            fetch(form.action, {
                 method: 'POST',
+                body: formData,
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: params
-            })
-            .then(response => response.json()) // Cambiamos a .json() para leer el total
-            .then(data => {
-                if (data.success) {
-                    // Actualizamos el número del badge usando el total que devuelve el controlador
-                    const badge = document.getElementById('cart-count') || document.querySelector('.badge');
-                    if (badge) {
-                        badge.innerText = data.total;
-                    }
-
-                    alert("¡Producto añadido al carrito!");
-                } else {
-                    alert("Error: " + data.message);
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
                 }
             })
-            .catch(err => console.error("Error al añadir producto:", err));
-        }
+            .then(response => response.json())
+                    .then(data => {
+            if (data.success) {
+                const cartBadge = document.getElementById('cart-badge');
+                if (cartBadge) {
+                    // 1. Actualizar el número
+                    cartBadge.innerText = data.total;
+                    cartBadge.style.display = 'inline-block';
+
+                    // 2. Aplicar animación de rebote
+                    cartBadge.classList.add('cart-bump');
+
+                    // 3. Quitar la clase después de que termine la animación (0.4s)
+                    setTimeout(() => {
+                        cartBadge.classList.remove('cart-bump');
+                    }, 400);
+                }
+
+                // Mostrar el Toast
+                const toastEl = document.getElementById('cartToast');
+                if (toastEl) {
+                    const toast = new bootstrap.Toast(toastEl);
+                    toast.show();
+                }
+            }
+        })
+            .catch(error => console.error('Error:', error));
+        });
     </script>
 }

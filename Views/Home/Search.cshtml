@@ -42,7 +42,8 @@
                             <span class="badge offer">Oferta</span>
                         }
                     </div>
-                    <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.Id" class="btn-view">Ver producto</a>
+                    <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.Id"
+                       asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString" class="btn-view">Ver producto</a>
                 </div>
             </div>
         }

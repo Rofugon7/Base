@@ -24,44 +24,63 @@ namespace BaseConLogin.Controllers.Front
         // INDEX
         // =========================
         [AllowAnonymous]
-        public IActionResult Index(string nombre, decimal? precioMin, decimal? precioMax, string estado)
+        public async Task<IActionResult> Index(string nombre, decimal? precioMin, decimal? precioMax, string activo, int page = 1)
         {
-            var productos = _context.ProductoSimples.Include(p => p.Producto).AsQueryable();
+            int pageSize = 15;
+            var query = _context.ProductoSimples
+                .Include(p => p.Producto)
+                .AsQueryable();
 
+            // --- FILTROS ---
             if (!string.IsNullOrEmpty(nombre))
-                productos = productos.Where(p => p.Producto.Nombre.Contains(nombre));
+                query = query.Where(p => p.Producto.Nombre.Contains(nombre));
 
             if (precioMin.HasValue)
-                productos = productos.Where(p => p.Producto.PrecioBase >= precioMin.Value);
+                query = query.Where(p => p.Producto.PrecioBase >= precioMin.Value);
 
             if (precioMax.HasValue)
-                productos = productos.Where(p => p.Producto.PrecioBase <= precioMax.Value);
+                query = query.Where(p => p.Producto.PrecioBase <= precioMax.Value);
 
-            if (!string.IsNullOrEmpty(estado))
+            if (!string.IsNullOrEmpty(activo) && activo != "todos")
             {
-                bool activo = estado == "true";
-                productos = productos.Where(p => p.Producto.Activo == activo);
+                bool esActivo = activo == "activos";
+                query = query.Where(p => p.Producto.Activo == esActivo);
             }
 
-            ViewBag.NombreFiltro = nombre;
-            ViewBag.PrecioMinFiltro = precioMin?.ToString("0.##");
-            ViewBag.PrecioMaxFiltro = precioMax?.ToString("0.##");
-            ViewBag.EstadoSeleccionado = estado;
-            ViewBag.Estados = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "", Text = "Todos" },
-                new SelectListItem { Value = "true", Text = "Activo" },
-                new SelectListItem { Value = "false", Text = "Inactivo" }
-            };
+            // --- ORDENACIÓN ---
+            query = query.OrderBy(p => p.Producto.Nombre);
 
-            return View(productos.ToList());
+            // --- PAGINACIÓN ---
+            int totalItems = await query.CountAsync();
+            var productos = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Pasar datos a la vista para mantener el estado de los filtros
+            ViewBag.FilterNombre = nombre;
+            ViewBag.FilterPrecioMin = precioMin;
+            ViewBag.FilterPrecioMax = precioMax;
+            ViewBag.EstadoSeleccionado = activo;
+            ViewBag.PaginaActual = page;
+            ViewBag.TotalPaginas = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            // Lista de estados para el select
+            ViewBag.Estados = new List<SelectListItem>
+    {
+        new SelectListItem { Text = "Todos", Value = "todos" },
+        new SelectListItem { Text = "Activos", Value = "activos" },
+        new SelectListItem { Text = "Inactivos", Value = "inactivos" }
+    };
+
+            return View(productos);
         }
 
         // =========================
         // DETAILS
         // =========================
         [AllowAnonymous]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id, string returnUrl)
         {
             var producto = await _context.ProductoSimples
                 .Include(p => p.Producto)
@@ -69,6 +88,18 @@ namespace BaseConLogin.Controllers.Front
                 .FirstOrDefaultAsync(p => p.ProductoBaseId == id && p.Producto.Activo);
 
             if (producto == null) return NotFound();
+
+            // Lógica de Productos Relacionados
+            var relacionados = await _context.ProductoSimples
+                .Include(p => p.Producto)
+                .Where(p => p.Producto.CategoriaId == producto.Producto.CategoriaId && p.ProductoBaseId != id && p.Producto.Activo)
+                .Take(4) // Limitamos a 4 para el diseño
+                .ToListAsync();
+
+
+            ViewBag.Relacionados = relacionados;
+            ViewBag.ReturnUrl = returnUrl;
+            ViewData["Title"] = producto.Producto.Nombre;
 
             return View(producto);
         }

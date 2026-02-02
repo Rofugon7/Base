@@ -6,53 +6,118 @@
 <div class="container py-5">
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success text-center">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show shadow-sm text-center mb-5" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
 
-    <div class="row">
-        <div class="col-md-5 mb-4">
-            <h3>Contacto</h3>
-            <p><strong>Teléfono:</strong> 658144377</p>
-            <p><strong>Email:</strong> <a href="mailto:rofugon7@hotmail.com">rofugon7@hotmail.com</a></p>
-            <p><strong>Horario:</strong> Lunes a viernes de 10:00 a 14:00 y de 17:00 a 20:00</p>
-            <a href="https://wa.me/34658144377" target="_blank" class="btn btn-success">
-                <i class="bi bi-whatsapp"></i> Enviar WhatsApp
-            </a>
+    <div class="row g-4 mb-5">
+        <div class="col-md-5">
+            <div class="card shadow-sm border-0 h-100 p-4 bg-dark text-white">
+                <h3 class="fw-bold mb-4">Información de Contacto</h3>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-telephone text-white"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 small text-opacity-75 text-white">Llámanos</p>
+                        <p class="mb-0 fw-bold">658 144 377</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-envelope text-white"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 small text-opacity-75 text-white">Email</p>
+                        <a href="mailto:rofugon7@hotmail.com" class="text-white text-decoration-none fw-bold">rofugon7@hotmail.com</a>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-4">
+                    <div class="bg-primary rounded-circle p-2 me-3" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                        <i class="bi bi-clock text-white"></i>
+                    </div>
+                    <div>
+                        <p class="mb-0 small text-opacity-75 text-white">Horario</p>
+                        <p class="mb-0 fw-bold small">L-V: 10:00-14:00 | 17:00-20:00</p>
+                    </div>
+                </div>
+
+                <hr class="opacity-25 mb-4">
+
+                <a href="https://wa.me/34658144377" target="_blank" class="btn btn-success btn-lg w-100 shadow-sm mt-auto">
+                    <i class="bi bi-whatsapp me-2"></i> Enviar WhatsApp
+                </a>
+            </div>
         </div>
+
         <div class="col-md-7">
-            <h3>Envíanos un mensaje</h3>
-            <form asp-action="Index" method="post">
-                <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
-                    <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+            <div class="card shadow-sm border-0 p-4 h-100">
+                <h3 class="fw-bold mb-4 text-dark">Envíanos un mensaje</h3>
+                <form asp-action="Index" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold">Nombre</label>
+                            <input asp-for="Name" class="form-control bg-light border-0 p-2" placeholder="Tu nombre..." />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Phone" class="form-label fw-semibold">Teléfono</label>
+                            <input asp-for="Phone" class="form-control bg-light border-0 p-2" placeholder="Opcional" />
+                            <span asp-validation-for="Phone" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold">Correo Electrónico</label>
+                        <input asp-for="Email" class="form-control bg-light border-0 p-2" placeholder="ejemplo@correo.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Message" class="form-label fw-semibold">Mensaje</label>
+                        <textarea asp-for="Message" class="form-control bg-light border-0 p-2" rows="4" placeholder="¿En qué podemos ayudarte?"></textarea>
+                        <span asp-validation-for="Message" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input asp-for="AcceptedPrivacyPolicy" class="form-check-input" />
+                        <label asp-for="AcceptedPrivacyPolicy" class="form-check-label small text-muted">
+                            He leído y acepto la política de privacidad
+                        </label>
+                        <br />
+                        <span asp-validation-for="AcceptedPrivacyPolicy" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm">
+                        Enviar Mensaje <i class="bi bi-send ms-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm border-0 overflow-hidden">
+                <div class="card-header bg-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Nuestra Ubicación</h5>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Phone" class="form-label"></label>
-                    <input asp-for="Phone" class="form-control" />
-                    <span asp-validation-for="Phone" class="text-danger"></span>
+                <div class="card-body p-0">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3037.662164432135!2d-3.7026725!3d40.4167754!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd422879cf186f91%3A0xf6a72e7373f1d3e!2sPuerta%20del%20Sol!5e0!3m2!1ses!2ses!4v1700000000000!5m2!1ses!2ses"
+                            width="100%"
+                            height="450"
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
                 </div>
-                <div class="mb-3">
-                    <label asp-for="Email" class="form-label"></label>
-                    <input asp-for="Email" class="form-control" />
-                    <span asp-validation-for="Email" class="text-danger"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="Message" class="form-label"></label>
-                    <textarea asp-for="Message" class="form-control"></textarea>
-                    <span asp-validation-for="Message" class="text-danger"></span>
-                </div>
-                <div class="mb-3 form-check">
-                    <input asp-for="AcceptedPrivacyPolicy" class="form-check-input" />
-                    <label asp-for="AcceptedPrivacyPolicy" class="form-check-label">
-                        Acepto la política de privacidad
-                    </label>
-                    <span asp-validation-for="AcceptedPrivacyPolicy" class="text-danger"></span>
-                </div>
-                <button type="submit" class="btn btn-primary">Enviar</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>

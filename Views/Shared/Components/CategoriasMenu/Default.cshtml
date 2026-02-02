@@ -1,0 +1,25 @@
+﻿@model List<BaseConLogin.Models.Categoria>
+
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="navbarCategorias" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa-solid fa-boxes-stacked me-1"></i> Productos
+    </a>
+    <ul class="dropdown-menu shadow" aria-labelledby="navbarCategorias">
+        <li>
+            <a class="dropdown-item" asp-controller="Home" asp-action="Search" asp-route-categoria="">
+                <strong>Todos los productos</strong>
+            </a>
+        </li>
+        <li><hr class="dropdown-divider"></li>
+        @foreach (var cat in Model)
+        {
+            <li>
+                <a class="dropdown-item" asp-controller="Home" asp-action="Search"
+                   asp-route-categoria="@cat.Id">
+                    @cat.Nombre
+                </a>
+            </li>
+        }
+    </ul>
+</li>

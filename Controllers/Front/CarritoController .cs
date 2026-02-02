@@ -71,17 +71,16 @@ namespace BaseConLogin.Controllers.Front
         // ==========================================
         // MÉTODO PARA AÑADIR (CORREGIDO Y RENOMBRADO)
         // ==========================================
-        [HttpPost("añadir")] // Ahora la URL es /carrito/añadir
-        public async Task<IActionResult> Añadir(int productoBaseId, int cantidad = 1)
+        [HttpPost("añadir")]
+        public async Task<IActionResult> Añadir(int productoBaseId, int cantidad = 1, int? tiendaId = null)
         {
-            var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+            // Priorizamos el tiendaId del formulario, si no, usamos el contexto
+            var idFinalTienda = tiendaId ?? _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
 
             try
             {
-                await _carritoService.AñadirProductoAsync(tiendaId, productoBaseId, cantidad);
-
-                // Obtenemos el nuevo total para que el JS actualice el badge
-                int nuevoTotal = await _carritoService.ObtenerCantidadItemsAsync(tiendaId);
+                await _carritoService.AñadirProductoAsync(idFinalTienda, productoBaseId, cantidad);
+                int nuevoTotal = await _carritoService.ObtenerCantidadItemsAsync(idFinalTienda);
 
                 return Json(new { success = true, total = nuevoTotal });
             }
