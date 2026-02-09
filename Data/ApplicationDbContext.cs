@@ -44,6 +44,8 @@ namespace BaseConLogin.Data
         public DbSet<Pedido> Pedidos { get; set; }
         public DbSet<PedidoItem> PedidoItems { get; set; }
         public DbSet<ProductoImagen> ProductoImagenes { get; set; }
+        public DbSet<Suscriptor> Suscriptores { get; set; }
+        public DbSet<ConfiguracionEmail> ConfiguracionEmails { get; set; }
 
 
         // =========================

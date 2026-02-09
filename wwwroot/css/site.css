@@ -1013,3 +1013,51 @@ footer {
     z-index: 10;
     pointer-events: none;
 }
+
+/* ... tus otros estilos ... */
+.social-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    background-color: #333; /* Gris oscuro de la imagen */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.social-icon:hover {
+    background-color: #0d6efd; /* Color primario al pasar el mouse */
+    color: white;
+}
+
+.list-unstyled a:hover {
+    opacity: 1;
+    text-decoration: underline !important;
+}
+
+/* Ocultar submenús por defecto */
+.dropdown-submenu {
+    position: relative;
+}
+
+    .dropdown-submenu .dropdown-menu {
+        top: 0;
+        left: 100%;
+        margin-top: -1px;
+        display: none; /* Forzar que esté oculto */
+    }
+
+/* Mostrar al pasar el cursor (Escritorio) */
+@@media (min-width: 992px) {
+    .dropdown-submenu:hover > .dropdown-menu {
+        display: block;
+    }
+}
+
+/* Ajuste para que el icono de la flecha se vea bien */
+.dropdown-submenu .dropdown-toggle::after {
+    display: none; /* Quitamos la flecha por defecto de Bootstrap */
+}

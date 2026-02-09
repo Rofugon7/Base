@@ -1,169 +1,230 @@
 ﻿@model BaseConLogin.ViewModel.HomeIndexVM
-
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Explora nuestra Tienda";
+    int contadorGlobal = 0;
 }
 
+<style>
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
 
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12) !important;
+        }
 
+    .btn-view {
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 1px;
+    }
 
-<div class="row"> 
-    <br />
-    <br />
+    .badge-overlay {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 10;
+    }
 
-</div>
+    .hero-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #343a40 100%);
+        color: white;
+        padding: 60px 0;
+        border-radius: 20px;
+        margin-bottom: 50px;
+    }
+</style>
 
-<div class="row">
+<div class="container py-4">
+    <div class="hero-section text-center shadow-lg">
+        <h1 class="display-4 fw-bold">Descubre lo Nuevo</h1>
+        <p class="lead opacity-75">Productos seleccionados con la mejor calidad para ti.</p>
+    </div>
 
-    @foreach (var p in Model.Productos)
+    @* --- SECCIÓN DESTACADOS (Layout de cuadrícula elegante) --- *@
+    @if (Model.Destacados.Any())
     {
-        <div class="col-md-4 mb-4">
-
-            <div class="card h-100 shadow-sm">
-
-                <img src="@p.ImagenPrincipal"
-                     class="card-img-top"
-                     style="height:220px;object-fit:cover" />
-
-                <div class="card-body">
-
-                    <h5>@p.Nombre</h5>
-
-                    <p class="text-muted small">
-                        @p.Descripcion
-                    </p>
-
-                    <h4 class="text-success">
-                        @p.PrecioBase €
-                    </h4>
-
-
-                    @if (p.EsOferta)
-                    {
-                        <span class="badge bg-danger">
-                            Oferta
-                        </span>
-                    }
-
-                    @if (p.EsNuevo)
-                    {
-                        <span class="badge bg-success">
-                            Nuevo
-                        </span>
-                    }
-
+        <div class="d-flex align-items-center mb-4">
+            <h2 class="fw-bold mb-0">✨ Destacados</h2>
+            <div class="flex-grow-1 ms-3 border-bottom opacity-25"></div>
+        </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+            @foreach (var p in Model.Destacados)
+            {
+                contadorGlobal++;
+                <div class="col">
+                    <div class="card h-100 shadow-sm product-card">
+                        <div class="badge-overlay">
+                            @if (p.EsNuevo)
+                            {
+                                <span class="badge bg-success rounded-pill px-3">Nuevo</span>
+                            }
+                            @if (p.EsOferta)
+                            {
+                                <span class="badge bg-warning text-dark rounded-pill px-3 ms-1">Oferta</span>
+                            }
+                        </div>
+                        <img src="@p.ImagenPrincipal" class="card-img-top" style="height:280px; object-fit:cover;" alt="@p.Nombre" @(contadorGlobal > 3 ? "loading=lazy" : "") />
+                        <div class="card-body d-flex flex-column text-center">
+                            <h5 class="fw-bold">@p.Nombre</h5>
+                            <p class="text-muted small flex-grow-1">@p.Descripcion</p>
+                            <p class="h4 text-primary fw-bold">@p.PrecioBase.ToString("C")</p>
+                            <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary btn-view mt-3">
+                                <i class="bi bi-eye me-2"></i>Ver Detalles
+                            </a>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="card-footer bg-white">
-
-                    <a asp-controller="ProductoSimple"
-                       asp-action="Details"
-                       asp-route-id="@p.ProductoBaseId"
-                       class="btn btn-outline-primary w-100">
-
-                        Ver producto
-
-                    </a>
-
-                </div>
-
-            </div>
-
+            }
         </div>
     }
-</div>
 
+    @* --- ÚLTIMAS UNIDADES (Diseño más compacto o con alerta) --- *@
+    @if (Model.UltimasUnidades.Any())
+    {
+        <div class="bg-light p-4 rounded-4 mb-5 border-start border-danger border-5">
+            <h2 class="fw-bold text-danger mb-4"><i class="bi bi-fire me-2"></i>¡Corre, que vuelan!</h2>
+            <div class="row row-cols-1 row-cols-md-4 g-3">
+                @foreach (var p in Model.UltimasUnidades)
+                {
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm product-card">
+                            <img src="@p.ImagenPrincipal" class="card-img" style="height:180px; object-fit:cover; opacity:0.9" loading="lazy" />
+                            <div class="card-img-overlay d-flex align-items-start justify-content-end">
+                                <span class="badge bg-danger">Últimas unidades</span>
+                            </div>
+                            <div class="card-body text-center p-2">
+                                <h6 class="mb-1 fw-bold">@p.Nombre</h6>
+                                <p class="mb-2 text-danger fw-bold small">@p.PrecioBase €</p>
+                                <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-outline-danger rounded-pill px-3">Ver</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
 
-@if (Model.Destacados.Any())
-{
-    <h2>Destacados</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-        @foreach (var p in Model.Destacados)
+    @* --- TODOS LOS PRODUCTOS --- *@
+    <div class="d-flex align-items-center mb-4 mt-5">
+        <h2 class="fw-bold mb-0">Catálogo Completo</h2>
+        <div class="flex-grow-1 ms-3 border-bottom opacity-25"></div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 mb-5">
+        @foreach (var p in Model.Productos)
         {
             <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@p.Nombre</h5>
-                        <p class="card-text text-truncate">@p.Descripcion</p>
-                        <p class="fw-bold">@p.PrecioBase €</p>
-                        @if (p.EsNuevo)
-                        {
-                            <span class="badge bg-success mb-2">Nuevo</span>
-                        }
-                        @if (p.EsOferta)
-                        {
-                            <span class="badge bg-warning text-dark mb-2">Oferta</span>
-                        }
-                        <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
-                            Ver Detalles
-                        </a>
+                <div class="card h-100 shadow-sm border-0 product-card">
+                    <img src="@p.ImagenPrincipal" class="card-img-top" style="height:200px; object-fit:cover;" loading="lazy" />
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small">ID: #@p.ProductoBaseId</span>
+                            @if (p.EsOferta)
+                            {
+                                <i class="bi bi-tag-fill text-warning"></i>
+                            }
+                        </div>
+                        <h6 class="fw-bold text-truncate">@p.Nombre</h6>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="h5 mb-0 fw-bold">@p.PrecioBase €</span>
+                            <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-dark rounded-circle shadow">
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         }
     </div>
-}
 
-@if (Model.UltimasUnidades.Any())
-{
-    <h2>Últimas Unidades</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-        @foreach (var p in Model.UltimasUnidades)
-        {
-            <div class="col">
-                <div class="card h-100 shadow-sm border-danger">
-                    <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">@p.Nombre</h5>
-                        <p class="card-text text-truncate">@p.Descripcion</p>
-                        <p class="fw-bold">@p.PrecioBase €</p>
-                        <span class="badge bg-danger mb-2">¡Últimas unidades!</span>
-                        <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
-                            Ver Detalles
-                        </a>
+    @* --- PAGINACIÓN --- *@
+    <nav class="mt-5">
+        <ul class="pagination justify-content-center border-0">
+            @for (int i = 1; i <= Model.TotalPaginas; i++)
+            {
+                <li class="page-item mx-1 @(i == Model.PaginaActual ? "active" : "")">
+                    <a class="page-link rounded-pill px-4 shadow-sm border-0" asp-action="Index" asp-route-pagina="@i">@i</a>
+                </li>
+            }
+        </ul>
+    </nav>
+
+    <div class="container-fluid mt-5">
+        <div class="row bg-dark text-white py-5 rounded-top-5 shadow-lg overflow-hidden position-relative">
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-25"
+                 style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.1) 1px, transparent 0); background-size: 32px 32px;">
+            </div>
+
+            <div class="container position-relative">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 mb-4 mb-lg-0 text-center text-lg-start">
+                        <h2 class="display-6 fw-bold mb-3">Suscríbete a nuestra newsletter</h2>
+                        <p class="lead opacity-75 mb-4">Obtén acceso semanal a nuestras mejores ofertas, consejos y trucos.</p>
+                        <form asp-controller="Home" asp-action="Suscribirse" method="post">
+                            <div class="input-group mb-3 mx-auto mx-lg-0" style="max-width: 400px;">
+                                <input type="email" name="email" required
+                                       class="form-control rounded-pill-start border-0"
+                                       placeholder="Tu correo electrónico">
+                                <button class="btn btn-primary rounded-pill-end px-4 fw-bold" type="submit">
+                                    Suscribirse
+                                </button>
+                            </div>
+                        </form>
+
+                        @if (TempData["NewsletterSuccess"] != null)
+                        {
+                            <small class="text-success d-block mt-2">@TempData["NewsletterSuccess"]</small>
+                        }
+                        <p class="small opacity-75 mb-4">Sin spam, nosotros lo odiamos más que tú.</p>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="row g-4 text-start">
+                            <div class="col-md-4 col-6">
+                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Atención al cliente</h6>
+                                <ul class="list-unstyled opacity-75 small">
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Preguntas Frecuentes</a></li>
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Envíos y devoluciones</a></li>
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Estado de tu Pedido</a></li>
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Plantillas para impresión</a></li>
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Solicitar presupuesto</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="col-md-3 col-6">
+                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">La empresa</h6>
+                                <ul class="list-unstyled opacity-75 small">
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Quienes somos</a></li>
+                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contacto</a></li>
+                                </ul>
+                            </div>
+
+                            <div class="col-md-5 col-12">
+                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Contacto</h6>
+                                <ul class="list-unstyled opacity-75 small mb-4">
+                                    <li class="mb-2"><i class="bi bi-telephone me-2"></i>913 758 045</li>
+                                    <li class="mb-2"><i class="bi bi-envelope me-2"></i>info@prenta.es</li>
+                                    <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Calle de Oñate, 18 · Madrid</li>
+                                </ul>
+
+                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Síguenos</h6>
+                                <div class="d-flex gap-2">
+                                    <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
+                                    <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
+                                    <a href="#" class="social-icon"><i class="bi bi-twitter-x"></i></a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        }
-    </div>
-}
-
-<h2>Todos los productos</h2>
-<div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-    @foreach (var p in Model.Productos)
-    {
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                <img src="@p.ImagenPrincipal" class="card-img-top" style="height:250px;object-fit:cover;" />
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">@p.Nombre</h5>
-                    <p class="card-text text-truncate">@p.Descripcion</p>
-                    <p class="fw-bold">@p.PrecioBase €</p>
-                    @if (p.EsNuevo)
-                    {
-                        <span class="badge bg-success mb-2">Nuevo</span>
-                    }
-                    @if (p.EsOferta)
-                    {
-                        <span class="badge bg-warning text-dark mb-2">Oferta</span>
-                    }
-                    <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary mt-auto">
-                        Ver Detalles
-                    </a>
-                </div>
-            </div>
         </div>
-    }
+    </div>
 </div>
-
-<nav>
-    <ul class="pagination justify-content-center">
-        @for (int i = 1; i <= Model.TotalPaginas; i++)
-        {
-            <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
-                <a class="page-link" asp-action="Index" asp-route-pagina="@i">@i</a>
-            </li>
-        }
-    </ul>
-</nav>

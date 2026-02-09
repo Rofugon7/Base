@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using BaseConLogin.Models.enumerados;
 
 namespace BaseConLogin.Controllers.Front
 {
@@ -53,9 +54,8 @@ namespace BaseConLogin.Controllers.Front
         // Añade este método a tu PedidosController.cs existente
 
         [Authorize(Roles = "Admin,AdministradorTienda")]
-        public async Task<IActionResult> Gestion()
+        public async Task<IActionResult> Gestion(string buscarNombre, string filtrarEstado)
         {
-            // En lugar de confiar en la URL, buscamos qué tienda gestiona este usuario
             var user = await _userManager.GetUserAsync(User);
             var usuarioTienda = await _context.UsuariosTiendas
                 .FirstOrDefaultAsync(ut => ut.UserId == user.Id);
@@ -64,13 +64,49 @@ namespace BaseConLogin.Controllers.Front
 
             IQueryable<Pedido> query = _context.Pedidos.IgnoreQueryFilters();
 
-            // Si es admin de una tienda específica, filtramos por la suya
+            // 1. Filtro por Tienda (Seguridad)
             if (usuarioTienda != null)
             {
                 query = query.Where(p => p.TiendaId == usuarioTienda.TiendaId);
             }
 
+            // 2. Filtro por Nombre de Cliente
+            if (!string.IsNullOrEmpty(buscarNombre))
+            {
+                query = query.Where(p => p.NombreCompleto.Contains(buscarNombre));
+            }
+
+            // 3. Filtro por Estado
+            if (!string.IsNullOrEmpty(filtrarEstado))
+            {
+                query = query.Where(p => p.Estado == filtrarEstado);
+            }
+
             var pedidos = await query.OrderByDescending(p => p.Fecha).ToListAsync();
+
+            // CALCULAMOS LAS MÉTRICAS
+            // 1. Total de ingresos de pedidos Finalizados
+            ViewBag.TotalVentas = pedidos
+                .Where(p => p.Estado == EstadoPedido.Finalizado)
+                .Sum(p => p.Total);
+
+            // 2. Tiempo medio de entrega (en horas)
+            var pedidosFinalizados = pedidos.Where(p => p.FechaFinalizacion.HasValue).ToList();
+            if (pedidosFinalizados.Any())
+            {
+                var promedioHoras = pedidosFinalizados
+                    .Average(p => (p.FechaFinalizacion.Value - p.Fecha).TotalHours);
+                ViewBag.TiempoPromedio = Math.Round(promedioHoras, 1);
+            }
+            else
+            {
+                ViewBag.TiempoPromedio = 0;
+            }
+
+            // Guardamos los valores para que los filtros mantengan el estado en la vista
+            ViewBag.NombreActual = buscarNombre;
+            ViewBag.EstadoActual = filtrarEstado;
+
             return View(pedidos);
         }
 
@@ -82,10 +118,44 @@ namespace BaseConLogin.Controllers.Front
             if (pedido == null) return NotFound();
 
             pedido.Estado = nuevoEstado;
+
+            // Si se mueve a Finalizado, registramos la fecha
+            if (nuevoEstado == EstadoPedido.Finalizado)
+            {
+                pedido.FechaFinalizacion = DateTime.Now;
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"El pedido #{id} ahora está {nuevoEstado}.";
-            return RedirectToAction(nameof(Gestion));
+            return RedirectToAction(nameof(Gestion), new { buscarNombre = ViewBag.NombreActual, filtrarEstado = ViewBag.EstadoActual });
+        }
+
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        [HttpPost]
+        public async Task<IActionResult> MarcarComoFinalizado(int id)
+        {
+            var pedido = await _context.Pedidos
+                .IgnoreQueryFilters() // Para que el admin lo encuentre siempre
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (pedido == null) return NotFound();
+
+            // Regla de negocio: Solo podemos finalizar si ya fue enviado
+            if (pedido.Estado == EstadoPedido.Enviado)
+            {
+                pedido.Estado = EstadoPedido.Finalizado;
+                pedido.FechaFinalizacion = DateTime.Now; // Es bueno tener esta auditoría
+
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "El pedido ha sido marcado como entregado y finalizado.";
+            }
+            else
+            {
+                TempData["Error"] = "Solo se pueden finalizar pedidos que estén en estado 'Enviado'.";
+            }
+
+            return RedirectToAction("Detalle", new { id = pedido.Id });
         }
     }
 }

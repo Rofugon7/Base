@@ -1,6 +1,7 @@
 ﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
 using BaseConLogin.Services.Carritos;
+using BaseConLogin.Services.Email;
 using BaseConLogin.Services.Pedidos;
 using BaseConLogin.Services.Productos;
 using BaseConLogin.Services.Seguridad;
@@ -60,6 +61,7 @@ builder.Services.AddScoped<ITiendaContext, TiendaContext>();
 builder.Services.AddScoped<ICanonicalService, CanonicalService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IClaimsTransformation, TiendaClaimsTransformation>();
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 // Inyección personalizada de ApplicationDbContext si es necesaria para Multi-tenancy
 builder.Services.AddScoped<ApplicationDbContext>(provider =>

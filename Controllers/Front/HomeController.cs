@@ -193,5 +193,30 @@ namespace BaseConLogin.Controllers.Front
             return 1;
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Suscribirse(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return BadRequest();
+
+            // Verificar si ya existe
+            var existe = await _context.Suscriptores.AnyAsync(s => s.Email == email);
+
+            if (!existe)
+            {
+                var nuevo = new Suscriptor { Email = email };
+                _context.Suscriptores.Add(nuevo);
+                await _context.SaveChangesAsync();
+                TempData["NewsletterSuccess"] = "¡Gracias! Te has suscrito correctamente.";
+            }
+            else
+            {
+                TempData["NewsletterInfo"] = "Este correo ya está suscrito.";
+            }
+
+            // Redirige a donde estaba el usuario
+            return Redirect(Request.Headers["Referer"].ToString());
+        }
+
     }
 }

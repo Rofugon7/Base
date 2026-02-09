@@ -1,0 +1,45 @@
+﻿@model IEnumerable<BaseConLogin.Models.Suscriptor>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-envelope-at me-2"></i>Suscriptores Newsletter</h2>
+        <span class="badge bg-primary">@Model.Count() registrados</span>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-dark text-white">
+                    <tr>
+                        <th>Email</th>
+                        <th>Fecha de Suscripción</th>
+                        <th>Estado</th>
+                        <th class="text-end">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@s.Email</td>
+                            <td>@s.FechaSuscripcion.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge @(s.Activo ? "bg-success" : "bg-secondary")">
+                                    @(s.Activo ? "Activo" : "Baja")
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <form asp-action="Eliminar" asp-route-id="@s.Id" method="post"
+                                      onsubmit="return confirm('¿Eliminar este suscriptor?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

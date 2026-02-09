@@ -83,16 +83,32 @@
                     <li class="nav-item"><a class="nav-link" asp-controller="Proyectos" asp-action="Index">Proyectos</a></li>
                     @await Component.InvokeAsync("CategoriasMenu")
                     <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">Contacto</a></li>
-                    @if (isAdmin)
+                    @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Panel de control</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" asp-controller="Pedidos" asp-action="Gestion">📦 Gestionar Pedidos</a></li>
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-shield-lock-fill me-1 text-primary"></i> Panel Admin
+                            </a>
+                            <ul class="dropdown-menu shadow border-0" style="min-width: 250px;" aria-labelledby="adminDropdown">
+                                <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Ventas e Inventario</h6></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Pedidos" asp-action="Gestion"><i class="bi bi-cart-check me-2 text-secondary"></i> Pedidos</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Tiendas" asp-action="Index"><i class="bi bi-shop me-2 text-secondary"></i> Tiendas</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Productos" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
+
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" asp-controller="Tiendas" asp-action="Index">Tiendas</a></li>
-                                <li><a class="dropdown-item" asp-controller="Categorias" asp-action="Index">Categorías</a></li>
-                                <li><a class="dropdown-item" asp-controller="ProductoSimple" asp-action="Index">Productos</a></li>
+
+                                <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Newsletter y Marketing</h6></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Index"><i class="bi bi-people me-2 text-secondary"></i> Lista de Suscriptores</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Enviar"><i class="bi bi-send me-2 text-secondary"></i> Redactar y Enviar</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Sistema</h6></li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Configuracion">
+                                        <i class="bi bi-gear-fill me-2 text-secondary"></i> Configurar Servidor Correo
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     }

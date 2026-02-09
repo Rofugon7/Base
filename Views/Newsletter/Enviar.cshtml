@@ -1,0 +1,148 @@
+﻿@{
+    ViewData["Title"] = "Redactar Newsletter";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <h2 class="mb-0"><i class="bi bi-send-fill me-2 text-primary"></i>Enviar Newsletter</h2>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <form asp-action="ProcesarEnvio" method="post" id="newsletterForm">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Asunto del correo</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-0"><i class="bi bi-pencil-square"></i></span>
+                        <input type="text" id="asuntoInput" name="asunto" class="form-control border-0 bg-light py-2"
+                               placeholder="Ej: 🚀 ¡Nuevas ofertas disponibles!" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Cuerpo del mensaje</label>
+                    <textarea id="newsletter-editor" name="contenido"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                    <div>
+                        <a asp-action="Index" class="btn btn-link text-muted text-decoration-none">Descartar</a>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-primary me-2 px-4" onclick="mostrarVistaPrevia()">
+                            <i class="bi bi-eye me-2"></i>Vista Previa
+                        </button>
+                        <button type="submit" class="btn btn-primary px-5 fw-bold shadow">
+                            <i class="bi bi-send-check-fill me-2"></i>Lanzar Newsletter
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white border-0">
+                <h5 class="modal-title"><i class="bi bi-display me-2"></i>Previsualización del Correo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body bg-light">
+                <div class="mb-3 p-3 bg-white rounded shadow-sm">
+                    <p class="mb-1 text-muted small"><strong>Asunto:</strong> <span id="previewAsunto"></span></p>
+                    <p class="mb-0 text-muted small"><strong>De:</strong> Tu Tienda (info@tutienda.com)</p>
+                </div>
+                <div class="p-4 bg-white rounded shadow-sm border" id="previewBody" style="min-height: 300px; max-height: 500px; overflow-y: auto;">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar y seguir editando</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card bg-light border-0 mt-4">
+    <div class="card-body d-flex align-items-center justify-content-between">
+        <div>
+            <h6 class="mb-1 fw-bold"><i class="bi bi-bug me-2"></i>¿Todo listo? Haz una prueba</h6>
+            <p class="small text-muted mb-0">Envía este diseño a tu correo para ver cómo queda en el móvil.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <input type="email" id="testEmail" class="form-control form-control-sm" placeholder="tu@email.com" style="width: 250px;">
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="enviarPrueba()">
+                Enviar prueba
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
+
+    <script>
+        tinymce.init({
+            selector: '#newsletter-editor',
+            language: 'es',
+            height: 450,
+            plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount',
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | link image emoticons table | align lineheight | numlist bullist removeformat',
+            menubar: false,
+            branding: false,
+            content_style: 'body { font-family: Arial, sans-serif; font-size: 14px; }',
+            setup: function (editor) {
+                editor.on('change', function () { tinymce.triggerSave(); });
+            }
+        });
+
+        function mostrarVistaPrevia() {
+            // Sincronizar TinyMCE con el textarea
+            tinymce.triggerSave();
+
+            // Obtener valores
+            const asunto = document.getElementById('asuntoInput').value || "(Sin asunto)";
+            const contenido = tinymce.get('newsletter-editor').getContent();
+
+            // Inyectar en el modal
+            document.getElementById('previewAsunto').innerText = asunto;
+            document.getElementById('previewBody').innerHTML = contenido || "<p class='text-muted italic'>El mensaje está vacío...</p>";
+
+            // Mostrar modal
+            var myModal = new bootstrap.Modal(document.getElementById('previewModal'));
+            myModal.show();
+        }
+
+            async function enviarPrueba() {
+            const email = document.getElementById('testEmail').value;
+            const asunto = document.getElementById('asuntoInput').value;
+            const contenido = tinymce.get('newsletter-editor').getContent();
+
+            if (!email) {
+                alert("Por favor, introduce un email para la prueba.");
+                return;
+            }
+
+            const response = await fetch('/Newsletter/EnviarPrueba', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    'email': email,
+                    'asunto': asunto,
+                    'contenido': contenido
+                })
+            });
+
+            if (response.ok) {
+                alert("¡Correo de prueba enviado! Revisa tu bandeja de entrada.");
+            } else {
+                alert("Error al enviar la prueba.");
+            }
+        }
+    </script>
+}

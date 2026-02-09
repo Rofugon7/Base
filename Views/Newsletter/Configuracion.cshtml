@@ -1,0 +1,153 @@
+﻿@model BaseConLogin.Models.ConfiguracionEmail
+
+@{
+    ViewData["Title"] = "Configuración SMTP";
+}
+
+<div class="container mt-4">
+    <div class="d-flex align-items-center mb-4">
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary me-3 shadow-sm">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+        <h2 class="mb-0"><i class="bi bi-gear-fill me-2 text-secondary"></i>Configuración de Correo</h2>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary fw-bold">Parámetros del Servidor SMTP</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="GuardarConfiguracion" method="post" id="formConfig">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" id="configId" />
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label fw-bold">Servidor SMTP</label>
+                                <input asp-for="ServidorSmtp" id="smtpServer" class="form-control" placeholder="ej: smtp.gmail.com" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Puerto</label>
+                                <input asp-for="Puerto" id="smtpPort" class="form-control" placeholder="587" required />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Usuario / Correo Remitente</label>
+                                <input asp-for="Usuario" id="smtpUser" class="form-control" placeholder="tu@email.com" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Contraseña / API Key</label>
+                                <div class="input-group">
+                                    <input asp-for="Password" id="smtpPass" type="password" class="form-control" required />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="passIcon"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Nombre del Remitente</label>
+                                <input asp-for="RemitenteNombre" id="smtpName" class="form-control" placeholder="Ej: Mi Tienda Online" required />
+                                <div class="form-text">Es el nombre que verán los clientes en su bandeja de entrada.</div>
+                            </div>
+                            <div class="col-md-6 mb-3 d-flex align-items-center">
+                                <div class="form-check form-switch mt-3">
+                                    <input asp-for="UsarSsl" class="form-check-input" type="checkbox" id="smtpSsl">
+                                    <label class="form-check-label fw-bold" for="smtpSsl">Habilitar SSL / TLS</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-info px-4" onclick="testConexion()">
+                                <i class="bi bi-lightning-charge me-2"></i>Probar Conexión
+                            </button>
+                            <button type="submit" class="btn btn-primary px-5 fw-bold shadow">
+                                <i class="bi bi-save me-2"></i>Guardar Configuración
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 bg-light shadow-sm">
+                <div class="card-body">
+                    <h6><i class="bi bi-info-circle-fill text-info me-2"></i>Guía Rápida</h6>
+                    <ul class="small text-muted mt-3 p-0" style="list-style: none;">
+                        <li class="mb-3"><strong>Gmail:</strong> Usa puerto 587 y genera una "Contraseña de Aplicación" en tu cuenta de Google.</li>
+                        <li class="mb-3"><strong>Outlook/Office365:</strong> Servidor: smtp.office365.com, Puerto: 587.</li>
+                        <li class="mb-3"><strong>SendGrid/Brevo:</strong> Usa la API Key como contraseña y 'apikey' como usuario (según el proveedor).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword() {
+            const passInput = document.getElementById('smtpPass');
+            const passIcon = document.getElementById('passIcon');
+            if (passInput.type === "password") {
+                passInput.type = "text";
+                passIcon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                passInput.type = "password";
+                passIcon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
+        }
+
+        async function testConexion() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Probando...';
+            btn.disabled = true;
+
+            const data = new URLSearchParams({
+                'ServidorSmtp': document.getElementById('smtpServer').value,
+                'Puerto': document.getElementById('smtpPort').value,
+                'Usuario': document.getElementById('smtpUser').value,
+                'Password': document.getElementById('smtpPass').value,
+                'UsarSsl': document.getElementById('smtpSsl').checked
+            });
+
+            try {
+                const response = await fetch('/Newsletter/ProbarConfiguracion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: data
+                });
+
+                if (response.ok) {
+                    alert("✅ Conexión exitosa. El servidor responde correctamente.");
+                } else {
+                    alert("❌ Error de conexión. Revisa los datos e intenta de nuevo.");
+                }
+            } catch (error) {
+                alert("Hubo un error al intentar conectar con el servidor.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+}

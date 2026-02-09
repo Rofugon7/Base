@@ -1,18 +1,106 @@
-﻿@model IEnumerable<BaseConLogin.Models.Pedido>
+﻿@using BaseConLogin.Models.enumerados
+@model IEnumerable<BaseConLogin.Models.Pedido>
 @{
     ViewData["Title"] = "Gestión de Pedidos";
 }
 
 <div class="container-fluid py-4">
-    <h2 class="mb-4"><i class="bi bi-gear-fill me-2"></i>Panel de Ventas</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-gear-fill me-2"></i>Panel de Ventas</h2>
+        <span class="badge bg-secondary fs-6">@Model.Count() pedidos encontrados</span>
+    </div>
 
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
+            <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75">Ventas Finalizadas</p>
+                            <h3 class="fw-bold">@ViewBag.TotalVentas.ToString("C")</h3>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-dark text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75">Promedio de Entrega</p>
+                            <h3 class="fw-bold">@ViewBag.TiempoPromedio h</h3>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-stopwatch"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-warning text-dark">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <p class="mb-1 opacity-75">Por gestionar</p>
+                            <h3 class="fw-bold">@Model.Count(p => p.Estado == EstadoPedido.Pagado)</h3>
+                        </div>
+                        <div class="fs-1 opacity-50">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form method="get" asp-action="Gestion" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small fw-bold">Buscar Cliente</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" name="buscarNombre" value="@ViewBag.NombreActual" class="form-control" placeholder="Ej: Juan Pérez...">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold">Estado</label>
+                    <select name="filtrarEstado" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="@EstadoPedido.Pagado" selected='@(ViewBag.EstadoActual == EstadoPedido.Pagado)'>@EstadoPedido.Pagado</option>
+                        <option value="@EstadoPedido.Enviado" selected='@(ViewBag.EstadoActual == EstadoPedido.Enviado)'>@EstadoPedido.Enviado</option>
+                        <option value="@EstadoPedido.Finalizado" selected='@(ViewBag.EstadoActual == EstadoPedido.Finalizado)'>@EstadoPedido.Finalizado</option>
+                        <option value="@EstadoPedido.Cancelado" selected='@(ViewBag.EstadoActual == EstadoPedido.Cancelado)'>@EstadoPedido.Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-filter"></i> Filtrar
+                    </button>
+                    <a asp-action="Gestion" class="btn btn-outline-secondary px-4">
+                        <i class="bi bi-arrow-clockwise"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div class="card shadow border-0">
         <div class="table-responsive">
@@ -21,10 +109,11 @@
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
-                        <th>Fecha</th>
+                        <th>Fecha Pedido</th>
                         <th>Total</th>
-                        <th>Estado Actual</th>
+                        <th>Estado</th>
                         <th>Acción</th>
+                        <th>Entrega</th> @* Nueva columna de métrica *@
                         <th class="text-end">Detalle</th>
                     </tr>
                 </thead>
@@ -34,29 +123,58 @@
                         <tr>
                             <td><strong>#@p.Id</strong></td>
                             <td>
-                                <div>@p.NombreCompleto</div>
+                                <div class="fw-bold">@p.NombreCompleto</div>
                                 <small class="text-muted">@p.Ciudad</small>
                             </td>
-                            <td>@p.Fecha.ToShortDateString()</td>
+                            <td>@p.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
                             <td class="fw-bold">@p.Total.ToString("C")</td>
                             <td>
-                                <span class="badge @(p.Estado == "Enviado" ? "bg-primary" : p.Estado == "Pagado" ? "bg-success" : "bg-warning text-dark")">
+                                <span class="badge @(p.Estado == EstadoPedido.Finalizado ? "bg-dark" :
+                                                                                          p.Estado == EstadoPedido.Enviado ? "bg-primary" :
+                                                                                          p.Estado == EstadoPedido.Pagado ? "bg-success" :
+                                                                                          p.Estado == EstadoPedido.Cancelado ? "bg-danger" : "bg-warning text-dark")">
                                     @p.Estado
                                 </span>
                             </td>
                             <td>
-                                <form asp-action="CambiarEstado" method="post" class="d-flex gap-1">
-                                    <input type="hidden" name="id" value="@p.Id" />
-                                    <select name="nuevoEstado" class="form-select form-select-sm" style="width: 130px;">
-                                        <option value="Pagado">Pagado</option>
-                                        <option value="Enviado">Enviado</option>
-                                        <option value="Cancelado">Cancelado</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-outline-secondary">Ok</button>
-                                </form>
+                                @if (p.Estado != EstadoPedido.Finalizado && p.Estado != EstadoPedido.Cancelado)
+                                {
+                                    <form asp-action="CambiarEstado" method="post" class="d-flex gap-1">
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        @* Mantener filtros tras post *@
+                                        <input type="hidden" name="buscarNombre" value="@ViewBag.NombreActual" />
+                                        <input type="hidden" name="filtrarEstado" value="@ViewBag.EstadoActual" />
+
+                                        <select name="nuevoEstado" class="form-select form-select-sm" style="width: 130px;">
+                                            <option value="@EstadoPedido.Pagado" selected="@(p.Estado == EstadoPedido.Pagado)">Pagado</option>
+                                            <option value="@EstadoPedido.Enviado" selected="@(p.Estado == EstadoPedido.Enviado)">Enviado</option>
+                                            <option value="@EstadoPedido.Finalizado">Finalizado</option>
+                                            <option value="@EstadoPedido.Cancelado">Cancelado</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Ok</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <small class="text-muted"><i class="bi bi-lock-fill"></i> Completado</small>
+                                }
+                            </td>
+                            <td>
+                                @if (p.FechaFinalizacion.HasValue)
+                                {
+                                    var diff = p.FechaFinalizacion.Value - p.Fecha;
+                                    <small class="text-muted">
+                                        <i class="bi bi-clock-history"></i>
+                                        @(diff.Days > 0 ? $"{diff.Days}d " : "") @(diff.Hours)h @(diff.Minutes)m
+                                    </small>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">---</span>
+                                }
                             </td>
                             <td class="text-end">
-                                <a asp-action="Detalle" asp-route-id="@p.Id" class="btn btn-sm btn-light border">
+                                <a asp-action="Detalle" asp-route-id="@p.Id" class="btn btn-sm btn-light border shadow-sm">
                                     <i class="bi bi-eye"></i>
                                 </a>
                             </td>

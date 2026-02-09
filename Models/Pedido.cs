@@ -20,6 +20,8 @@
         public string CodigoPostal { get; set; }
         public string Telefono { get; set; }
 
+        public DateTime? FechaFinalizacion { get; set; }
+
         public ICollection<PedidoItem> Items { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BaseConLogin.Data; // Tu ApplicationDbContext
 using BaseConLogin.Models;
+using BaseConLogin.Models.enumerados;
 using BaseConLogin.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,7 +27,7 @@ namespace BaseConLogin.Services.Pedidos
                     TiendaId = tiendaId,
                     Fecha = DateTime.Now,
                     Total = carrito.Total,
-                    Estado = "Pendiente", // Se cambiará a "Pagado" tras la simulación de pago
+                    Estado = EstadoPedido.Pendiente, // Se cambiará a "Pagado" tras la simulación de pago
                     NombreCompleto = datosEnvio.NombreCompleto,
                     Direccion = datosEnvio.Direccion,
                     Ciudad = datosEnvio.Ciudad,
