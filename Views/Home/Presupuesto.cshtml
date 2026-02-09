@@ -1,0 +1,117 @@
+﻿@model BaseConLogin.Models.Presupuesto
+@{
+    ViewData["Title"] = "Presupuesto Personalizado";
+}
+
+<div class="container my-5">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success shadow-sm border-0 mb-4">
+            <i class="bi bi-check2-circle me-2"></i> @TempData["Success"]
+        </div>
+    }
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-xl-8">
+            <div class="budget-card shadow-sm bg-white p-4 p-md-5 rounded">
+
+                <h1 class="h2 fw-bold mb-3" style="color: #333;">Solicitud de presupuesto personalizado</h1>
+                <p class="text-muted mb-5">
+                    Para la consulta sobre productos a medida que no están disponibles en nuestro sitio web, completa el siguiente formulario. Recibirás una respuesta en <strong>24-48 horas hábiles</strong>, excluyendo fines de semana y festivos.
+                </p>
+
+                <form method="post">
+                    <div class="mb-4">
+                        <input type="text" name="Cantidad" class="form-control custom-form-input" placeholder="Cantidad" required>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <input type="text" name="DimensionPlana" class="form-control custom-form-input" placeholder="Dimensión plana (Ancho x Alto)">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="DimensionFinal" class="form-control custom-form-input" placeholder="Dimensión final (después de cortar/plegar)">
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <input type="text" name="CarasImpresas" class="form-control custom-form-input" placeholder="Caras impresas (Una cara / Doble cara)">
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="TipoPapel" class="form-control custom-form-input" placeholder="Tipo de papel (Couché, Offset, Reciclado, etc)">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <input type="text" name="Acabado" class="form-control custom-form-input" placeholder="Acabado / Revestimiento (Laminado, plastificado, etc)">
+                    </div>
+
+                    <div class="mb-4">
+                        <textarea name="InformacionAdicional" class="form-control custom-form-input" rows="6" placeholder="Información adicional"></textarea>
+                    </div>
+
+                    <hr class="my-5 opacity-10">
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <input type="text" name="Nombre" class="form-control custom-form-input" placeholder="Nombre" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" name="Apellidos" class="form-control custom-form-input" placeholder="Apellidos" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-5">
+                        <div class="col-md-6">
+                            <input type="email" name="Email" class="form-control custom-form-input" placeholder="Correo electrónico" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="tel" name="Telefono" class="form-control custom-form-input" placeholder="Teléfono">
+                        </div>
+                    </div>
+
+                    <div class="d-grid d-md-flex">
+                        <button type="submit" class="btn btn-dark btn-lg px-5 py-3 fw-bold text-uppercase border-0 rounded-1" style="background-color: #333; font-size: 0.9rem;">
+                            Enviar solicitud de presupuesto
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para este formulario */
+    .custom-form-input {
+        border-radius: 4px !important;
+        border: 1px solid #eee !important;
+        background-color: #fcfcfc !important;
+        padding: 14px 18px !important;
+        color: #444 !important;
+        font-size: 0.95rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .custom-form-input:focus {
+            background-color: #ffffff !important;
+            border-color: #333 !important;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+            outline: none;
+        }
+
+        .custom-form-input::placeholder {
+            color: #b0b0b0;
+        }
+
+    .budget-card {
+        border: 1px solid #f0f0f0;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -218,5 +218,104 @@ namespace BaseConLogin.Controllers.Front
             return Redirect(Request.Headers["Referer"].ToString());
         }
 
+        [HttpGet("Home/PreguntasFrecuentes")]
+        public IActionResult PreguntasFrecuentes()
+        {
+            return View();
+        }
+
+        [HttpGet("Home/Envios")]
+        public IActionResult Envios()
+        {
+            return View();
+        }
+
+        [HttpGet("Home/Plantillas")]
+        public IActionResult Plantillas()
+        {
+            return View();
+        }
+
+        [HttpGet("Home/Presupuesto")]
+        public IActionResult Presupuesto()
+        {
+            return View();
+        }
+
+ 
+        [HttpPost("Home/Presupuesto")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Presupuesto(Presupuesto modelo)
+        {
+            if (ModelState.IsValid)
+            {
+                // Guardamos en Base de Datos
+                _context.Add(modelo);
+                await _context.SaveChangesAsync();
+
+                // Usamos TempData para mostrar un aviso en la vista tras la redirección
+                TempData["Success"] = "¡Presupuesto enviado correctamente! Nos pondremos en contacto contigo pronto.";
+
+                return RedirectToAction(nameof(Presupuesto));
+            }
+
+            // Si hay errores de validación, volvemos a mostrar la vista con los datos
+            return View(modelo);
+        }
+
+        // Listado de presupuestos (GET: Home/ListadoPresupuestos)
+        [HttpGet("Home/ListadoPresupuestos")]
+        public async Task<IActionResult> ListadoPresupuestos()
+        {
+            var presupuestos = await _context.Presupuestos
+                .OrderByDescending(p => p.FechaSolicitud)
+                .ToListAsync();
+            return View(presupuestos);
+        }
+
+        // Detalle del presupuesto (GET: Home/DetallePresupuesto/5)
+        [HttpGet("Home/DetallePresupuesto/{id}")]
+        public async Task<IActionResult> DetallePresupuesto(int id)
+        {
+            var presupuesto = await _context.Presupuestos
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (presupuesto == null) return NotFound();
+
+            return View(presupuesto);
+        }
+
+        [HttpPost("Home/EliminarPresupuesto/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EliminarPresupuesto(int id)
+        {
+            var presupuesto = await _context.Presupuestos.FindAsync(id);
+
+            if (presupuesto != null)
+            {
+                _context.Presupuestos.Remove(presupuesto);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "El presupuesto ha sido eliminado correctamente.";
+            }
+            else
+            {
+                TempData["Error"] = "No se pudo encontrar el presupuesto para eliminar.";
+            }
+
+            return RedirectToAction(nameof(ListadoPresupuestos));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CambiarEstado(int id, string nuevoEstado)
+        {
+            var presupuesto = await _context.Presupuestos.FindAsync(id);
+            if (presupuesto != null)
+            {
+                presupuesto.Estado = nuevoEstado;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(DetallePresupuesto), new { id = id });
+        }
+
     }
 }

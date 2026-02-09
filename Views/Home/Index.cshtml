@@ -188,15 +188,44 @@
                     <div class="col-lg-6">
                         <div class="row g-4 text-start">
                             <div class="col-md-4 col-6">
-                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Atención al cliente</h6>
-                                <ul class="list-unstyled opacity-75 small">
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Preguntas Frecuentes</a></li>
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Envíos y devoluciones</a></li>
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Estado de tu Pedido</a></li>
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Plantillas para impresión</a></li>
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Solicitar presupuesto</a></li>
+                                <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px; color: #fff;">Atención al cliente</h6>
+                                <ul class="list-unstyled small">
+                                    <li class="mb-2">
+                                        @* Cambiamos text-muted por text-white-50 para que se vea sobre fondo oscuro *@
+                                        <a asp-controller="Home" asp-action="PreguntasFrecuentes" class="text-white-50 text-decoration-none hover-link">
+                                            Preguntas Frecuentes (FAQ)
+                                        </a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <a asp-controller="Home" asp-action="Envios" class="text-white-50 text-decoration-none">
+                                            Envíos y devoluciones
+                                        </a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <a asp-controller="Pedidos" asp-action="Index" class="text-white-50 text-decoration-none hover-link">
+                                            Estado de tu Pedido
+                                        </a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <a asp-controller="Home" asp-action="Plantillas" class="text-white-50 text-decoration-none hover-link">
+                                            Plantillas para impresión
+                                        </a>
+                                    </li>
+                                    <li class="mb-2">
+                                        <a asp-controller="Home" asp-action="Presupuesto" class="text-white-50 text-decoration-none hover-link">
+                                            Solicitar presupuesto
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
+
+                            <style>
+                                /* Efecto para que el usuario sepa que es un enlace al poner el ratón encima */
+                                .hover-link:hover {
+                                    color: #ffffff !important;
+                                    text-decoration: underline !important;
+                                }
+                            </style>
 
                             <div class="col-md-3 col-6">
                                 <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">La empresa</h6>

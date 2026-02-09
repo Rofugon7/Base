@@ -1,0 +1,82 @@
+﻿@model BaseConLogin.Models.Presupuesto
+
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-action="ListadoPresupuestos">Listado</a></li>
+            <li class="breadcrumb-item active">Detalle de presupuesto #@Model.Id</li>
+        </ol>
+    </nav>
+
+    <div class="card border-0 shadow-sm p-4 mt-4">
+        <h6 class="fw-bold mb-3">Gestión de Estado</h6>
+        <form asp-action="CambiarEstado" method="post" class="d-flex gap-2">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <select name="nuevoEstado" class="form-select form-select-sm" style="max-width: 200px;">
+                <option value="Pendiente" selected="@(Model.Estado == "Pendiente")">Pendiente</option>
+                <option value="Respondido" selected="@(Model.Estado == "Respondido")">Respondido</option>
+                <option value="Aceptado" selected="@(Model.Estado == "Aceptado")">Aceptado</option>
+                <option value="Rechazado" selected="@(Model.Estado == "Rechazado")">Rechazado</option>
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm">Actualizar Estado</button>
+        </form>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm p-4 h-100">
+                <h5 class="fw-bold mb-4">Contacto</h5>
+                <p class="mb-1 text-muted small text-uppercase">Nombre completo</p>
+                <p class="fw-bold">@Model.Nombre @Model.Apellidos</p>
+
+                <p class="mb-1 text-muted small text-uppercase">Email</p>
+                <p class="fw-bold">@Model.Email</p>
+
+                <p class="mb-1 text-muted small text-uppercase">Teléfono</p>
+                <p class="fw-bold">@(Model.Telefono ?? "No facilitado")</p>
+
+                <hr>
+                <p class="text-muted small">Solicitado el @Model.FechaSolicitud.ToString("F")</p>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm p-4">
+                <h5 class="fw-bold mb-4 text-primary">Especificaciones del Producto</h5>
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Cantidad</label>
+                        <p class="border-bottom pb-2">@Model.Cantidad</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Papel / Material</label>
+                        <p class="border-bottom pb-2">@Model.TipoPapel</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Dimensión Plana</label>
+                        <p class="border-bottom pb-2">@Model.DimensionPlana</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Dimensión Final</label>
+                        <p class="border-bottom pb-2">@Model.DimensionFinal</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Caras Impresas</label>
+                        <p class="border-bottom pb-2">@Model.CarasImpresas</p>
+                    </div>
+                    <div class="col-sm-6 mb-3">
+                        <label class="text-muted small">Acabado</label>
+                        <p class="border-bottom pb-2">@Model.Acabado</p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <label class="text-muted small fw-bold">Información Adicional:</label>
+                    <div class="p-3 bg-light rounded mt-2">
+                        @Html.Raw(Model.InformacionAdicional?.Replace("\n", "<br>") ?? "Sin comentarios adicionales.")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,839 @@
+﻿@{
+    ViewData["Title"] = "Plantillas de Impresión";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold"><i class="bi bi-file-earmark-pdf me-2 text-danger"></i>Descarga de Plantillas</h2>
+        <p class="text-muted">Utiliza nuestras plantillas profesionales para asegurar que tus archivos cumplen con las medidas y sangrados requeridos.</p>
+    </div>
+
+         <div class="accordion shadow-sm" id="accordionPlantillas">
+
+            <div class="accordion-item border-0 mb-2 shadow-sm">
+                <h2 class="accordion-header" id="headingTarjetas">
+                    <button class="accordion-button fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTarjetas" aria-expanded="true" aria-controls="collapseTarjetas">
+                        <i class="bi bi-card-heading me-3 fs-4"></i> Tarjetas de Visita
+                    </button>
+                </h2>
+                <div id="collapseTarjetas" class="accordion-collapse collapse show" aria-labelledby="headingTarjetas" data-bs-parent="#accordionPlantillas">
+                    <div class="accordion-body bg-light">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold">Rectangulares</h6>
+                                    <p class="text-muted small">85 x 55 mm</p>
+                                    <a href="https://www.dropbox.com/s/2dexc7crn821y8y/rectangulares-55x85mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto"><i class="bi bi-download me-1"></i>Descargar ZIP</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold">Cuadradas</h6>
+                                    <p class="text-muted small">65 x 65 mm</p>
+                                    <a href="https://www.dropbox.com/s/obgv4gz27jyv1yi/cuadradas-65x65mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto"><i class="bi bi-download me-1"></i>Descargar ZIP</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold">Delgadas</h6>
+                                    <p class="text-muted small">85 x 40 mm</p>
+                                    <a href="https://www.dropbox.com/s/07z2yogee39ydkx/delgadas-40x85mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto"><i class="bi bi-download me-1"></i>Descargar ZIP</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-2 shadow-sm">
+                <h2 class="accordion-header" id="headingFlyers">
+                    <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFlyers" aria-expanded="false" aria-controls="collapseFlyers">
+                        <i class="bi bi-file-earmark-richtext me-3 fs-4"></i> Flyers
+                    </button>
+                </h2>
+                <div id="collapseFlyers" class="accordion-collapse collapse" aria-labelledby="headingFlyers" data-bs-parent="#accordionPlantillas">
+                    <div class="accordion-body bg-light">
+                        <div class="row g-3">
+                            @* Renderizado de las 5 opciones de Flyers *@
+                            @{
+                                var flyers = new[] {
+                                                        new { Titulo = "A7", Medida = "105 x 74 mm", Link = "https://www.dropbox.com/s/16u2a7ci2n6pae1/flyer-a7-105x74mm.zip?dl=1" },
+                                                        new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/fp7dn65biegtegb/flyer-a6-148x105mm.zip?dl=1" },
+                                                        new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/915z8qh70c1pqa6/flyer-a5-210x148mm.zip?dl=1" },
+                                                        new { Titulo = "A4", Medida = "297 x 210 mm", Link = "https://www.dropbox.com/s/z0llemzl1596m9c/flyer-a4-297x210mm.zip?dl=1" },
+                                                        new { Titulo = "DL", Medida = "210 x 100 mm", Link = "https://www.dropbox.com/s/ystj3d5ctx6etyl/flyer-dl-210x100mm.zip?dl=1" }
+                                                        };
+                            }
+                            @foreach (var f in flyers)
+                            {
+                                <div class="col-md-4 col-6">
+                                    <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                        <h6 class="fw-bold mb-0">@f.Titulo</h6>
+                                        <p class="text-muted small">@f.Medida</p>
+                                        <a href="@f.Link" class="btn btn-outline-primary btn-sm mt-auto">Descargar</a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="accordion-item border-0 mb-2 shadow-sm">
+                <h2 class="accordion-header" id="headingDipticos">
+                    <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDipticos" aria-expanded="false" aria-controls="collapseDipticos">
+                        <i class="bi bi-book me-3 fs-4"></i> Dípticos
+                    </button>
+                </h2>
+                <div id="collapseDipticos" class="accordion-collapse collapse" aria-labelledby="headingDipticos" data-bs-parent="#accordionPlantillas">
+                    <div class="accordion-body bg-light">
+                        <div class="row g-3">
+                            @* Renderizado de las 4 opciones de Dípticos *@
+                            @{
+                                var dipticos = new[] {
+                                                        new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/ypu9ix14si7pqfd/diptico-a6-148x105mm.zip?dl=1" },
+                                                        new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/tke5icsnr7ufrfv/diptico-a5-210x148mm.zip?dl=1" },
+                                                        new { Titulo = "A4", Medida = "297 x 210 mm", Link = "https://www.dropbox.com/s/4mj70ub267bi370/diptico-a4-297x210mm.zip?dl=1" },
+                                                        new { Titulo = "DL", Medida = "210 x 100 mm", Link = "https://www.dropbox.com/s/m639vq6qddkog6t/diptico-dl-210x100mm.zip?dl=1" }
+                                                        };
+                            }
+                            @foreach (var d in dipticos)
+                            {
+                                <div class="col-md-4 col-6">
+                                    <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                        <h6 class="fw-bold mb-0">@d.Titulo</h6>
+                                        <p class="text-muted small">@d.Medida</p>
+                                        <a href="@d.Link" class="btn btn-outline-primary btn-sm mt-auto">Descargar</a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingTripticos">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTripticos" aria-expanded="false" aria-controls="collapseTripticos">
+                    <i class="bi bi-layout-three-columns me-3 fs-4"></i> Trípticos
+                </button>
+            </h2>
+            <div id="collapseTripticos" class="accordion-collapse collapse" aria-labelledby="headingTripticos" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var tripticos = new[] {
+                                                new { Titulo = "A6", Medida = "148 x 106 mm", Link = "https://www.dropbox.com/s/qt5af9emx1mchpn/triptico-a6-148x106mm.zip?dl=1" },
+                                                new { Titulo = "DL", Medida = "210 x 100 mm", Link = "https://www.dropbox.com/s/7wbpe2ihk7o843b/triptico-dl-210x100mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var t in tripticos)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@t.Titulo</h6>
+                                    <p class="text-muted small">@t.Medida</p>
+                                    <a href="@t.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingInvitacion">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseInvitacion" aria-expanded="false" aria-controls="collapseInvitacion">
+                    <i class="bi bi-ticket-perforated me-3 fs-4"></i> Tarjetones de Invitación
+                </button>
+            </h2>
+            <div id="collapseInvitacion" class="accordion-collapse collapse" aria-labelledby="headingInvitacion" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var invitaciones = new[] {
+                                                new { Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/572oefpqf6705vi/tarjetones-de-invitacion-148x105mm.zip?dl=1" },
+                                                new { Medida = "148 x 148 mm", Link = "https://www.dropbox.com/s/trgzpy8vrqx99vb/tarjetones-de-invitacion-148x148mm.zip?dl=1" },
+                                                new { Medida = "210 x 105 mm", Link = "https://www.dropbox.com/s/xmq1r411j11dpn1/tarjetones-de-invitacion-210x105mm.zip?dl=1" },
+                                                new { Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/bt23ybgnjjb55lv/tarjetones-de-invitacion-210x148mm.zip?dl=1" },
+                                                new { Medida = "210 x 210 mm", Link = "https://www.dropbox.com/s/hq0mqwjjciiujya/tarjetones-de-invitacion-210x210mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var inv in invitaciones)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-1 small">Invitación</h6>
+                                    <p class="text-muted small">@inv.Medida</p>
+                                    <a href="@inv.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingHosteleria">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHosteleria" aria-expanded="false" aria-controls="collapseHosteleria">
+                    <i class="bi bi-egg-fried me-3 fs-4"></i> Menús de Hostelería
+                </button>
+            </h2>
+            <div id="collapseHosteleria" class="accordion-collapse collapse" aria-labelledby="headingHosteleria" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var menus = new[] {
+                                                new { Titulo = "Menú Largo", Medida = "Estándar", Link = "https://www.dropbox.com/s/7v14kv1vgt696ey/menus-de-hosteleria-largo.zip?dl=1" },
+                                                new { Titulo = "Menú Díptico", Medida = "Plegado", Link = "https://www.dropbox.com/s/e3l2hpmhgfeskcm/menus-de-hosteleria-diptico.zip?dl=1" },
+                                                new { Titulo = "Menú Tríptico", Medida = "3 Cuerpos", Link = "https://www.dropbox.com/s/p72p5n002u5ql3v/menus-de-hosteleria-triptico.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var m in menus)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-1">@m.Titulo</h6>
+                                    <p class="text-muted small">@m.Medida</p>
+                                    <a href="@m.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingManteles">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseManteles" aria-expanded="false" aria-controls="collapseManteles">
+                    <i class="bi bi-cup-hot me-3 fs-4"></i> Manteles de Papel
+                </button>
+            </h2>
+            <div id="collapseManteles" class="accordion-collapse collapse" aria-labelledby="headingManteles" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Mantel A3</h6>
+                                <p class="text-muted small">420 x 297 mm</p>
+                                <a href="https://www.dropbox.com/s/xzi4iiu326sqxou/manteles-de-papel-a3-420x297mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingCarteles">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCarteles" aria-expanded="false" aria-controls="collapseCarteles">
+                    <i class="bi bi-megaphone me-3 fs-4"></i> Carteles Publicitarios
+                </button>
+            </h2>
+            <div id="collapseCarteles" class="accordion-collapse collapse" aria-labelledby="headingCarteles" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var carteles = new[] {
+                                                new { Titulo = "A3", Medida = "420 x 297 mm", Link = "https://www.dropbox.com/s/bdg54u5abak3sw7/carteles-publicitarios-a3-420x297mm.zip?dl=1" },
+                                                new { Titulo = "A2", Medida = "594 x 420 mm", Link = "https://www.dropbox.com/s/sr73tinhhxs10ot/carteles-publicitarios-a2-594x420mm.zip?dl=1" },
+                                                new { Titulo = "A1", Medida = "841 x 594 mm", Link = "https://www.dropbox.com/s/ni7isr62disfpo2/carteles-publicitarios-a1-841x594mm.zip?dl=1" },
+                                                new { Titulo = "A0", Medida = "1189 x 841 mm", Link = "https://www.dropbox.com/s/7iwwdnavycjjtkh/carteles-publicitarios-a0-1189x841mm.zip?dl=1" },
+                                                new { Titulo = "B2", Medida = "707 x 500 mm", Link = "https://www.dropbox.com/s/66fbeko3i8hfe4k/carteles-publicitarios-b2-707x500mm.zip?dl=1" },
+                                                new { Titulo = "B1", Medida = "1000 x 707 mm", Link = "https://www.dropbox.com/s/t8yfc9pak9k5xa3/carteles-publicitarios-b1-1000x707mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var c in carteles)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@c.Titulo</h6>
+                                    <p class="text-muted small">@c.Medida</p>
+                                    <a href="@c.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingVinilos">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVinilos" aria-expanded="false" aria-controls="collapseVinilos">
+                    <i class="bi bi-stickies me-3 fs-4"></i> Carteles Adhesivos
+                </button>
+            </h2>
+            <div id="collapseVinilos" class="accordion-collapse collapse" aria-labelledby="headingVinilos" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Vinilos</h6>
+                                <p class="text-muted small">Formato estándar</p>
+                                <a href="https://www.dropbox.com/s/iuqs3hoas2l5eee/vinilos.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingPosteres">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePosteres" aria-expanded="false" aria-controls="collapsePosteres">
+                    <i class="bi bi-image me-3 fs-4"></i> Pósteres
+                </button>
+            </h2>
+            <div id="collapsePosteres" class="accordion-collapse collapse" aria-labelledby="headingPosteres" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var posteres = new[] {
+                                                new { Titulo = "Póster A3", Medida = "420 x 297 mm", Link = "https://www.dropbox.com/s/bdg54u5abak3sw7/carteles-publicitarios-a3-420x297mm.zip?dl=1" },
+                                                new { Titulo = "Póster A2", Medida = "594 x 420 mm", Link = "https://www.dropbox.com/s/sr73tinhhxs10ot/carteles-publicitarios-a2-594x420mm.zip?dl=1" },
+                                                new { Titulo = "Póster A1", Medida = "841 x 594 mm", Link = "https://www.dropbox.com/s/ni7isr62disfpo2/carteles-publicitarios-a1-841x594mm.zip?dl=1" },
+                                                new { Titulo = "Póster A0", Medida = "1189 x 841 mm", Link = "https://www.dropbox.com/s/7iwwdnavycjjtkh/carteles-publicitarios-a0-1189x841mm.zip?dl=1" },
+                                                new { Titulo = "Póster B2", Medida = "707 x 500 mm", Link = "https://www.dropbox.com/s/66fbeko3i8hfe4k/carteles-publicitarios-b2-707x500mm.zip?dl=1" },
+                                                new { Titulo = "Póster B1", Medida = "1000 x 707 mm", Link = "https://www.dropbox.com/s/t8yfc9pak9k5xa3/carteles-publicitarios-b1-1000x707mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var p in posteres)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@p.Titulo</h6>
+                                    <p class="text-muted small">@p.Medida</p>
+                                    <a href="@p.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingSellos">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSellos" aria-expanded="false" aria-controls="collapseSellos">
+                    <i class="bi bi-patch-check me-3 fs-4"></i> Sellos de Caucho Autoentintables
+                </button>
+            </h2>
+            <div id="collapseSellos" class="accordion-collapse collapse" aria-labelledby="headingSellos" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var sellos = new[] {
+                                                new { Modelo = "S841-4910", Medida = "24 x 8 mm", Link = "https://www.dropbox.com/s/5lxp5cbmakeu81c/24x8mm-S841-4910.zip?dl=1" },
+                                                new { Modelo = "S842-4911", Medida = "36 x 12 mm", Link = "https://www.dropbox.com/s/2sbd8rg0x3nqtz5/36x12mm-S842-4911.zip?dl=1" },
+                                                new { Modelo = "S843-4912", Medida = "45 x 16 mm", Link = "https://www.dropbox.com/s/7kk8r7m10b3g1o5/45x16mm-S843-4912.zip?dl=1" },
+                                                new { Modelo = "S844-4913", Medida = "58 x 20 mm", Link = "https://www.dropbox.com/s/bsc1q86u4m8oceg/58x20mm-S844-4913.zip?dl=1" },
+                                                new { Modelo = "S845-4915", Medida = "68 x 23 mm", Link = "https://www.dropbox.com/s/qdube2nk048jn3k/68x23mm-S845-4915.zip?dl=1" },
+                                                new { Modelo = "S813-4916", Medida = "68 x 8 mm", Link = "https://www.dropbox.com/s/7wnxm18xj33bbkr/68x8mm-S813-4916.zip?dl=1" },
+                                                new { Modelo = "S833-4925", Medida = "80 x 25 mm", Link = "https://www.dropbox.com/s/skmw58pr5c1vihd/80x25mm-S833-4925.zip?dl=1" },
+                                                new { Modelo = "S830-4926", Medida = "73 x 36 mm", Link = "https://www.dropbox.com/s/zr221fcyhn4kytx/73x36mm-S830-4926.zip?dl=1" },
+                                                new { Modelo = "S829-4927", Medida = "58 x 38 mm", Link = "https://www.dropbox.com/s/4zaixk66waz0gq3/58x38mm-S829-4927.zip?dl=1" },
+                                                new { Modelo = "S828-4928", Medida = "54 x 31 mm", Link = "https://www.dropbox.com/s/ibrkbzku98pn9wq/54x31mm-S828-4928.zip?dl=1" },
+                                                new { Modelo = "S827-4929", Medida = "50 x 30 mm", Link = "https://www.dropbox.com/s/j65oj4tvi7a58km/50x30mm-S827-4929.zip?dl=1" },
+                                                new { Modelo = "R510-4921", Medida = "10 x 10 mm", Link = "https://www.dropbox.com/s/j042wdzxc3ydzj2/10x10mm-R510-4921.zip?dl=1" },
+                                                new { Modelo = "R520-4922", Medida = "18 x 18 mm", Link = "https://www.dropbox.com/s/64sn60a7c9wsty6/18x18mm-R520-4922.zip?dl=1" },
+                                                new { Modelo = "R530-4923", Medida = "28 x 28 mm", Link = "https://www.dropbox.com/s/qrnn3sal8o2y5vf/28x28mm-R530-4923.zip?dl=1" },
+                                                new { Modelo = "R542-4924", Medida = "38 x 38 mm", Link = "https://www.dropbox.com/s/caomsvgnloe4g41/38x38mm-R542-4924.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var s in sellos)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-2 text-center">
+                                    <span class="badge bg-secondary mb-2 align-self-center">@s.Modelo</span>
+                                    <p class="text-muted small mb-2">@s.Medida</p>
+                                    <a href="@s.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingSellosClasicos">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSellosClasicos" aria-expanded="false" aria-controls="collapseSellosClasicos">
+                    <i class="bi bi-archive me-3 fs-4"></i> Sellos de Caucho Clásicos
+                </button>
+            </h2>
+            <div id="collapseSellosClasicos" class="accordion-collapse collapse" aria-labelledby="headingSellosClasicos" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-2">
+                        @{
+                            var clasicos = new[] {
+                                                new { Dim = "20 x 10 mm", Link = "https://www.dropbox.com/s/celnk7tnbja1q6w/sellos-de-caucho-clasicos-20x10mm.zip?dl=1" },
+                                                new { Dim = "20 x 12 mm", Link = "https://www.dropbox.com/s/46l9bi9kzu2iu7i/sellos-de-caucho-clasicos-20x12mm.zip?dl=1" },
+                                                new { Dim = "20 x 14 mm", Link = "https://www.dropbox.com/s/fdfp6ah7kqwh2zb/sellos-de-caucho-clasicos-20x14mm.zip?dl=1" },
+                                                new { Dim = "20 x 16 mm", Link = "https://www.dropbox.com/s/arc2x6o906abaa1/sellos-de-caucho-clasicos-20x16mm.zip?dl=1" },
+                                                new { Dim = "20 x 20 mm", Link = "https://www.dropbox.com/s/468p5nlplh5wl2b/sellos-de-caucho-clasicos-20x20mm.zip?dl=1" },
+                                                new { Dim = "20 x 40 mm", Link = "https://www.dropbox.com/s/b2wf13916h4qj43/sellos-de-caucho-clasicos-20x40mm.zip?dl=1" },
+                                                new { Dim = "20 x 60 mm", Link = "https://www.dropbox.com/s/gn82qof1tbavzyg/sellos-de-caucho-clasicos-20x60mm.zip?dl=1" },
+                                                new { Dim = "20 x 80 mm", Link = "https://www.dropbox.com/s/6qb4lhgc99ei14h/sellos-de-caucho-clasicos-20x80mm.zip?dl=1" },
+                                                new { Dim = "40 x 40 mm", Link = "https://www.dropbox.com/s/03keq5qy2uv5awf/sellos-de-caucho-clasicos-40x40mm.zip?dl=1" },
+                                                new { Dim = "40 x 60 mm", Link = "https://www.dropbox.com/s/0l9jmvs3pv4jew9/sellos-de-caucho-clasicos-40x60mm.zip?dl=1" },
+                                                new { Dim = "40 x 80 mm", Link = "https://www.dropbox.com/s/k841m4qqrj1pu1i/sellos-de-caucho-clasicos-40x80mm.zip?dl=1" },
+                                                new { Dim = "40 x 100 mm", Link = "https://www.dropbox.com/s/cnka1uzthpb3ibb/sellos-de-caucho-clasicos-40x100mm.zip?dl=1" },
+                                                new { Dim = "40 x 120 mm", Link = "https://www.dropbox.com/s/52dhj8s0503c6t4/sellos-de-caucho-clasicos-40x120mm.zip?dl=1" },
+                                                new { Dim = "40 x 140 mm", Link = "https://www.dropbox.com/s/z6h0t78lz3bd929/sellos-de-caucho-clasicos-40x140mm.zip?dl=1" },
+                                                new { Dim = "40 x 160 mm", Link = "https://www.dropbox.com/s/lm1idkwmwid9gwo/sellos-de-caucho-clasicos-40x160mm.zip?dl=1" },
+                                                new { Dim = "60 x 60 mm", Link = "https://www.dropbox.com/s/3t6sarct4w87kjf/sellos-de-caucho-clasicos-60x60mm.zip?dl=1" },
+                                                new { Dim = "60 x 80 mm", Link = "https://www.dropbox.com/s/olmxhpuaxdn9m7w/sellos-de-caucho-clasicos-60x80mm.zip?dl=1" },
+                                                new { Dim = "60 x 100 mm", Link = "https://www.dropbox.com/s/nux2oz7u2gxrbi4/sellos-de-caucho-clasicos-60x100mm.zip?dl=1" },
+                                                new { Dim = "60 x 120 mm", Link = "https://www.dropbox.com/s/dtots6n4ydekexc/sellos-de-caucho-clasicos-60x120mm.zip?dl=1" },
+                                                new { Dim = "60 x 140 mm", Link = "https://www.dropbox.com/s/do7j4xjiy24cqmg/sellos-de-caucho-clasicos-60x140mm.zip?dl=1" },
+                                                new { Dim = "60 x 160 mm", Link = "https://www.dropbox.com/s/uhyms2663wy14gg/sellos-de-caucho-clasicos-60x160mm.zip?dl=1" },
+                                                new { Dim = "80 x 80 mm", Link = "https://www.dropbox.com/s/xy0wufmggn03231/sellos-de-caucho-clasicos-80x80mm.zip?dl=1" },
+                                                new { Dim = "80 x 100 mm", Link = "https://www.dropbox.com/s/5uqnjrrzl8jjvh6/sellos-de-caucho-clasicos-80x100mm.zip?dl=1" },
+                                                new { Dim = "80 x 120 mm", Link = "https://www.dropbox.com/s/s4msm7zb3tdtgy0/sellos-de-caucho-clasicos-80x120mm.zip?dl=1" },
+                                                new { Dim = "80 x 140 mm", Link = "https://www.dropbox.com/s/74tom5idgtnaulr/sellos-de-caucho-clasicos-80x140mm.zip?dl=1" },
+                                                new { Dim = "80 x 160 mm", Link = "https://www.dropbox.com/s/g5mcorrlkws0rsp/sellos-de-caucho-clasicos-80x160mm.zip?dl=1" },
+                                                new { Dim = "100 x 100 mm", Link = "https://www.dropbox.com/s/wwipa6kw7y63ufx/sellos-de-caucho-clasicos-100x100mm.zip?dl=1" },
+                                                new { Dim = "100 x 120 mm", Link = "https://www.dropbox.com/s/ur3gl3vbtholahu/sellos-de-caucho-clasicos-100x120mm.zip?dl=1" },
+                                                new { Dim = "100 x 140 mm", Link = "https://www.dropbox.com/s/o9nsms21traag8x/sellos-de-caucho-clasicos-100x140mm.zip?dl=1" },
+                                                new { Dim = "100 x 160 mm", Link = "https://www.dropbox.com/s/yd22xw7ha3b0y6c/sellos-de-caucho-clasicos-100x160mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var item in clasicos)
+                        {
+                            <div class="col-lg-2 col-md-3 col-4">
+                                <div class="card h-100 border-0 shadow-sm p-1 text-center">
+                                    <div style="font-size: 0.75rem;" class="fw-bold mb-1 text-truncate">@item.Dim</div>
+                                    <a href="@item.Link" class="btn btn-primary btn-sm py-0" title="Descargar">
+                                        <i class="bi bi-download small"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingCarpetas">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCarpetas" aria-expanded="false" aria-controls="collapseCarpetas">
+                    <i class="bi bi-folder me-3 fs-4"></i> Carpetas de Presentación
+                </button>
+            </h2>
+            <div id="collapseCarpetas" class="accordion-collapse collapse" aria-labelledby="headingCarpetas" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Con Solapa</h6>
+                                <p class="text-muted small">440 x 310 mm</p>
+                                <a href="https://www.dropbox.com/s/as0fmd5bf04lcaa/carpetas-de-presentacion-con-solapa-440x310mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Sin Solapa</h6>
+                                <p class="text-muted small">440 x 310 mm</p>
+                                <a href="https://www.dropbox.com/s/uzbsuouodiqejha/carpetas-de-presentacion-sin-solapa-440x310mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingLibretas">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLibretas" aria-expanded="false" aria-controls="collapseLibretas">
+                    <i class="bi bi-journal-text me-3 fs-4"></i> Libretas
+                </button>
+            </h2>
+            <div id="collapseLibretas" class="accordion-collapse collapse" aria-labelledby="headingLibretas" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var libretas = new[] {
+                                                new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/yyc37aw103nzool/libretas-a6-148x105mm.zip?dl=1" },
+                                                new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/v4gmdcsp44msh2c/libretas-a5-210x148mm.zip?dl=1" },
+                                                new { Titulo = "A4", Medida = "297 x 210 mm", Link = "https://www.dropbox.com/s/cac18yjmovxv6vk/libretas-a4-297x210mm.zip?dl=1" },
+                                                new { Titulo = "Cuadrada", Medida = "210 x 210 mm", Link = "https://www.dropbox.com/s/fb2ri1bgwq0p7ln/libretas-cuadrado-210x210mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var l in libretas)
+                        {
+                            <div class="col-md-3 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@l.Titulo</h6>
+                                    <p class="text-muted small">@l.Medida</p>
+                                    <a href="@l.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingBlocs">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBlocs" aria-expanded="false" aria-controls="collapseBlocs">
+                    <i class="bi bi-sticky me-3 fs-4"></i> Blocs de Notas
+                </button>
+            </h2>
+            <div id="collapseBlocs" class="accordion-collapse collapse" aria-labelledby="headingBlocs" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var blocs = new[] {
+                                                new { Titulo = "A7", Medida = "105 x 74 mm", Link = "https://www.dropbox.com/s/39khbp6n0n1reo1/blocs-de-notas-a7-105x74mm.zip?dl=1" },
+                                                new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/i7qhg5lk7mjgna3/blocs-de-notas-a6-148x105mm.zip?dl=1" },
+                                                new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/71zn514tm2lm49q/blocs-de-notas-a5-210x148mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var b in blocs)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@b.Titulo</h6>
+                                    <p class="text-muted small">@b.Medida</p>
+                                    <a href="@b.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingPapelCarta">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePapelCarta" aria-expanded="false" aria-controls="collapsePapelCarta">
+                    <i class="bi bi-envelope-paper me-3 fs-4"></i> Papel de Carta
+                </button>
+            </h2>
+            <div id="collapsePapelCarta" class="accordion-collapse collapse" aria-labelledby="headingPapelCarta" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">A4</h6>
+                                <p class="text-muted small">210 x 297 mm</p>
+                                <a href="https://www.dropbox.com/s/qw8iylgv9o6dwzr/papel-de-carta-a4-297x210mm.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingSobres">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSobres" aria-expanded="false" aria-controls="collapseSobres">
+                    <i class="bi bi-envelope me-3 fs-4"></i> Sobres
+                </button>
+            </h2>
+            <div id="collapseSobres" class="accordion-collapse collapse" aria-labelledby="headingSobres" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var sobres = new[] {
+                                                new { Titulo = "C5", Medida = "229 x 162 mm", Link = "https://www.dropbox.com/s/eqb1nstvu7w6av2/c5-229x162mm.zip?dl=1" },
+                                                new { Titulo = "C4", Medida = "229 x 324 mm", Link = "https://www.dropbox.com/s/s8fzuvpb61b6ih5/c4-229x324mm.zip?dl=1" },
+                                                new { Titulo = "DL", Medida = "220 x 110 mm", Link = "https://www.dropbox.com/s/0mv62r6p5uft3uo/dl-220x110mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var s in sobres)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@s.Titulo</h6>
+                                    <p class="text-muted small">@s.Medida</p>
+                                    <a href="@s.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingTalonarios">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTalonarios" aria-expanded="false" aria-controls="collapseTalonarios">
+                    <i class="bi bi-receipt me-3 fs-4"></i> Talonarios Autocopiativos
+                </button>
+            </h2>
+            <div id="collapseTalonarios" class="accordion-collapse collapse" aria-labelledby="headingTalonarios" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var talonarios = new[] {
+                                                new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/qyvf3qodrywrm5s/talonarios-a6-148x105mm.zip?dl=1" },
+                                                new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/jqj9eu05c6x76v8/talonarios-a5-210x148mm.zip?dl=1" },
+                                                new { Titulo = "A4", Medida = "297 x 210 mm", Link = "https://www.dropbox.com/s/jjv5tun0yvtcimn/talonarios-a4-297x210mm.zip?dl=1" },
+                                                new { Titulo = "DL", Medida = "210 x 100 mm", Link = "https://www.dropbox.com/s/2adji071z2466ff/talonarios-dl-210x100mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var t in talonarios)
+                        {
+                            <div class="col-md-3 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@t.Titulo</h6>
+                                    <p class="text-muted small">@t.Medida</p>
+                                    <a href="@t.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingLonas">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLonas" aria-expanded="false" aria-controls="collapseLonas">
+                    <i class="bi bi-aspect-ratio me-3 fs-4"></i> Lonas
+                </button>
+            </h2>
+            <div id="collapseLonas" class="accordion-collapse collapse" aria-labelledby="headingLonas" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Lonas</h6>
+                                <p class="text-muted small">Gran Formato</p>
+                                <a href="https://www.dropbox.com/s/rpzm52qypbf6vob/lonas.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingRollups">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRollups" aria-expanded="false" aria-controls="collapseRollups">
+                    <i class="bi bi-distribute-vertical me-3 fs-4"></i> Roll-ups
+                </button>
+            </h2>
+            <div id="collapseRollups" class="accordion-collapse collapse" aria-labelledby="headingRollups" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var rollups = new[] {
+                                                new { Titulo = "Estándar", Medida = "80 x 200 cm", Link = "https://www.dropbox.com/s/1aumgk3msr6pur9/roll-ups-2000x800mm.zip?dl=1" },
+                                                new { Titulo = "Ancho", Medida = "100 x 200 cm", Link = "https://www.dropbox.com/s/2g8c25k5vl8u0et/roll-ups-2000x1000mm.zip?dl=1" },
+                                                new { Titulo = "Extra Ancho", Medida = "120 x 200 cm", Link = "https://www.dropbox.com/s/mif9lrx743fzczg/roll-ups-2000x1200mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var r in rollups)
+                        {
+                            <div class="col-md-4 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@r.Titulo</h6>
+                                    <p class="text-muted small">@r.Medida</p>
+                                    <a href="@r.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingXBanners">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseXBanners" aria-expanded="false" aria-controls="collapseXBanners">
+                    <i class="bi bi-fullscreen me-3 fs-4"></i> X-Banners
+                </button>
+            </h2>
+            <div id="collapseXBanners" class="accordion-collapse collapse" aria-labelledby="headingXBanners" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var xbanners = new[] {
+                                                new { Titulo = "Estándar", Medida = "90 x 200 cm", Link = "https://www.dropbox.com/s/7869f5zv22rjhfh/x-banners-2000x900mm.zip?dl=1" },
+                                                new { Titulo = "Gran Formato", Medida = "120 x 200 cm", Link = "https://www.dropbox.com/s/eo35ji0n5hnyh3l/x-banners-2000x1200mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var x in xbanners)
+                        {
+                            <div class="col-md-6 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@x.Titulo</h6>
+                                    <p class="text-muted small">@x.Medida</p>
+                                    <a href="@x.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingPegatinas">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePegatinas" aria-expanded="false" aria-controls="collapsePegatinas">
+                    <i class="bi bi-tags me-3 fs-4"></i> Pegatinas en Vinilo Blanco
+                </button>
+            </h2>
+            <div id="collapsePegatinas" class="accordion-collapse collapse" aria-labelledby="headingPegatinas" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var pegatinas = new[] {
+                                                new { Dim = "52 x 74 mm", Link = "https://www.dropbox.com/s/2dl0g67i775oc85/pegatinas-en-vinilo-blanco-52x74mm.zip?dl=1" },
+                                                new { Dim = "74 x 105 mm", Link = "https://www.dropbox.com/s/xb980aa8f0m9871/pegatinas-en-vinilo-blanco-74x105mm.zip?dl=1" },
+                                                new { Dim = "85 x 55 mm", Link = "https://www.dropbox.com/s/82k29ropduqw2j0/pegatinas-en-vinilo-blanco-85x55mm.zip?dl=1" },
+                                                new { Dim = "105 x 148 mm", Link = "https://www.dropbox.com/s/rl7ayb2k84i130c/pegatinas-en-vinilo-blanco-105x148mm.zip?dl=1" },
+                                                new { Dim = "148 x 210 mm", Link = "https://www.dropbox.com/s/dlsuy64ljz4jbrl/pegatinas-en-vinilo-blanco-148x210mm.zip?dl=1" },
+                                                new { Dim = "196 x 42 mm", Link = "https://www.dropbox.com/s/6qtdylbfyax2ct7/pegatinas-en-vinilo-blanco-196x42mm.zip?dl=1" },
+                                                new { Dim = "210 x 105 mm", Link = "https://www.dropbox.com/s/i7a8t9wvea962dz/pegatinas-en-vinilo-blanco-210x105mm.zip?dl=1" },
+                                                new { Dim = "50 x 50 mm", Link = "https://www.dropbox.com/s/ofuuhivo91sfuo0/pegatinas-en-vinilo-blanco-50x50mm.zip?dl=1" },
+                                                new { Dim = "74 x 74 mm", Link = "https://www.dropbox.com/s/f9s2kj9v90nhvbr/pegatinas-en-vinilo-blanco-74x74mm.zip?dl=1" },
+                                                new { Dim = "100 x 100 mm", Link = "https://www.dropbox.com/s/i3dl69rzqf7c6v1/pegatinas-en-vinilo-blanco-100x100mm.zip?dl=1" },
+                                                new { Dim = "148 x 148 mm", Link = "https://www.dropbox.com/s/6gn4lxcg1e492vv/pegatinas-en-vinilo-blanco-148x148mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var p in pegatinas)
+                        {
+                            <div class="col-md-3 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-2 text-center">
+                                    <h6 class="fw-bold mb-1 small">@p.Dim</h6>
+                                    <a href="@p.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingVinilosGeneral">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseVinilosGeneral" aria-expanded="false" aria-controls="collapseVinilosGeneral">
+                    <i class="bi bi-layers me-3 fs-4"></i> Vinilos
+                </button>
+            </h2>
+            <div id="collapseVinilosGeneral" class="accordion-collapse collapse" aria-labelledby="headingVinilosGeneral" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-6">
+                            <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                <h6 class="fw-bold mb-1">Vinilos</h6>
+                                <p class="text-muted small">Formato General</p>
+                                <a href="https://www.dropbox.com/s/iuqs3hoas2l5eee/vinilos.zip?dl=1" class="btn btn-outline-primary btn-sm mt-auto">
+                                    <i class="bi bi-download me-1"></i>Descargar ZIP
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingLienzos">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLienzos" aria-expanded="false" aria-controls="collapseLienzos">
+                    <i class="bi bi-palette me-3 fs-4"></i> Lienzos con Foto
+                </button>
+            </h2>
+            <div id="collapseLienzos" class="accordion-collapse collapse" aria-labelledby="headingLienzos" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var lienzos = new[] {
+                                                new { Dim = "20 x 30 cm", Link = "https://www.dropbox.com/s/ckbpg3aajftjsk0/lienzo-20x30cm.zip?dl=1" },
+                                                new { Dim = "30 x 20 cm", Link = "https://www.dropbox.com/s/roc1yusu9w976iu/lienzo-30x20cm.zip?dl=1" },
+                                                new { Dim = "30 x 30 cm", Link = "https://www.dropbox.com/s/lknk8zmctk3xsq3/lienzo-30x30cm.zip?dl=1" },
+                                                new { Dim = "30 x 40 cm", Link = "https://www.dropbox.com/s/5r1ylnmr2tfz8hd/lienzo-30x40cm.zip?dl=1" },
+                                                new { Dim = "40 x 50 cm", Link = "https://www.dropbox.com/s/nkcsx5rc22wwt0h/lienzo-40x50cm.zip?dl=1" },
+                                                new { Dim = "40 x 100 cm", Link = "https://www.dropbox.com/s/3j8ih71c46jpcj1/lienzo-40x100cm.zip?dl=1" },
+                                                new { Dim = "50 x 40 cm", Link = "https://www.dropbox.com/s/0ugo8offec969se/lienzo-50x40cm.zip?dl=1" },
+                                                new { Dim = "50 x 50 cm", Link = "https://www.dropbox.com/s/dq4st91023dqu7o/lienzo-50x50cm.zip?dl=1" },
+                                                new { Dim = "50 x 70 cm", Link = "https://www.dropbox.com/s/oflyhxtqz9hyu5l/lienzo-50x70cm.zip?dl=1" },
+                                                new { Dim = "70 x 50 cm", Link = "https://www.dropbox.com/s/wi2phx4hxyxyj6o/lienzo-70x50cm.zip?dl=1" },
+                                                new { Dim = "70 x 100 cm", Link = "https://www.dropbox.com/s/bmssydartywo0th/lienzo-70x100cm.zip?dl=1" },
+                                                new { Dim = "100 x 40 cm", Link = "https://www.dropbox.com/s/e5q2g2lf5t9i18r/lienzo-100x40cm.zip?dl=1" },
+                                                new { Dim = "100 x 70 cm", Link = "https://www.dropbox.com/s/16ilckwx5k5o74b/lienzo-100x70cm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var l in lienzos)
+                        {
+                            <div class="col-md-3 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-2 text-center">
+                                    <h6 class="fw-bold mb-1 small">@l.Dim</h6>
+                                    <a href="@l.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion-item border-0 mb-2 shadow-sm">
+            <h2 class="accordion-header" id="headingLaminas">
+                <button class="accordion-button collapsed fw-bold text-primary bg-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLaminas" aria-expanded="false" aria-controls="collapseLaminas">
+                    <i class="bi bi-printer me-3 fs-4"></i> Láminas y Prints
+                </button>
+            </h2>
+            <div id="collapseLaminas" class="accordion-collapse collapse" aria-labelledby="headingLaminas" data-bs-parent="#accordionPlantillas">
+                <div class="accordion-body bg-light">
+                    <div class="row g-3">
+                        @{
+                            var laminas = new[] {
+                                                new { Titulo = "A6", Medida = "148 x 105 mm", Link = "https://www.dropbox.com/s/2sh648k4efj5o3w/laminas-prints-a6-148x105mm.zip?dl=1" },
+                                                new { Titulo = "A5", Medida = "210 x 148 mm", Link = "https://www.dropbox.com/s/9cwfh54a9x5d2tt/laminas-prints-a5-210x148mm.zip?dl=1" },
+                                                new { Titulo = "A4", Medida = "297 x 210 mm", Link = "https://www.dropbox.com/s/qemw8elkb77cv0n/laminas-prints-a4-297x210mm.zip?dl=1" },
+                                                new { Titulo = "A3", Medida = "420 x 297 mm", Link = "https://www.dropbox.com/s/v3jeiitll9gbxz5/laminas-prints-a3-420x297mm.zip?dl=1" },
+                                                new { Titulo = "Cuadrado", Medida = "150 x 150 mm", Link = "https://www.dropbox.com/s/8b57w6hqy7he3r2/laminas-prints-150x150mm.zip?dl=1" },
+                                                new { Titulo = "Cuadrado", Medida = "210 x 210 mm", Link = "https://www.dropbox.com/s/ezjb5fr34n9j1pu/laminas-prints-210x210mm.zip?dl=1" },
+                                                new { Titulo = "Cuadrado", Medida = "300 x 300 mm", Link = "https://www.dropbox.com/s/wfuy2j0t3bcaqld/laminas-prints-300x300mm.zip?dl=1" }
+                                                };
+                        }
+                        @foreach (var lam in laminas)
+                        {
+                            <div class="col-md-3 col-6">
+                                <div class="card h-100 border-0 shadow-sm p-3 text-center">
+                                    <h6 class="fw-bold mb-0">@lam.Titulo</h6>
+                                    <p class="text-muted small">@lam.Medida</p>
+                                    <a href="@lam.Link" class="btn btn-outline-primary btn-sm mt-auto">
+                                        <i class="bi bi-download me-1"></i>Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        </div>
+
+
+
+    </div>

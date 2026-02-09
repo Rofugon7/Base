@@ -1061,3 +1061,22 @@ footer {
 .dropdown-submenu .dropdown-toggle::after {
     display: none; /* Quitamos la flecha por defecto de Bootstrap */
 }
+
+.accordion-button:not(.collapsed) {
+    background-color: #ffffff !important;
+    color: #0d6efd !important;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+}
+
+.accordion-item {
+    border-radius: 10px !important;
+    overflow: hidden;
+}
+
+.accordion-button::after {
+    background-size: 1.2rem;
+}

@@ -92,7 +92,11 @@
                             <ul class="dropdown-menu shadow border-0" style="min-width: 250px;" aria-labelledby="adminDropdown">
                                 <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Ventas e Inventario</h6></li>
                                 <li><a class="dropdown-item py-2" asp-controller="Pedidos" asp-action="Gestion"><i class="bi bi-cart-check me-2 text-secondary"></i> Pedidos</a></li>
-                                <li><a class="dropdown-item py-2" asp-controller="Tiendas" asp-action="Index"><i class="bi bi-shop me-2 text-secondary"></i> Tiendas</a></li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Home" asp-action="ListadoPresupuestos">
+                                        <i class="bi bi-clipboard-check me-2 text-secondary"></i> Presupuestos
+                                    </a>
+                                </li>
                                 <li><a class="dropdown-item py-2" asp-controller="Productos" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
 
                                 <li><hr class="dropdown-divider"></li>
@@ -109,6 +113,7 @@
                                         <i class="bi bi-gear-fill me-2 text-secondary"></i> Configurar Servidor Correo
                                     </a>
                                 </li>
+                                <li><a class="dropdown-item py-2" asp-controller="Tiendas" asp-action="Index"><i class="bi bi-shop me-2 text-secondary"></i> Tiendas</a></li>
                             </ul>
                         </li>
                     }
