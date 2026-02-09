@@ -24,11 +24,12 @@
 
     <div class="d-flex justify-content-end gap-3">
         <button class="btn btn-link text-muted" onclick="vaciarCarrito()">Vaciar carrito</button>
-        <form asp-controller="Checkout" asp-action="Confirmar" method="post">
-            <button type="submit" id="btn-finalizar" class="btn btn-success btn-lg px-5 rounded-pill fw-bold shadow-sm" style="display:none;">
-                Finalizar pedido <i class="fa-solid fa-chevron-right ms-2"></i>
-            </button>
-        </form>
+
+        <a asp-controller="Checkout" asp-action="Index" id="btn-finalizar"
+           class="btn btn-success btn-lg px-5 rounded-pill fw-bold shadow-sm"
+           style="display:none;">
+            Finalizar pedido <i class="fa-solid fa-chevron-right ms-2"></i>
+        </a>
     </div>
 </div>
 

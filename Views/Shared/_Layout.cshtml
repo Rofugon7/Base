@@ -190,17 +190,30 @@
 
     <script>
         // Función para actualizar el badge visualmente
-        function actualizarContadorCarrito() {
+                function actualizarContadorCarrito() {
             fetch('/carrito/cantidad')
-                .then(res => res.json())
+                .then(response => {
+                    if (!response.ok) throw new Error("Error en red");
+                    return response.json();
+                })
                 .then(data => {
                     const badge = document.getElementById('cart-badge');
                     if (badge) {
-                        badge.innerText = data.total;
-                        badge.style.display = (data.total > 0) ? 'inline-block' : 'none';
+                        // Intentamos leer 'total' o 'Total' por si acaso
+                        const cantidad = data.total !== undefined ? data.total : data.Total;
+
+                        badge.innerText = cantidad;
+
+                        // Forzamos la visibilidad si hay más de 0
+                        if (cantidad > 0) {
+                            badge.setAttribute("style", "display: inline-block !important;");
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                        console.log("Contador actualizado a:", cantidad);
                     }
                 })
-                .catch(err => console.error("Error actualizando contador:", err));
+                .catch(err => console.error("Fallo al actualizar badge:", err));
         }
 
         // Función para mostrar notificaciones Toast

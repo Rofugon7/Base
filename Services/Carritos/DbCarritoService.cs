@@ -110,13 +110,38 @@ namespace BaseConLogin.Services.Carritos
             }
         }
 
+
         public async Task LimpiarCarritoAsync(int tiendaId)
         {
-            // Asumiendo que usas Session y una clave basada en el tiendaId
-            string sessionKey = $"Carrito_{tiendaId}";
-            _httpContextAccessor.HttpContext.Session.Remove(sessionKey);
-            await Task.CompletedTask;
+            // 1. Obtenemos el usuario actual
+            var userId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+
+            // 2. Buscamos el ID del carrito en la base de datos para este usuario y tienda
+            var carritoId = await _context.Carritos // Asumiendo que tu tabla se llama Carritos o CarritosPersistentes
+                .IgnoreQueryFilters()
+                .Where(c => c.UserId == userId && c.TiendaId == tiendaId)
+                .Select(c => c.Id)
+                .FirstOrDefaultAsync();
+
+            if (carritoId > 0)
+            {
+                // 3. Borramos los items usando ese ID
+                var items = await _context.CarritoItems
+                    .IgnoreQueryFilters()
+                    .Where(i => i.CarritoPersistenteId == carritoId) // O el nombre que use tu FK
+                    .ToListAsync();
+
+                if (items.Any())
+                {
+                    _context.CarritoItems.RemoveRange(items);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            // 4. Limpiar rastro en la sesión
+            _httpContextAccessor.HttpContext?.Session.Remove("Carrito");
         }
+
 
         public async Task<CarritoSession> ObtenerCarritoAsync(int tiendaId)
         {

@@ -31,6 +31,9 @@ public class CheckoutController : Controller
     [HttpGet("")]
     public async Task<IActionResult> Index()
     {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
         var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
         var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
 
@@ -39,8 +42,13 @@ public class CheckoutController : Controller
 
         var model = new CheckoutViewModel
         {
+            TiendaId = tiendaId,
             Carrito = carrito,
-            TiendaId = tiendaId // <-- ESTO ES VITAL: Asignarlo aquí para que la vista lo reciba
+            NombreCompleto = user.NombreCompleto,
+            Direccion = user.Direccion,
+            Ciudad = user.Ciudad,
+            CodigoPostal = user.CodigoPostal,
+            Telefono = user.TelefonoContacto
         };
         return View(model);
     }
