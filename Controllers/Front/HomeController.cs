@@ -272,6 +272,11 @@ namespace BaseConLogin.Controllers.Front
                 .ToListAsync();
             return View(presupuestos);
         }
+        [HttpGet("Home/QuienesSomos")]
+        public IActionResult QuienesSomos()
+        {
+            return View();
+        }
 
         // Detalle del presupuesto (GET: Home/DetallePresupuesto/5)
         [HttpGet("Home/DetallePresupuesto/{id}")]

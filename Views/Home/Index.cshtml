@@ -230,24 +230,42 @@
                             <div class="col-md-3 col-6">
                                 <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">La empresa</h6>
                                 <ul class="list-unstyled opacity-75 small">
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Quienes somos</a></li>
-                                    <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contacto</a></li>
+                                    <li class="nav-item">
+                                        <a class="text-white-50 text-decoration-none" asp-controller="Home" asp-action="QuienesSomos">Conócenos</a>
+                                    </li>
+                                    <li class="nav-item"><a class="text-white-50 text-decoration-none" asp-controller="Contact" asp-action="Index">Contacto</a></li>
                                 </ul>
                             </div>
 
                             <div class="col-md-5 col-12">
                                 <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Contacto</h6>
                                 <ul class="list-unstyled opacity-75 small mb-4">
-                                    <li class="mb-2"><i class="bi bi-telephone me-2"></i>913 758 045</li>
-                                    <li class="mb-2"><i class="bi bi-envelope me-2"></i>info@prenta.es</li>
-                                    <li class="mb-2"><i class="bi bi-geo-alt me-2"></i>Calle de Oñate, 18 · Madrid</li>
+                                    <li class="mb-2">
+                                        <a href="tel:+34913758045" class="text-decoration-none text-reset hover-link-contact">
+                                            <i class="bi bi-telephone me-2 text-primary"></i>913 758 045
+                                        </a>
+                                    </li>
+
+                                    <li class="mb-2">
+                                        <a href="mailto:info@prenta.es" class="text-decoration-none text-reset hover-link-contact">
+                                            <i class="bi bi-envelope me-2 text-primary"></i>info@prenta.es
+                                        </a>
+                                    </li>
+
+                                    <li class="mb-2">
+                                        <a href="https://www.google.com/maps/search/?api=1&query=Calle+de+Oñate+18+28020+Madrid"
+                                           target="_blank"
+                                           class="text-decoration-none text-reset hover-link-contact">
+                                            <i class="bi bi-geo-alt me-2 text-primary"></i>Calle de Oñate, 18 · Madrid
+                                        </a>
+                                    </li>
                                 </ul>
 
                                 <h6 class="fw-bold text-uppercase mb-3 small" style="letter-spacing: 1px;">Síguenos</h6>
                                 <div class="d-flex gap-2">
-                                    <a href="#" class="social-icon"><i class="bi bi-instagram"></i></a>
-                                    <a href="#" class="social-icon"><i class="bi bi-facebook"></i></a>
-                                    <a href="#" class="social-icon"><i class="bi bi-twitter-x"></i></a>
+                                    <a href="https://instagram.com/PRENTAes" class="social-icon"><i class="bi bi-instagram"></i></a>
+                                    <a href="https://facebook.com/PRENTAes" class="social-icon"><i class="bi bi-facebook"></i></a>
+                                    <a href="https://twitter.com/PRENTAes" class="social-icon"><i class="bi bi-twitter-x"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -257,3 +275,11 @@
         </div>
     </div>
 </div>
+
+<style>
+    /* Efecto sutil al pasar el ratón */
+    .hover-link-contact:hover {
+        color: #0d6efd !important; /* Color primario de Bootstrap */
+        transition: 0.2s;
+    }
+</style>
