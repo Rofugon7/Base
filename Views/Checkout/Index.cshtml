@@ -21,6 +21,11 @@
                             <span asp-validation-for="NombreCompleto" class="text-danger small"></span>
                         </div>
                         <div class="col-12">
+                            <label class="form-label">DNI / NIF</label>
+                            <input asp-for="DniCif" class="form-control bg-light" readonly />
+                            <div class="form-text" style="font-size: 0.7rem;">Para cambios, edita tu perfil.</div>
+                        </div>
+                        <div class="col-12">
                             <label class="form-label">Dirección de Envío</label>
                             <input asp-for="Direccion" class="form-control" placeholder="Calle Ejemplo 123" />
                             <span asp-validation-for="Direccion" class="text-danger small"></span>

@@ -4,6 +4,7 @@ using BaseConLogin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaseConLogin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260210183515_AddNifToPedido")]
+    partial class AddNifToPedido
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -272,22 +275,8 @@ namespace BaseConLogin.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("EsRectificativa")
-                        .HasColumnType("bit");
-
-                    b.Property<int?>("FacturaOriginalId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("FechaEmision")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("HashActual")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("HashAnterior")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("HashCertificado")
                         .IsRequired()
@@ -295,10 +284,6 @@ namespace BaseConLogin.Migrations
 
                     b.Property<decimal>("IvaPorcentaje")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("MotivoRectificacion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NombreCliente")
                         .IsRequired()
@@ -322,8 +307,6 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FacturaOriginalId");
 
                     b.HasIndex("PedidoId");
 
@@ -975,17 +958,11 @@ namespace BaseConLogin.Migrations
 
             modelBuilder.Entity("BaseConLogin.Models.Factura", b =>
                 {
-                    b.HasOne("BaseConLogin.Models.Factura", "FacturaOriginal")
-                        .WithMany()
-                        .HasForeignKey("FacturaOriginalId");
-
                     b.HasOne("BaseConLogin.Models.Pedido", "Pedido")
                         .WithMany()
                         .HasForeignKey("PedidoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FacturaOriginal");
 
                     b.Navigation("Pedido");
                 });

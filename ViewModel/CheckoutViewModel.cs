@@ -27,5 +27,8 @@ namespace BaseConLogin.Models.ViewModels
         public string CodigoPostal { get; set; }
 
         public int TiendaId { get; set; } // Añade esta propiedad
+
+        [Required(ErrorMessage = "El Dni/Cif es obligatorio")]
+        public string DniCif { get; set; }
     }
 }

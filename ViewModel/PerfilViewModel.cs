@@ -24,5 +24,9 @@ namespace BaseConLogin.Models.ViewModels
         [Phone]
         [Display(Name = "Teléfono de Contacto")]
         public string? TelefonoContacto { get; set; }
+
+        [Required(ErrorMessage = "El Dni/Cif es obligatorio")]
+        [Display(Name = "Dni/Cif")]
+        public string DniCif { get; set; }
     }
 }

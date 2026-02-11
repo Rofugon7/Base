@@ -48,6 +48,9 @@ namespace BaseConLogin.Data
         public DbSet<ConfiguracionEmail> ConfiguracionEmails { get; set; }
         public DbSet<Presupuesto> Presupuestos { get; set; }
 
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<FacturaLinea> FacturaLineas { get; set; }
+
 
         // =========================
         // Model configuration

@@ -4,6 +4,7 @@ using BaseConLogin.Models.ViewModels;
 using BaseConLogin.Services.Seo;
 using BaseConLogin.Services.Tiendas;
 using BaseConLogin.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -321,6 +322,28 @@ namespace BaseConLogin.Controllers.Front
             }
             return RedirectToAction(nameof(DetallePresupuesto), new { id = id });
         }
+
+        [HttpGet("Home/Cookies")]
+        [AllowAnonymous]
+        public IActionResult Cookies()
+        {
+            return View();
+        }
+
+        [HttpGet("Home/Privacidad")]
+        [AllowAnonymous]
+        public IActionResult Privacidad()
+        {
+            return View();
+        }
+
+        [HttpGet("Home/CondicionesGenerales")]
+        [AllowAnonymous]
+        public IActionResult CondicionesGenerales()
+        {
+            return View();
+        }
+        
 
     }
 }

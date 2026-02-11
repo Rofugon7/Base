@@ -33,6 +33,7 @@ namespace BaseConLogin.Services.Pedidos
                     Ciudad = datosEnvio.Ciudad,
                     CodigoPostal = datosEnvio.CodigoPostal,
                     Telefono = datosEnvio.Telefono,
+                    DniCif = datosEnvio.DniCif,
                     Items = new List<PedidoItem>()
                 };
 

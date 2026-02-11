@@ -1,4 +1,6 @@
-﻿namespace BaseConLogin.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace BaseConLogin.Models
 {
     public class Pedido
     {
@@ -23,5 +25,8 @@
         public DateTime? FechaFinalizacion { get; set; }
 
         public ICollection<PedidoItem> Items { get; set; }
+        
+        [Required]
+        public string DniCif { get; set; }
     }
 }

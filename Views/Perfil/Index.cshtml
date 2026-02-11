@@ -29,6 +29,12 @@
                                 <span asp-validation-for="NombreCompleto" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label asp-for="DniCif" class="form-label fw-bold"></label>
+                                <input asp-for="DniCif" class="form-control" placeholder="Ej: 00000000X" />
+                                <span asp-validation-for="DniCif" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
                                 <label asp-for="Email" class="form-label fw-bold"></label>
                                 <input asp-for="Email" class="form-control bg-light" readonly />
                             </div>

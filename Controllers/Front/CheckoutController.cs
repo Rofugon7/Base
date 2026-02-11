@@ -45,6 +45,7 @@ public class CheckoutController : Controller
             TiendaId = tiendaId,
             Carrito = carrito,
             NombreCompleto = user.NombreCompleto,
+            DniCif = user.NifCif,
             Direccion = user.Direccion,
             Ciudad = user.Ciudad,
             CodigoPostal = user.CodigoPostal,

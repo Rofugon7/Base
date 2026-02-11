@@ -254,5 +254,44 @@
     </script>
 
     @RenderSection("Scripts", required: false)
+
+    <div id="cookie-banner" class="fixed-bottom bg-light border-top shadow-lg p-4 d-none" style="z-index: 9999;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h5 class="fw-bold text-danger">NO TRAFICAMOS CON TUS DATOS</h5>
+                    <p class="small text-muted mb-0">
+                        Para ofrecer las mejores experiencias, utilizamos tecnologías como las cookies para almacenar y/o acceder a la información del dispositivo. El consentimiento de estas tecnologías nos permitirá procesar datos como el comportamiento de navegación o las identificaciones únicas en este sitio. No consentir o retirar el consentimiento, puede afectar negativamente a ciertas características y funciones.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <button id="btn-aceptar-cookies" class="btn btn-danger btn-sm me-2">Aceptar</button>
+                    <button id="btn-denegar-cookies" class="btn btn-outline-secondary btn-sm">Denegar</button>
+                    <div class="mt-2">
+                        <a asp-controller="Home" asp-action="Cookies" class="small text-decoration-none me-3">Política de Cookies</a>
+                        <a asp-controller="Home" asp-action="Privacidad" class="small text-decoration-none">Política de Privacidad</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            if (!localStorage.getItem("cookiesAceptadas")) {
+                document.getElementById("cookie-banner").classList.remove("d-none");
+            }
+
+            document.getElementById("btn-aceptar-cookies").addEventListener("click", function () {
+                localStorage.setItem("cookiesAceptadas", "true");
+                document.getElementById("cookie-banner").classList.add("d-none");
+            });
+
+            document.getElementById("btn-denegar-cookies").addEventListener("click", function () {
+                localStorage.setItem("cookiesAceptadas", "false");
+                document.getElementById("cookie-banner").classList.add("d-none");
+            });
+        });
+    </script>
 </body>
 </html>

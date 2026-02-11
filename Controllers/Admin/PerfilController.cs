@@ -28,6 +28,7 @@ namespace BaseConLogin.Controllers.Admin
                 Email = user.Email ?? "",
                 Direccion = user.Direccion,
                 Ciudad = user.Ciudad,
+                DniCif = user.NifCif,
                 CodigoPostal = user.CodigoPostal,
                 TelefonoContacto = user.TelefonoContacto ?? user.PhoneNumber
             };
@@ -49,6 +50,7 @@ namespace BaseConLogin.Controllers.Admin
             user.Direccion = model.Direccion;
             user.Ciudad = model.Ciudad;
             user.CodigoPostal = model.CodigoPostal;
+            user.NifCif = model.DniCif;
             user.TelefonoContacto = model.TelefonoContacto;
             user.PhoneNumber = model.TelefonoContacto; // Sincronizamos con el campo base de Identity
 

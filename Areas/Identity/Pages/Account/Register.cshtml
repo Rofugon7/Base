@@ -18,6 +18,11 @@
                 <span asp-validation-for="Input.NombreCompleto" class="text-danger"></span>
             </div>
             <div class="form-floating mb-3">
+                <input asp-for="Input.NifCif" class="form-control" aria-required="true" placeholder="00000000X" />
+                <label asp-for="Input.NifCif">NIF/CIF</label>
+                <span asp-validation-for="Input.NifCif" class="text-danger"></span>
+            </div>
+            <div class="form-floating mb-3">
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label asp-for="Input.Email">Email</label>
                 <span asp-validation-for="Input.Email" class="text-danger"></span>

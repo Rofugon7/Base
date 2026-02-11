@@ -1,0 +1,142 @@
+﻿@model BaseConLogin.Models.Factura
+@{
+    ViewData["Title"] = "Factura " + Model.NumeroFactura;
+    Layout = "_Layout"; // O usa un layout limpio sin menús para imprimir
+}
+
+<div class="container my-5" id="factura-print">
+    <div class="card shadow-sm border-0 p-5">
+        <div class="row mb-4">
+            <div class="col-6">
+                <h2 class="fw-bold text-primary">PRENTA.es</h2>
+                <p class="text-muted small">
+                    <strong>Copias Orense S.L.</strong><br />
+                    CIF: B78035599<br />
+                    Calle de Oñate 18, 28020 Madrid<br />
+                    admon@copor.es
+                </p>
+            </div>
+            @if (Model.EsRectificativa)
+            {
+                <div class="alert alert-warning border-2 border-warning">
+                    <h5 class="mb-0 fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>FACTURA RECTIFICATIVA</h5>
+                    <p class="small mb-0">Esta factura rectifica a la factura número: <strong>@Model.FacturaOriginal?.NumeroFactura</strong></p>
+                    <p class="small mb-0">Motivo: @Model.MotivoRectificacion</p>
+                </div>
+            }
+            <div class="col-6 text-end">
+                <h3 class="text-uppercase text-secondary">Factura</h3>
+                <p class="mb-0"><strong>Número:</strong> @Model.NumeroFactura</p>
+                <p class="mb-0"><strong>Fecha:</strong> @Model.FechaEmision.ToString("dd/MM/yyyy")</p>
+                <p><strong>Ref. Pedido:</strong> #@Model.PedidoId</p>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row my-4">
+            <div class="col-12">
+                <h6 class="text-uppercase text-muted border-bottom pb-2">Datos del Cliente</h6>
+                <div class="col-6">
+                    <p class="mb-1"><strong>Nombre/Razón Social:</strong> @Model.NombreCliente</p>
+                    <p class="mb-1"><strong>NIF / CIF:</strong> <span class="badge bg-light text-dark border">@Model.DniCie</span></p>
+                </div>
+                <p class="mb-1"><strong>Dirección:</strong> @Model.DireccionFacturacion</p>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead class="bg-light">
+                <tr>
+                    <th>Descripción</th>
+                    <th class="text-center">Cant.</th>
+                    <th class="text-end">Precio Unit.</th>
+                    <th class="text-end">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var linea in Model.Lineas)
+                {
+                    <tr>
+                        <td>@linea.Descripcion</td>
+                        <td class="text-center">@linea.Cantidad</td>
+                        <td class="text-end">@linea.PrecioUnitario.ToString("N2")€</td>
+                        <td class="text-end">@linea.Subtotal.ToString("N2")€</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="row mt-5 align-items-end">
+            <div class="col-7">
+                <div class="p-3 border bg-light d-flex align-items-center" style="width: fit-content;">
+                    <div class="bg-white border p-1 me-3">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=https://www.prenta.es/verify/@Model.HashCertificado" alt="QR Verifactu" />
+                    </div>
+                    <div class="small">
+                        <p class="mb-0 fw-bold">Registro Verifactu</p>
+                        <p class="mb-0 text-muted" style="font-size: 0.7rem;">Huella: @Model.HashCertificado</p>
+                    </div>
+                </div>
+                <div class="mt-3 p-2 bg-light border-start border-4 border-primary">
+                    <p class="mb-0 small" style="font-family: monospace; font-size: 0.65rem;">
+                        <strong>HUELLA DIGITAL VERI*FACTU:</strong><br />
+                        @(Model.HashActual ?? "Pendiente de firma")
+                    </p>
+                    <p class="mb-0 small text-muted" style="font-size: 0.6rem;">
+                        @if (!string.IsNullOrEmpty(Model.HashAnterior) && Model.HashAnterior.Length >= 8)
+                        {
+                            <span>Hash Anterior: @Model.HashAnterior.Substring(0, 8)...</span>
+                        }
+                        else
+                        {
+                            <span>Hash Anterior: @(Model.HashAnterior ?? "N/A")</span>
+                        }
+                    </p>
+                </div>
+            </div>
+            <div class="col-5">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="text-end">Base Imponible:</td>
+                        <td class="text-end">@Model.BaseImponible.ToString("N2")€</td>
+                    </tr>
+                    <tr>
+                        <td class="text-end">IVA (@Model.IvaPorcentaje%):</td>
+                        <td class="text-end">@Model.TotalIva.ToString("N2")€</td>
+                    </tr>
+                    <tr class="border-top">
+                        <td class="text-end fw-bold fs-5">TOTAL:</td>
+                        <td class="text-end fw-bold fs-5 text-primary">@Model.TotalFactura.ToString("N2")€</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 no-print">
+        <button onclick="window.print();" class="btn btn-primary px-5">
+            <i class="bi bi-printer me-2"></i> Imprimir o Guardar como PDF
+        </button>
+    </div>
+</div>
+
+<style>
+    @@media print {
+        .no-print, .navbar, footer {
+            display: none !important;
+        }
+
+        .container {
+            max-width: 100% !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .card {
+            border: none !important;
+            shadow: none !important;
+        }
+    }
+</style>

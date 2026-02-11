@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace BaseConLogin.Models
 {
@@ -9,5 +10,7 @@ namespace BaseConLogin.Models
         public string? Ciudad { get; set; }
         public string? CodigoPostal { get; set; }
         public string? TelefonoContacto { get; set; }
+        [Display(Name = "NIF / CIF")]
+        public string? NifCif { get; set; }
     }
 }

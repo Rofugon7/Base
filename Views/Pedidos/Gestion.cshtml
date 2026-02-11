@@ -5,6 +5,7 @@
 }
 
 <div class="container-fluid py-4">
+    @* --- ENCABEZADO Y MÉTRICAS --- *@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-gear-fill me-2"></i>Panel de Ventas</h2>
         <span class="badge bg-secondary fs-6">@Model.Count() pedidos encontrados</span>
@@ -17,57 +18,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
-    <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-success text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="mb-1 opacity-75">Ventas Finalizadas</p>
-                            <h3 class="fw-bold">@ViewBag.TotalVentas.ToString("C")</h3>
-                        </div>
-                        <div class="fs-1 opacity-50">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+    }
 
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-dark text-white">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="mb-1 opacity-75">Promedio de Entrega</p>
-                            <h3 class="fw-bold">@ViewBag.TiempoPromedio h</h3>
-                        </div>
-                        <div class="fs-1 opacity-50">
-                            <i class="bi bi-stopwatch"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-warning text-dark">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="mb-1 opacity-75">Por gestionar</p>
-                            <h3 class="fw-bold">@Model.Count(p => p.Estado == EstadoPedido.Pagado)</h3>
-                        </div>
-                        <div class="fs-1 opacity-50">
-                            <i class="bi bi-box-seam"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    @* --- FILTROS DE BÚSQUEDA --- *@
     <div class="card shadow-sm border-0 mb-4 bg-light">
         <div class="card-body">
             <form method="get" asp-action="Gestion" class="row g-3 align-items-end">
@@ -75,33 +34,29 @@
                     <label class="form-label small fw-bold">Buscar Cliente</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                        <input type="text" name="buscarNombre" value="@ViewBag.NombreActual" class="form-control" placeholder="Ej: Juan Pérez...">
+                        <input type="text" name="buscarNombre" value="@ViewBag.NombreActual" class="form-control" placeholder="Nombre del cliente...">
                     </div>
                 </div>
-
                 <div class="col-md-3">
                     <label class="form-label small fw-bold">Estado</label>
                     <select name="filtrarEstado" class="form-select">
                         <option value="">Todos los estados</option>
-                        <option value="@EstadoPedido.Pagado" selected='@(ViewBag.EstadoActual == EstadoPedido.Pagado)'>@EstadoPedido.Pagado</option>
-                        <option value="@EstadoPedido.Enviado" selected='@(ViewBag.EstadoActual == EstadoPedido.Enviado)'>@EstadoPedido.Enviado</option>
-                        <option value="@EstadoPedido.Finalizado" selected='@(ViewBag.EstadoActual == EstadoPedido.Finalizado)'>@EstadoPedido.Finalizado</option>
-                        <option value="@EstadoPedido.Cancelado" selected='@(ViewBag.EstadoActual == EstadoPedido.Cancelado)'>@EstadoPedido.Cancelado</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Pagado">Pagado</option>
+                        <option value="Enviado">Enviado</option>
+                        <option value="Finalizado">Finalizado</option>
+                        <option value="Cancelado">Cancelado</option>
                     </select>
                 </div>
-
                 <div class="col-md-5 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary px-4">
-                        <i class="bi bi-filter"></i> Filtrar
-                    </button>
-                    <a asp-action="Gestion" class="btn btn-outline-secondary px-4">
-                        <i class="bi bi-arrow-clockwise"></i> Limpiar
-                    </a>
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-filter"></i> Filtrar</button>
+                    <a asp-action="Gestion" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-clockwise"></i> Limpiar</a>
                 </div>
             </form>
         </div>
     </div>
 
+    @* --- TABLA DE PEDIDOS --- *@
     <div class="card shadow border-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -109,17 +64,18 @@
                     <tr>
                         <th>ID</th>
                         <th>Cliente</th>
-                        <th>Fecha Pedido</th>
+                        <th>Fecha</th>
                         <th>Total</th>
-                        <th>Estado</th>
-                        <th>Acción</th>
-                        <th>Entrega</th> @* Nueva columna de métrica *@
-                        <th class="text-end">Detalle</th>
+                        <th>Estado Actual</th>
+                        <th class="text-center">Acción Siguiente</th>
+                        <th class="text-end">Documentos / Detalles</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var p in Model)
                     {
+                        var esFacturado = ((HashSet<int>)ViewBag.PedidosFacturados).Contains(p.Id);
+
                         <tr>
                             <td><strong>#@p.Id</strong></td>
                             <td>
@@ -130,53 +86,84 @@
                             <td class="fw-bold">@p.Total.ToString("C")</td>
                             <td>
                                 <span class="badge @(p.Estado == EstadoPedido.Finalizado ? "bg-dark" :
-                                                                                          p.Estado == EstadoPedido.Enviado ? "bg-primary" :
-                                                                                          p.Estado == EstadoPedido.Pagado ? "bg-success" :
-                                                                                          p.Estado == EstadoPedido.Cancelado ? "bg-danger" : "bg-warning text-dark")">
+                                                                                         p.Estado == EstadoPedido.Enviado ? "bg-primary" :
+                                                                                         p.Estado == EstadoPedido.Pagado ? "bg-success" :
+                                                                                         p.Estado == EstadoPedido.Cancelado ? "bg-danger" : "bg-warning text-dark")">
                                     @p.Estado
                                 </span>
                             </td>
-                            <td>
+
+                            @* --- LÓGICA DE FLUJO DE ESTADOS --- *@
+                            <td class="text-center">
                                 @if (p.Estado != EstadoPedido.Finalizado && p.Estado != EstadoPedido.Cancelado)
                                 {
-                                    <form asp-action="CambiarEstado" method="post" class="d-flex gap-1">
-                                        <input type="hidden" name="id" value="@p.Id" />
-                                        @* Mantener filtros tras post *@
-                                        <input type="hidden" name="buscarNombre" value="@ViewBag.NombreActual" />
-                                        <input type="hidden" name="filtrarEstado" value="@ViewBag.EstadoActual" />
+                                    <div class="btn-group shadow-sm">
+                                        @if (p.Estado == EstadoPedido.Pendiente)
+                                        {
+                                            <form asp-action="CambiarEstado" method="post">
+                                                <input type="hidden" name="id" value="@p.Id" />
+                                                <input type="hidden" name="nuevoEstado" value="Pagado" />
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-cash-stack"></i> Marcar Pagado
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (p.Estado == EstadoPedido.Pagado)
+                                        {
+                                            <form asp-action="CambiarEstado" method="post">
+                                                <input type="hidden" name="id" value="@p.Id" />
+                                                <input type="hidden" name="nuevoEstado" value="Enviado" />
+                                                <button type="submit" class="btn btn-sm btn-info text-white">
+                                                    <i class="bi bi-truck"></i> Marcar Enviado
+                                                </button>
+                                            </form>
+                                        }
+                                        else if (p.Estado == EstadoPedido.Enviado)
+                                        {
+                                            <form asp-action="CambiarEstado" method="post">
+                                                <input type="hidden" name="id" value="@p.Id" />
+                                                <input type="hidden" name="nuevoEstado" value="Finalizado" />
+                                                <button type="submit" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-check-all"></i> Finalizar
+                                                </button>
+                                            </form>
+                                        }
 
-                                        <select name="nuevoEstado" class="form-select form-select-sm" style="width: 130px;">
-                                            <option value="@EstadoPedido.Pagado" selected="@(p.Estado == EstadoPedido.Pagado)">Pagado</option>
-                                            <option value="@EstadoPedido.Enviado" selected="@(p.Estado == EstadoPedido.Enviado)">Enviado</option>
-                                            <option value="@EstadoPedido.Finalizado">Finalizado</option>
-                                            <option value="@EstadoPedido.Cancelado">Cancelado</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Ok</button>
-                                    </form>
+                                        @* Botón Cancelar siempre disponible *@
+                                        <button type="button" class="btn btn-sm btn-outline-danger btn-rectificar"
+                                                data-id="@p.Id"
+                                                data-facturado="@esFacturado.ToString().ToLower()">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <small class="text-muted"><i class="bi bi-lock-fill"></i> Completado</small>
+                                    <small class="text-muted">Proceso completado</small>
                                 }
                             </td>
-                            <td>
-                                @if (p.FechaFinalizacion.HasValue)
-                                {
-                                    var diff = p.FechaFinalizacion.Value - p.Fecha;
-                                    <small class="text-muted">
-                                        <i class="bi bi-clock-history"></i>
-                                        @(diff.Days > 0 ? $"{diff.Days}d " : "") @(diff.Hours)h @(diff.Minutes)m
-                                    </small>
-                                }
-                                else
-                                {
-                                    <span class="text-muted small">---</span>
-                                }
-                            </td>
+
+                            @* --- DOCUMENTOS Y ACCIONES --- *@
                             <td class="text-end">
-                                <a asp-action="Detalle" asp-route-id="@p.Id" class="btn btn-sm btn-light border shadow-sm">
-                                    <i class="bi bi-eye"></i>
-                                </a>
+                                <div class="btn-group">
+                                    @if (esFacturado)
+                                    {
+                                        <a asp-action="DescargarFactura" asp-route-id="@p.Id" asp-route-esRectificativa="false"
+                                           class="btn btn-sm btn-outline-dark" title="Factura Original">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+                                        @if (p.Estado == EstadoPedido.Cancelado)
+                                        {
+                                            <a asp-action="DescargarFactura" asp-route-id="@p.Id" asp-route-esRectificativa="true"
+                                               class="btn btn-sm btn-outline-danger" title="Factura Rectificativa">
+                                                <i class="bi bi-file-earmark-minus"></i>
+                                            </a>
+                                        }
+                                    }
+                                    <a asp-action="Detalle" asp-route-id="@p.Id" class="btn btn-sm btn-light border">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -185,3 +172,89 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalRectificarGlobal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="RectificarFactura" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="modalTitle">Cancelar Pedido</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="idPedido" id="modalIdPedido" />
+
+                    <p id="modalMessage">Vas a cancelar el pedido <strong id="displayIdPedido">#0</strong>.</p>
+
+                    <div id="seccionMotivo">
+                        <label class="form-label fw-bold">Motivo:</label>
+                        <select name="motivo" class="form-select" required>
+                            <option value="Cancelación de pedido">Cancelación de pedido</option>
+                            <option value="Devolución de mercancía">Devolución de mercancía</option>
+                            <option value="Error en datos del cliente">Error en datos del cliente</option>
+                            <option value="Error en precios o productos">Error en precios o productos</option>
+                        </select>
+                        <small class="text-muted" id="helperText"></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-danger" id="btnConfirmar">Confirmar Cancelación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const modalEl = document.getElementById('modalRectificarGlobal');
+            if (modalEl) {
+                const modalRect = new bootstrap.Modal(modalEl);
+                document.querySelectorAll('.btn-rectificar').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.getAttribute('data-id');
+                        document.getElementById('modalIdPedido').value = id;
+                        document.getElementById('displayIdPedido').innerText = '#' + id;
+                        modalRect.show();
+                    });
+                });
+            }
+        });
+
+                document.querySelectorAll('.btn-rectificar').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const tieneFactura = this.getAttribute('data-facturado') === "true"; // Viene de la tabla
+
+                // Referencias a elementos del modal
+                const modalTitle = document.getElementById('modalTitle');
+                const modalMessage = document.getElementById('modalMessage');
+                const helperText = document.getElementById('helperText');
+                const btnConfirmar = document.getElementById('btnConfirmar');
+
+                // Valores comunes
+                document.getElementById('modalIdPedido').value = id;
+                document.getElementById('displayIdPedido').innerText = '#' + id;
+
+                // Lógica condicional
+                if (tieneFactura) {
+                    modalTitle.innerText = "Generar Factura Rectificativa";
+                    modalMessage.innerHTML = `Vas a anular la factura del pedido <strong>#${id}</strong>.`;
+                    helperText.innerText = "Se emitirá un abono legal por el importe total.";
+                    btnConfirmar.innerText = "Confirmar Rectificación";
+                } else {
+                    modalTitle.innerText = "Cancelar Pedido";
+                    modalMessage.innerHTML = `Vas a cancelar el pedido <strong>#${id}</strong>. Se restaurará el stock automáticamente.`;
+                    helperText.innerText = "No se generará factura porque el pedido no ha sido facturado.";
+                    btnConfirmar.innerText = "Confirmar Cancelación";
+                }
+
+                const modalRect = new bootstrap.Modal(document.getElementById('modalRectificarGlobal'));
+                modalRect.show();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,53 @@
+﻿<div class="factura-box p-4 border shadow-sm">
+    <div class="row">
+        <div class="col-6">
+            <h2 class="fw-bold">PRENTA.es</h2>
+            <p class="small text-muted">Copias Orense S.L.<br />B78035599<br />Calle de Oñate 18, Madrid</p>
+        </div>
+        <div class="col-6 text-end">
+            <h4 class="text-primary">FACTURA</h4>
+            <p class="mb-0"><strong>Nº:</strong> @Model.NumeroFactura</p>
+            <p><strong>Fecha:</strong> @Model.FechaEmision.ToShortDateString()</p>
+        </div>
+    </div>
+
+    <table class="table mt-4">
+        <thead>
+            <tr>
+                <th>Descripción</th>
+                <th class="text-end">Cantidad</th>
+                <th class="text-end">Precio</th>
+                <th class="text-end">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Pedido.Items)
+            {
+                <tr>
+                    <td>@item.NombreProducto</td>
+                    <td class="text-end">@item.Cantidad</td>
+                    <td class="text-end">@item.PrecioUnitario.ToString("C")</td>
+                    <td class="text-end">@item.Total.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="row mt-5">
+        <div class="col-8">
+            <div class="d-flex align-items-center">
+                <div id="qrcode" style="width:100px; height:100px;" class="bg-light border me-3">
+                </div>
+                <p class="small text-muted" style="font-size: 0.7rem;">
+                    Documento generado según normativa Veri*factu.<br />
+                    Huella digital: @Model.HashActual.Substring(0, 10)...
+                </p>
+            </div>
+        </div>
+        <div class="col-4 text-end">
+            <p class="mb-1">Base Imponible: @Model.BaseImponible.ToString("C")</p>
+            <p class="mb-1">IVA (21%): @Model.IvaTotal.ToString("C")</p>
+            <h5 class="fw-bold">TOTAL: @Model.Total.ToString("C")</h5>
+        </div>
+    </div>
+</div>
