@@ -54,24 +54,35 @@
                     }
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@tienda.Id" class="btn btn-sm btn-primary">Editar</a>
+                    <div class="d-flex gap-2 justify-content-center">
+                        @* Botón Editar *@
+                        <a asp-action="Edit" asp-route-id="@tienda.Id"
+                           class="btn btn-sm btn-outline-warning border-0 bg-transparent text-warning shadow-none d-inline-flex align-items-center py-1">
+                            <i class="bi bi-pencil-square me-1"></i> <span>Editar</span>
+                        </a>
 
-                    @if (tienda.Activa)
-                    {
-                        <form asp-action="Desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro que quieres desactivar esta tienda?');">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@tienda.Id" />
-                            <button type="submit" class="btn btn-sm btn-danger">Desactivar</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <form asp-action="Reactivar" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="id" value="@tienda.Id" />
-                            <button type="submit" class="btn btn-sm btn-success">Reactivar</button>
-                        </form>
-                    }
+                        @if (tienda.Activa)
+                        {
+                            <form action="/admin/tiendas/desactivar" method="post" class="d-inline" onsubmit="return confirm('¿Seguro?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@tienda.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0 bg-transparent text-danger shadow-none d-inline-flex align-items-center py-1">
+                                    <i class="bi bi-shield-x me-1"></i> <span>Desactivar</span>
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form action="/admin/tiendas/reactivar" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@tienda.Id" />
+                                <button type="submit" class="btn btn-sm btn-outline-success border-0 bg-transparent text-success shadow-none d-inline-flex align-items-center py-1">
+                                    <i class="bi bi-shield-check me-1"></i> <span>Reactivar </span>
+                                </button>
+                            </form>
+                        }
+                       
+                    </div>
                 </td>
             </tr>
         }

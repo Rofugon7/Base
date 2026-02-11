@@ -7,6 +7,15 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ICarritoService CarritoService
+@inject BaseConLogin.Services.Tiendas.ITiendaConfigService TiendaService
+@{
+    var tiendaConfig = await TiendaService.GetConfigAsync();
+    var colorMarca = string.IsNullOrEmpty(tiendaConfig.ColorCorporativo) ? "#dc3545" : tiendaConfig.ColorCorporativo;
+    var colorBotones = string.IsNullOrEmpty(tiendaConfig.ColorBotones) ? "#0D6EFD" : tiendaConfig.ColorBotones;
+    var colorBotonesTextos = string.IsNullOrEmpty(tiendaConfig.ColorBotonesTexto) ? "#fff" : tiendaConfig.ColorBotonesTexto;
+    var colorEnlaces = string.IsNullOrEmpty(tiendaConfig.ColorEnlaces) ? "#dc3545" : tiendaConfig.ColorEnlaces;
+    var colorTexto = string.IsNullOrEmpty(tiendaConfig.ColorTextos) ? "#dc3545" : tiendaConfig.ColorTextos;
+}
 
 @{
     string usuarioConectado = "";
@@ -72,11 +81,52 @@
             animation: pulse-bump 0.4s ease-out;
             background-color: #ffc107 !important; /* Cambia a color amarillo momentáneamente */
         }
+
+        :root {
+            --color-marca: @colorMarca;
+            --color-botones: @colorBotones;
+            --color-botones-texto: @colorBotonesTextos;
+            --color-enlaces: @colorEnlaces;
+            --color-texto: @colorTexto;
+        }
+
+        /* Aplicación inmediata de colores base */
+        body {
+            color: var(--color-texto);
+        }
+
+        a {
+            color: var(--color-enlaces);
+        }
+
+        /* Forzar el estilo de tus botones personalizados */
+        .btn-brand, .btn-primary {
+            background-color: var(--color-botones) !important;
+            border-color: var(--color-botones) !important;
+            color: var(--color-botones-texto) !important;
+        }
+
+        .social-icon {
+            background-color: var(--color-marca) !important; /* Fondo con el color de marca */
+            color: var(--color-botones-texto) !important; /* Icono con el color de texto de botones */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            border-radius: 4px;
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+            .social-icon:hover {
+                transform: scale(1.1);
+                filter: brightness(110%);
+            }
     </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-dark px-3 shadow-sm" style=" background-color:@tiendaConfig.ColorCorporativo; ">
             <div class="container-fluid">
                 <ul class="navbar-nav me-auto flex-row gap-3">
                     <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
@@ -97,7 +147,9 @@
                                         <i class="bi bi-clipboard-check me-2 text-secondary"></i> Presupuestos
                                     </a>
                                 </li>
-                                <li><a class="dropdown-item py-2" asp-controller="Productos" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="ProductoSimple" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
+
+                                <li><a class="dropdown-item py-2" asp-controller="Categorias" asp-action="Index"><i class="bi bi-tags-fill me-2 text-secondary"></i> Categorias</a></li>
 
                                 <li><hr class="dropdown-divider"></li>
 
@@ -114,6 +166,8 @@
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item py-2" asp-controller="Tiendas" asp-action="Index"><i class="bi bi-shop me-2 text-secondary"></i> Tiendas</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Configuracion" asp-action="Index"><i class="bi bi-sliders2-vertical me-2 text-secondary"></i> Panel de control</a></li>
+                                
                             </ul>
                         </li>
                     }
@@ -255,21 +309,21 @@
 
     @RenderSection("Scripts", required: false)
 
-    <div id="cookie-banner" class="fixed-bottom bg-light border-top shadow-lg p-4 d-none" style="z-index: 9999;">
+    <div id="cookie-banner" class="fixed-bottom bg-white border-top shadow-lg p-4 d-none" style="z-index: 9999;">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h5 class="fw-bold text-danger">NO TRAFICAMOS CON TUS DATOS</h5>
+                    <h5 class="fw-bold text-brand">NO TRAFICAMOS CON TUS DATOS</h5>
                     <p class="small text-muted mb-0">
-                        Para ofrecer las mejores experiencias, utilizamos tecnologías como las cookies para almacenar y/o acceder a la información del dispositivo. El consentimiento de estas tecnologías nos permitirá procesar datos como el comportamiento de navegación o las identificaciones únicas en este sitio. No consentir o retirar el consentimiento, puede afectar negativamente a ciertas características y funciones.
+                        Para ofrecer las mejores experiencias, utilizamos tecnologías como las cookies para almacenar y/o acceder a la información del dispositivo en <strong>@tiendaConfig.NombreComercial</strong>. El consentimiento de estas tecnologías nos permitirá procesar datos como el comportamiento de navegación o las identificaciones únicas en este sitio. No consentir o retirar el consentimiento, puede afectar negativamente a ciertas características y funciones.
                     </p>
                 </div>
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <button id="btn-aceptar-cookies" class="btn btn-danger btn-sm me-2">Aceptar</button>
-                    <button id="btn-denegar-cookies" class="btn btn-outline-secondary btn-sm">Denegar</button>
+                    <button id="btn-aceptar-cookies" class="btn btn-brand btn-sm px-4 me-2 shadow-sm">Aceptar</button>
+                    <button id="btn-denegar-cookies" class="btn btn-outline-secondary btn-sm px-4">Denegar</button>
                     <div class="mt-2">
-                        <a asp-controller="Home" asp-action="Cookies" class="small text-decoration-none me-3">Política de Cookies</a>
-                        <a asp-controller="Home" asp-action="Privacidad" class="small text-decoration-none">Política de Privacidad</a>
+                        <a asp-controller="Home" asp-action="Cookies" class="small text-decoration-none text-muted me-3">Política de Cookies</a>
+                        <a asp-controller="Home" asp-action="Privacidad" class="small text-decoration-none text-muted">Política de Privacidad</a>
                     </div>
                 </div>
             </div>

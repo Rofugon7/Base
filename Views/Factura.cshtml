@@ -1,8 +1,13 @@
-﻿<div class="factura-box p-4 border shadow-sm">
+﻿@inject BaseConLogin.Services.Tiendas.ITiendaConfigService TiendaService
+@{
+    var tiendaConf = await TiendaService.GetConfigAsync();
+}
+
+<div class="factura-box p-4 border shadow-sm">
     <div class="row">
         <div class="col-6">
-            <h2 class="fw-bold">PRENTA.es</h2>
-            <p class="small text-muted">Copias Orense S.L.<br />B78035599<br />Calle de Oñate 18, Madrid</p>
+            <h2 class="fw-bold">@tiendaConf.NombreComercial</h2>
+            <p class="small text-muted">@tiendaConf.NombreEmpresa<br />@tiendaConf.CIF<br />@tiendaConf.Direccion</p>
         </div>
         <div class="col-6 text-end">
             <h4 class="text-primary">FACTURA</h4>
@@ -46,7 +51,7 @@
         </div>
         <div class="col-4 text-end">
             <p class="mb-1">Base Imponible: @Model.BaseImponible.ToString("C")</p>
-            <p class="mb-1">IVA (21%): @Model.IvaTotal.ToString("C")</p>
+            <p class="mb-1">IVA (@tiendaConf.IvaPorDefecto%): @Model.IvaTotal.ToString("C")</p>
             <h5 class="fw-bold">TOTAL: @Model.Total.ToString("C")</h5>
         </div>
     </div>

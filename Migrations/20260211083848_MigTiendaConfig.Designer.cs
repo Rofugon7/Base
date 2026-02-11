@@ -4,6 +4,7 @@ using BaseConLogin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaseConLogin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211083848_MigTiendaConfig")]
+    partial class MigTiendaConfig
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -749,124 +752,6 @@ namespace BaseConLogin.Migrations
                     b.ToTable("Tiendas");
                 });
 
-            modelBuilder.Entity("BaseConLogin.Models.TiendaConfig", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Actividad")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CIF")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorBotones")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorBotonesTexto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorCorporativo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorEnlaces")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorTextos")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmailAdministrador")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmailContacto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Folio")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Horario")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Inscripcion")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("IvaPorDefecto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Libro")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("LogoPath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MapaIncrustado")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Maps")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NombreComercial")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("NombreEmpresa")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PrefijoFactura")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RegistroMercantil")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Representante")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tomo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UrlFacebook")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UrlInstagram")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UrlTikTok")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UrlX")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("WebURL")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Whatsapp")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("TiendaConfigs");
-                });
-
             modelBuilder.Entity("BaseConLogin.Models.UsuarioTienda", b =>
                 {
                     b.Property<string>("UserId")
@@ -1048,6 +933,62 @@ namespace BaseConLogin.Migrations
                     b.HasIndex("ProductoBaseId");
 
                     b.ToTable("ProductoImagenes");
+                });
+
+            modelBuilder.Entity("TiendaConfig", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CIF")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ColorCorporativo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailContacto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("IvaPorDefecto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("LogoPath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreComercial")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NombreEmpresa")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PrefijoFactura")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telefono")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("WebURL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TiendaConfigs");
                 });
 
             modelBuilder.Entity("BaseConLogin.Models.CarritoPersistente", b =>

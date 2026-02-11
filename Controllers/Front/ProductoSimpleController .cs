@@ -452,5 +452,18 @@ namespace BaseConLogin.Controllers.Front
                 })
                 .ToListAsync();
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Desactivar(int id)
+        {
+            var producto = await _context.ProductoSimples.FindAsync(id);
+            if (producto != null)
+            {
+                producto.Producto.Activo  = false; // O la propiedad que uses
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

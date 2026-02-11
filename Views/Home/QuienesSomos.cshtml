@@ -2,6 +2,11 @@
     ViewData["Title"] = "Quiénes Somos";
 }
 
+@inject BaseConLogin.Services.Tiendas.ITiendaConfigService TiendaService
+@{
+    var tiendaConf = await TiendaService.GetConfigAsync();
+}
+
 <div class="container my-5">
     <div class="text-center mb-5">
         <h1 class="fw-bold display-4">¿Quiénes somos?</h1>
@@ -21,7 +26,7 @@
                 <img src="/imagenes/Prenta.jpg" class="d-block w-100" alt="Tienda física Prenta" style="height: 450px; object-fit: cover;">
                 <div class="carousel-caption d-none d-md-block" style="background: rgba(0,0,0,0.5); border-radius: 10px;">
                     <h5>Nuestra tienda en Madrid</h5>
-                    <p>Visítanos en Calle de Oñate 18.</p>
+                    <p>@tiendaConf.Direccion</p>
                 </div>
             </div>
             <div class="carousel-item">
@@ -52,7 +57,7 @@
             <section class="mb-5">
                 <h3 class="fw-bold mb-3"><i class="bi bi-rocket-takeoff me-2 text-primary"></i> Nuestra Historia</h3>
                 <p style="text-align: justify; line-height: 1.8;">
-                    <strong>PRENTA.es</strong> nace en el 2018 de la ambición de 4 socios que, durante años, se han dedicado exclusivamente a realizar servicios integrales a empresas del sector de la ingeniería a través de <strong>COPIAS ORENSE S.L.</strong>, una empresa con 33 años de antigüedad y una amplia experiencia en el trato al cliente.
+                    <strong>@tiendaConf.NombreComercial</strong> nace en el 2018 de la ambición de 4 socios que, durante años, se han dedicado exclusivamente a realizar servicios integrales a empresas del sector de la ingeniería a través de <strong>@tiendaConf.NombreEmpresa </strong>, una empresa con 33 años de antigüedad y una amplia experiencia en el trato al cliente.
                 </p>
                 <p style="text-align: justify; line-height: 1.8;">
                     En esta nueva etapa, queremos hacer realidad nuestro sueño de ofrecer los mejores servicios a nuestros clientes, superándonos cada día para que puedas personalizar tu vida en todos los ámbitos: desde esa camiseta "friki" que tanto te gusta, hasta la taza de tu desayuno.
@@ -62,7 +67,7 @@
             <section class="mb-5">
                 <h3 class="fw-bold mb-3"><i class="bi bi-palette me-2 text-primary"></i> Creatividad y Tecnología</h3>
                 <p style="text-align: justify; line-height: 1.8;">
-                    Contamos con un equipo de excelentes personas y un diseñador que convertirá tus ideas en realidad o mejorará tus propios diseños. En <strong>PRENTA.es</strong> estamos a la vanguardia, disponiendo de las últimas novedades en maquinaria para la personalización de tazas, camisetas y todo tipo de objetos.
+                    Contamos con un equipo de excelentes personas y un diseñador que convertirá tus ideas en realidad o mejorará tus propios diseños. En <strong>@tiendaConf.NombreComercial</strong> estamos a la vanguardia, disponiendo de las últimas novedades en maquinaria para la personalización de tazas, camisetas y todo tipo de objetos.
                 </p>
             </section>
 
@@ -80,23 +85,23 @@
                 <ul class="list-unstyled mb-0">
                     <li class="mb-3">
                         <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Empresa</small>
-                        <span>Copias Orense SL</span>
+                        <span>@tiendaConf.NombreEmpresa</span>
                     </li>
                     <li class="mb-3">
                         <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">CIF</small>
-                        <span>B78035599</span>
+                        <span>@tiendaConf.CIF</span>
                     </li>
                     <li class="mb-3">
                         <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Representante</small>
-                        <span>Sergio Oñate Martinez</span>
+                        <span>@tiendaConf.Representante</span>
                     </li>
                     <li class="mb-3">
                         <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Dirección</small>
-                        <span>Calle de Oñate nº 18, 28020 Madrid</span>
+                        <span>@tiendaConf.Direccion</span>
                     </li>
                     <li>
                         <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Email</small>
-                        <a href="mailto:admon@copor.es" class="text-decoration-none">admon@copor.es</a>
+                        <a href="mailto:@tiendaConf.EmailAdministrador" class="text-decoration-none">@tiendaConf.EmailAdministrador</a>
                     </li>
                 </ul>
             </div>
@@ -104,7 +109,7 @@
             <div class="card border-0 shadow-sm p-4 bg-dark text-white text-center">
                 <h5 class="fw-bold mb-3">Visítanos</h5>
                 <p class="small">Acércate a nuestra tienda física para asesorarte en persona.</p>
-                <a href="https://maps.google.com/?q=Calle+de+Oñate+18+Madrid" target="_blank" class="btn btn-outline-light btn-sm">
+                <a href="@tiendaConf.Maps" target="_blank" class="btn btn-outline-light btn-sm">
                     <i class="bi bi-geo-alt me-1"></i> Ver en Google Maps
                 </a>
             </div>

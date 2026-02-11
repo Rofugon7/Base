@@ -1,4 +1,8 @@
-﻿<div class="container mt-5 mb-5">
+﻿@inject BaseConLogin.Services.Tiendas.ITiendaConfigService TiendaService
+@{
+    var tiendaConf = await TiendaService.GetConfigAsync();
+}
+<div class="container mt-5 mb-5">
     <div class="text-center mb-5">
         <h2 class="fw-bold">Preguntas Frecuentes</h2>
         <p class="text-muted">Todo lo que necesitas saber sobre nuestras tiendas y pedidos</p>
@@ -44,7 +48,7 @@
                     </h2>
                     <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour" data-bs-parent="#accordionFaq">
                         <div class="accordion-body text-muted">
-                            Actualmente estamos situados en la <b>Calle de Oñate, 18 · Madrid</b>.
+                            Actualmente estamos situados en la <b>@tiendaConf.Direccion</b>.
                         </div>
                     </div>
                 </div>
@@ -59,11 +63,9 @@
                         <div class="accordion-body text-muted">
                             Puedes comprobarlo con los siguientes métodos:<br /><br />
 
-                            Entra en www.prenta.es/estado-pedido/, introduce el número de pedido y el e-mail que has utilizado para realizar la compra.<br />
+                            Entra en tu perfil de la pagina y mira la seccion de mis pedidos.<br />
                             Utiliza el enlace de seguimiento que hemos enviado a tu correo electrónico para conocer el estado actual de tu pedido.<br />
-                            Por favor, ten en cuenta que no puedes hacer seguimiento de los pedidos en los que hayas solicitado «Recogida en tienda».<br />
-                            Inicia sesión con tu cuenta de PRENTA, entra en www.prenta.es/mi-cuenta/ y entra en tu historial de pedidos o utiliza el enlace para
-                            Comprobar el estado actual del envío.
+                            Por favor, ten en cuenta que no puedes hacer seguimiento de los pedidos en los que hayas solicitado «Recogida en tienda».<br />                         
                         </div>
                     </div>
                 </div>

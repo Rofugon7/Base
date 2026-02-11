@@ -1,0 +1,270 @@
+﻿@model BaseConLogin.Models.TiendaConfig
+
+@{
+    ViewData["Title"] = "Configuración Global";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-11">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-sliders2-vertical me-2 text-primary"></i>Panel de Configuración</h2>
+                    <p class="text-muted small mb-0">Gestione la identidad, facturación y branding de su tienda.</p>
+                </div>
+                <button type="submit" form="configForm" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-save me-2"></i>Guardar Cambios
+                </button>
+            </div>
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                    <i class="bi bi-check-all me-2"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            <form id="configForm" asp-action="Index" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-4">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-building me-2"></i>Información Legal y Comercial</h5>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NombreEmpresa" class="form-label fw-bold">Razón Social</label>
+                                    <input asp-for="NombreEmpresa" class="form-control" placeholder="Nombre legal de la SL/Autónomo" />
+                                    <span asp-validation-for="NombreEmpresa" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="NombreComercial" class="form-label fw-bold">Nombre de la Tienda</label>
+                                    <input asp-for="NombreComercial" class="form-control" placeholder="Marca pública" />
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label asp-for="CIF" class="form-label fw-bold">NIF / CIF</label>
+                                    <input asp-for="CIF" class="form-control" />
+                                    <span asp-validation-for="CIF" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-8 mb-3">
+                                    <label asp-for="WebURL" class="form-label fw-bold">URL del Sitio Web</label>
+                                    <input asp-for="WebURL" class="form-control" placeholder="https://www.tuweb.com" />
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Direccion" class="form-label fw-bold">Dirección Fiscal</label>
+                                    <textarea asp-for="Direccion" class="form-control" rows="2"></textarea>
+                                    <span asp-validation-for="Direccion" class="text-danger small"></span>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label asp-for="Horario" class="form-label fw-bold">Horario</label>
+                                    <input asp-for="Horario" class="form-control" rows="2"></input>
+                                    <span asp-validation-for="Horario" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-telephone me-2"></i>Contacto de Soporte</h5>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="EmailContacto" class="form-label fw-bold">Email</label>
+                                    <input asp-for="EmailContacto" class="form-control" type="email" />
+                                    <span asp-validation-for="EmailContacto" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Telefono" class="form-label fw-bold">Teléfono</label>
+                                    <input asp-for="Telefono" class="form-control" />
+                                    <span asp-validation-for="Telefono" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-telephone me-2"></i>Contacto del Administrador</h5>
+                            </div>
+                            <div class="card-body row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="EmailAdministrador" class="form-label fw-bold">Email</label>
+                                    <input asp-for="EmailAdministrador" class="form-control" type="email" />
+                                    <span asp-validation-for="EmailAdministrador" class="text-danger small"></span>
+                                </div> 
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Representante" class="form-label fw-bold">Representante</label>
+                                    <input asp-for="Representante" class="form-control" />
+                                    <span asp-validation-for="Representante" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card shadow-sm border-0 mb-4 bg-light">
+                            <div class="card-header bg-dark text-white py-3">
+                                <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Facturación</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label asp-for="PrefijoFactura" class="form-label fw-bold">Prefijo de Serie</label>
+                                    <input asp-for="PrefijoFactura" class="form-control" placeholder="Ej: FAC-" />
+                                    <div class="form-text small">Para Verifactu: FAC2026/...</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="IvaPorDefecto" class="form-label fw-bold">IVA General (%)</label>
+                                    <div class="input-group">
+                                        <input asp-for="IvaPorDefecto" class="form-control text-center" type="number" step="0.01" />
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-palette me-2"></i>Branding</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4 text-center">
+                                    <label class="form-label fw-bold d-block">Logotipo Actual</label>
+                                    @if (!string.IsNullOrEmpty(Model.LogoPath))
+                                    {
+                                        <img src="@Model.LogoPath" class="img-thumbnail mb-2" style="max-height: 80px;" />
+                                    }
+                                    <input type="text" asp-for="LogoPath" class="form-control form-control-sm" placeholder="URL del logo" />
+                                </div>
+                                <hr />
+                                <div class="mb-3">
+                                    <label asp-for="ColorCorporativo" class="form-label fw-bold">Color Principal</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorCorporativo" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorCorporativo</code>
+                                    </div>
+                                    <div class="form-text small">Se usará en banners.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorBotones" class="form-label fw-bold">Color Botones</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorBotones" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorBotones</code>
+                                    </div>
+                                    <div class="form-text small">Se usará en botones.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorBotonesTexto" class="form-label fw-bold">Color Texto Botones</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorBotonesTexto" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorBotonesTexto</code>
+                                    </div>
+                                    <div class="form-text small">Se usará en el texto de los botones.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorEnlaces" class="form-label fw-bold">Color Enlaces</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorEnlaces" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorEnlaces</code>
+                                    </div>
+                                    <div class="form-text small">Se usará en los enlaces.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorTextos" class="form-label fw-bold">Color Textos</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorTextos" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorTextos</code>
+                                    </div>
+                                    <div class="form-text small">Se usará en los textos.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-journal-text me-2"></i>Datos del Registro Mercantil</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="RegistroMercantil" class="form-label fw-bold"></label>
+                                        <input asp-for="RegistroMercantil" class="form-control" placeholder="Ej: Registro Mercantil de Madrid" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label asp-for="Tomo" class="form-label fw-bold"></label>
+                                        <input asp-for="Tomo" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label asp-for="Libro" class="form-label fw-bold">Libro/Hoja</label> @* Asumiendo Hoja *@
+                                        <input asp-for="Libro" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label asp-for="Folio" class="form-label fw-bold"></label>
+                                        <input asp-for="Folio" class="form-control" />
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label asp-for="Inscripcion" class="form-label fw-bold"></label>
+                                        <input asp-for="Inscripcion" class="form-control" />
+                                    </div>
+                                    <div class="col-12">
+                                        <label asp-for="Actividad" class="form-label fw-bold"></label>
+                                        <input asp-for="Actividad" class="form-control" placeholder="Ej: Comercio al por menor de artículos de papelería" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="card shadow-sm border-0">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-share me-2"></i>Redes Sociales</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <label asp-for="Whatsapp" class="form-label small fw-bold"></label>
+                                    <input asp-for="Whatsapp" class="form-control form-control-sm" placeholder="600000000" />
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="UrlInstagram" class="form-label small fw-bold">Instagram</label>
+                                    <input asp-for="UrlInstagram" class="form-control form-control-sm" />
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="UrlFacebook" class="form-label small fw-bold">Facebook</label>
+                                    <input asp-for="UrlFacebook" class="form-control form-control-sm" />
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="UrlX" class="form-label small fw-bold">X (Twitter)</label>
+                                    <input asp-for="UrlX" class="form-control form-control-sm" />
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="UrlTikTok" class="form-label small fw-bold">TikTok</label>
+                                    <input asp-for="UrlTikTok" class="form-control form-control-sm" />
+                                </div>
+                                <div class="mb-2">
+                                    <label asp-for="Maps" class="form-label small fw-bold">Google Maps (URL)</label>
+                                    <textarea asp-for="Maps" class="form-control form-control-sm" rows="2"></textarea>
+                                </div>
+
+                                <div class="mb-2">
+                                    <label asp-for="MapaIncrustado" class="form-label small fw-bold">Google Maps incrustado (URL)</label>
+                                    <textarea asp-for="MapaIncrustado" class="form-control form-control-sm" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

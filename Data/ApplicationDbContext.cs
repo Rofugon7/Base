@@ -50,6 +50,7 @@ namespace BaseConLogin.Data
 
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<FacturaLinea> FacturaLineas { get; set; }
+        public DbSet<TiendaConfig> TiendaConfigs { get; set; }
 
 
         // =========================

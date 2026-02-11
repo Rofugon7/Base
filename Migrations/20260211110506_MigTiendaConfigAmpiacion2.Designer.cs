@@ -4,6 +4,7 @@ using BaseConLogin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaseConLogin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211110506_MigTiendaConfigAmpiacion2")]
+    partial class MigTiendaConfigAmpiacion2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -764,31 +767,11 @@ namespace BaseConLogin.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ColorBotones")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorBotonesTexto")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ColorCorporativo")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ColorEnlaces")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ColorTextos")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmailAdministrador")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -797,9 +780,6 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Folio")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Horario")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Inscripcion")
@@ -812,9 +792,6 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LogoPath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MapaIncrustado")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Maps")
@@ -832,9 +809,6 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RegistroMercantil")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Representante")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Telefono")

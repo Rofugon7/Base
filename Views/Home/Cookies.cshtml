@@ -1,4 +1,8 @@
-﻿<div class="container py-5">
+﻿@inject BaseConLogin.Services.Tiendas.ITiendaConfigService TiendaService
+@{
+	var tiendaConf = await TiendaService.GetConfigAsync();
+}
+<div class="container py-5">
     <h1>Política de Cookies</h1>
 	<p class="text-muted"><a asp-action="CondicionesGenerales">Condiciones Generales de Uso</a> | <a asp-action="Privacidad">Política de Privacidad</a></p>
     <hr />
@@ -55,15 +59,15 @@
 								Your online choices: <a href="http://www.youronlinechoices.com/es/">www.youronlinechoices.com/es/</a>
 							</p>
 							<p>&nbsp;</p>
-							<p><strong>Cookies utilizadas en «prenta.es»</strong></p>
+							<p><strong>Cookies utilizadas en «@tiendaConf.NombreComercial»</strong></p>
 							<p>A continuación se identifican las cookies que están siendo utilizadas en este portal así como su tipología y función:</p>
 							<p><strong>Aceptación de la Política de cookies</strong></p>
-							<p>«prenta.es» asume que usted acepta el uso de cookies. No obstante, muestra información sobre su Política de cookies en la parte inferior o superior de cualquier página del portal con cada inicio de sesión con el objeto de que usted sea consciente.</p>
+							<p>«@tiendaConf.NombreComercial» asume que usted acepta el uso de cookies. No obstante, muestra información sobre su Política de cookies en la parte inferior o superior de cualquier página del portal con cada inicio de sesión con el objeto de que usted sea consciente.</p>
 							<p>Ante esta información es posible llevar a cabo las siguientes acciones:</p>
 							<ul>
 								<li>Aceptar cookies. No se volverá a visualizar este aviso al acceder a cualquier página del portal durante la presente sesión.</li>
 								<li>Cerrar. Se oculta el aviso en la presente página.</li>
-								<li>Modificar su configuración. Podrá obtener más información sobre qué son las cookies, conocer la Política de cookies de «prenta.es» y modificar la configuración de su navegador.</li>
+								<li>Modificar su configuración. Podrá obtener más información sobre qué son las cookies, conocer la Política de cookies de «@tiendaConf.NombreComercial» y modificar la configuración de su navegador.</li>
 							</ul>
 
 						</div>

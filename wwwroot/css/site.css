@@ -22,16 +22,32 @@ body {
 }
 
 .btn {
-    background-color: #0D6EFD !important;
-    border-color: #0D6EFD !important;
-    color: #fff !important;
+    background-color: var(--color-botones) !important;
+    border-color: var(--color-botones) !important;
+    color: var(--color-botones-texto) !important;
 }
 
     .btn:hover,
     .btn:focus {
-        background-color: #0B5ED7 !important; /* tono ligeramente más oscuro para hover */
-        border-color: #0A58CA !important;
-        color: #fff !important;
+        filter: brightness(90%);
+    }
+
+    .btn.btn-danger {
+        background-color: #dc3545 !important;
+        border-color: #dc3545 !important;
+        color: #ffffff !important;
+    }
+
+    .btn.btn-success {
+        background-color: #198754 !important;
+        border-color: #198754 !important;
+        color: #ffffff !important;
+    }
+
+    .btn.btn-secondary {
+        background-color: #6c757d !important;
+        border-color: #6c757d !important;
+        color: #ffffff !important;
     }
 
 .card {
@@ -933,9 +949,11 @@ footer {
 
 /* 6. Ajuste del icono si lo pusiste */
 .nav-link i {
-    color: #666;
+    color: rgba(@tienda.ColorCorporativo) !important;
     transition: color 0.3s;
 }
+
+
 
 .nav-link:hover i {
     color: #0d6efd;
@@ -1079,4 +1097,28 @@ footer {
 
 .accordion-button::after {
     background-size: 1.2rem;
+}
+
+/* Variables dinámicas de marca */
+:root {
+    --brand-color: @colorMarca;
+}
+
+/* Aplicación al banner y botones */
+.bg-brand {
+    background-color: var(--brand-color) !important;
+}
+
+.btn-brand {
+    background-color: var(--brand-color) !important;
+    border-color: var(--brand-color) !important;
+    color: white !important;
+}
+
+    .btn-brand:hover {
+        filter: brightness(90%);
+    }
+
+.text-brand {
+    color: var(--brand-color) !important;
 }

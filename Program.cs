@@ -62,6 +62,7 @@ builder.Services.AddScoped<ICanonicalService, CanonicalService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IClaimsTransformation, TiendaClaimsTransformation>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddScoped<ITiendaConfigService, TiendaConfigService>();
 
 // Inyección personalizada de ApplicationDbContext si es necesaria para Multi-tenancy
 builder.Services.AddScoped<ApplicationDbContext>(provider =>

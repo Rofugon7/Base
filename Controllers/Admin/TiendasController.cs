@@ -72,5 +72,34 @@ namespace BaseConLogin.Controllers.Admin
 
             return RedirectToAction(nameof(Index));
         }
+
+
+        [HttpPost("Desactivar")] // Ruta única y explícita
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DesactivarConfirmado(int id)
+        {
+            var tienda = await _context.Tiendas.FindAsync(id);
+            if (tienda != null)
+            {
+                tienda.Activa = false;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost("Reactivar")] // Ruta única y explícita
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ReactivarConfirmado(int id)
+        {
+            var tienda = await _context.Tiendas
+        .IgnoreQueryFilters()
+        .FirstOrDefaultAsync(t => t.Id == id);
+            if (tienda != null)
+            {
+                tienda.Activa = true;
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
