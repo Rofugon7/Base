@@ -453,16 +453,45 @@ namespace BaseConLogin.Controllers.Front
                 .ToListAsync();
         }
 
-        [HttpPost]
+        [HttpPost("desactivar/{id}")]
+        [Authorize(Roles = "Admin,AdministradorTienda")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Desactivar(int id)
         {
-            var producto = await _context.ProductoSimples.FindAsync(id);
-            if (producto != null)
+            // Buscamos el ProductoBase directamente, que es donde está el campo 'Activo'
+            var productoBase = await _context.ProductosBase.FindAsync(id);
+
+            if (productoBase != null)
             {
-                producto.Producto.Activo  = false; // O la propiedad que uses
+                // Verificamos permisos antes de actuar
+                if (!PuedeGestionarProducto(productoBase.TiendaId)) return Forbid();
+
+                productoBase.Activo = false;
                 await _context.SaveChangesAsync();
             }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost("activar/{id}")]
+        [Authorize(Roles = "Admin,AdministradorTienda")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Activar(int id)
+        {
+            // Buscamos directamente el ProductoBase usando el id
+            var productoBase = await _context.ProductosBase.FindAsync(id);
+
+            if (productoBase != null)
+            {
+                // 1. Verificación de seguridad (que el usuario sea dueño de la tienda)
+                if (!PuedeGestionarProducto(productoBase.TiendaId)) return Forbid();
+
+                // 2. Cambiamos el estado
+                productoBase.Activo = true;
+
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

@@ -7,6 +7,7 @@ using BaseConLogin.Services.Productos;
 using BaseConLogin.Services.Seguridad;
 using BaseConLogin.Services.Seo;
 using BaseConLogin.Services.Tiendas;
+using BaseConLogin.Services.TrabajosImpresion;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IClaimsTransformation, TiendaClaimsTransformation>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<ITiendaConfigService, TiendaConfigService>();
+builder.Services.AddScoped<IImpresionService, ImpresionService>();
 
 // Inyección personalizada de ApplicationDbContext si es necesaria para Multi-tenancy
 builder.Services.AddScoped<ApplicationDbContext>(provider =>
@@ -80,6 +82,14 @@ if (!builder.Environment.IsDevelopment())
     builder.WebHost.UseUrls("http://0.0.0.0:80");
 }
 builder.Services.AddResponseCompression();
+
+builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = 104857600; }); // 100MB
+
+// Configura el límite de subida para Kestrel (Servidor)
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 104857600; // 100 MB por defecto en el servidor
+});
 
 var app = builder.Build();
 

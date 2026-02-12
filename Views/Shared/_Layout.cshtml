@@ -122,6 +122,29 @@
                 transform: scale(1.1);
                 filter: brightness(110%);
             }
+
+        .nav-link-custom {
+            color: var(--color-texto) !important; /* El mismo que el resto del menú */
+            font-weight: 500;
+        }
+
+            .nav-link-custom:hover {
+                color: var(--color-enlaces) !important; /* Cambia al color de enlaces al pasar el mouse */
+            }
+
+        /* Estilo específico para el icono de administración */
+        .icon-admin-brand {
+            color: var(--color-botones) !important; /* Fuerza el color de tus botones */
+            font-size: 1.1em; /* Un pelín más grande para destacar */
+            opacity: 1; /* Asegura que se vea vívido */
+        }
+
+        /* Opcional: Si quieres que el icono brille al pasar el ratón por encima del texto */
+        .nav-item.dropdown:hover .icon-admin-brand {
+            filter: brightness(120%);
+            transform: scale(1.1);
+            transition: all 0.2s ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -129,15 +152,35 @@
         <nav class="navbar navbar-expand-lg navbar-dark px-3 shadow-sm" style=" background-color:@tiendaConfig.ColorCorporativo; ">
             <div class="container-fluid">
                 <ul class="navbar-nav me-auto flex-row gap-3">
-                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
+                    <li class="nav-item d-flex align-items-center">
+                        <a class="nav-link p-0" asp-area="" asp-controller="Home" asp-action="Index">
+                            @if (!string.IsNullOrEmpty(@tiendaConfig.LogoPath))
+                            {
+                                <img src="@tiendaConfig.LogoPath" alt="Logo" style="height: 40px; width: auto; object-fit: contain;" />
+                            }
+                            else
+                            {
+                                <span class="fw-bold">Inicio</span>
+                            }
+                        </a>
+                    </li>
                     <li class="nav-item"><a class="nav-link" asp-controller="Proyectos" asp-action="Index">Proyectos</a></li>
                     @await Component.InvokeAsync("CategoriasMenu")
                     <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">Contacto</a></li>
+                    @if (SignInManager.IsSignedIn(User))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Impresiones" asp-action="Subir">
+                                <i class="bi bi-cloud-upload me-1"></i> Subir Ficheros
+                            </a>
+                        </li>
+                    }
                     @if (User.IsInRole("Admin"))
                     {
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-shield-lock-fill me-1 text-primary"></i> Panel Admin
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-shield-lock-fill me-1 icon-admin-brand"></i>
+                                <span>Panel Admin</span>
                             </a>
                             <ul class="dropdown-menu shadow border-0" style="min-width: 250px;" aria-labelledby="adminDropdown">
                                 <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Ventas e Inventario</h6></li>
@@ -148,17 +191,22 @@
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item py-2" asp-controller="ProductoSimple" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
-
                                 <li><a class="dropdown-item py-2" asp-controller="Categorias" asp-action="Index"><i class="bi bi-tags-fill me-2 text-secondary"></i> Categorias</a></li>
-
                                 <li><hr class="dropdown-divider"></li>
-
                                 <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Newsletter y Marketing</h6></li>
                                 <li><a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Index"><i class="bi bi-people me-2 text-secondary"></i> Lista de Suscriptores</a></li>
                                 <li><a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Enviar"><i class="bi bi-send me-2 text-secondary"></i> Redactar y Enviar</a></li>
+                                <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Ficheros</h6></li>
+                                @* NUEVA OPCIÓN PARA REVISAR DOCUMENTOS *@
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Impresiones" asp-action="PanelAdmin">
+                                        <i class="bi bi-file-earmark-check me-2 text-secondary"></i> Revisar Impresiones
+                                    </a>
+                                </li>
 
                                 <li><hr class="dropdown-divider"></li>
 
+                                <li><hr class="dropdown-divider"></li>
                                 <li><h6 class="dropdown-header text-uppercase small fw-bold text-muted">Sistema</h6></li>
                                 <li>
                                     <a class="dropdown-item py-2" asp-controller="Newsletter" asp-action="Configuracion">
@@ -167,7 +215,6 @@
                                 </li>
                                 <li><a class="dropdown-item py-2" asp-controller="Tiendas" asp-action="Index"><i class="bi bi-shop me-2 text-secondary"></i> Tiendas</a></li>
                                 <li><a class="dropdown-item py-2" asp-controller="Configuracion" asp-action="Index"><i class="bi bi-sliders2-vertical me-2 text-secondary"></i> Panel de control</a></li>
-                                
                             </ul>
                         </li>
                     }
@@ -212,6 +259,11 @@
                                     <li>
                                         <a class="dropdown-item py-2" asp-controller="Pedidos" asp-action="MisPedidos">
                                             <i class="bi bi-bag-check me-2"></i> Mis Pedidos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item py-2" asp-controller="Impresiones" asp-action="MisImpresiones">
+                                            <i class="bi bi-printer me-2"></i> Mis Impresiones
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>

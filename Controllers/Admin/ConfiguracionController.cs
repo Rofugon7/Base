@@ -79,6 +79,9 @@ namespace BaseConLogin.Controllers.Admin
                     configExistente.Whatsapp = model.Whatsapp;
                     configExistente.MapaIncrustado = model.MapaIncrustado;
 
+                    configExistente.MaxFileSizeMB = model.MaxFileSizeMB;
+                    configExistente.FormatosPermitidos = model.FormatosPermitidos;
+
                     _context.Update(configExistente);
                 }
 

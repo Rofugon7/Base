@@ -1,0 +1,72 @@
+﻿@model IEnumerable<TrabajoImpresion>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-shield-lock me-2 icon-admin-brand"></i>Gestión de Impresiones</h2>
+        <form class="d-flex gap-2" method="get">
+            <input type="text" name="searchNif" class="form-control shadow-none" placeholder="Buscar por NIF..." />
+            <button type="submit" class="btn btn-brand">Buscar</button>
+        </form>
+    </div>
+
+    <div class="table-responsive bg-white shadow-sm p-3 rounded">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Usuario (NIF)</th>
+                    <th>Archivo</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model) {
+                <tr>
+                    <td>@item.FechaSubida.ToString("dd/MM/yy HH:mm")</td>
+                    <td>
+                            @if (item.Usuario != null)
+                            {
+                                <strong>@item.Usuario.NombreCompleto</strong>
+                            }
+                            else
+                            {
+                                <strong class="text-danger">Usuario no encontrado</strong>
+                            }
+    <br />
+                        <span class="badge bg-light text-dark border">@item.NifLimpio</span>
+                    </td>
+                    <td>@item.NombreArchivoOriginal</td>
+                    <td>
+                        <form asp-action="CambiarEstado" method="post" class="d-inline">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <select name="nuevoEstado" onchange="this.form.submit()" class="form-select form-select-sm border-0 bg-light">
+                                <option value="Pendiente" selected="@(item.Estado == "Pendiente")">Pendiente</option>
+                                <option value="En Proceso" selected="@(item.Estado == "En Proceso")">En Proceso</option>
+                                <option value="Completado" selected="@(item.Estado == "Completado")">Completado</option>
+                                <option value="Cancelado" selected="@(item.Estado == "Cancelado")">Cancelado</option>
+                            </select>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="btn-group">
+                            @if (!item.ArchivoEliminado) {
+                                <a asp-action="Descargar" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Descargar">
+                                    <i class="bi bi-download"></i>
+                                </a>
+                            }
+                            
+                            @if ((item.Estado == "Completado" || item.Estado == "Cancelado") && !item.ArchivoEliminado) {
+                                <form asp-action="EliminarArchivo" asp-route-id="@item.Id" method="post" onsubmit="return confirm('¿Borrar archivo físico?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1" title="Limpiar servidor">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

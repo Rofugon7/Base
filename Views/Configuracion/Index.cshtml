@@ -257,6 +257,30 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-pdf me-2 icon-admin-brand"></i> Configuración de Impresiones</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="MaxFileSizeMB" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <input asp-for="MaxFileSizeMB" type="number" class="form-control shadow-none" />
+                                        <span class="input-group-text">MB</span>
+                                    </div>
+                                    <span asp-validation-for="MaxFileSizeMB" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="FormatosPermitidos" class="form-label fw-bold"></label>
+                                    <input asp-for="FormatosPermitidos" class="form-control shadow-none" placeholder=".pdf,.jpg,.png" />
+                                    <div class="form-text">Escribe las extensiones incluyendo el punto y separadas por comas.</div>
+                                    <span asp-validation-for="FormatosPermitidos" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>

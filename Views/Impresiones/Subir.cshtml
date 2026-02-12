@@ -1,0 +1,89 @@
+﻿@model BaseConLogin.ViewModel.SubirArchivoViewModel
+@{
+    ViewData["Title"] = "Enviar para Imprimir";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-4 text-center">
+                    <i class="bi bi-cloud-arrow-up fs-1 icon-admin-brand"></i>
+                    <h3 class="fw-bold">Subir Documento</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form id="uploadForm" asp-action="Subir" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" id="confirmOverwrite" name="confirmOverwrite" value="false" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Seleccionar Archivo</label>
+                            <input asp-for="Archivo" type="file" id="fileInput" class="form-control shadow-none" required />
+                            <small class="text-muted">Formatos: @ViewBag.Formatos. Máximo: @ViewBag.MaxSize MB</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Notas de impresión</label>
+                            <textarea asp-for="Notas" class="form-control shadow-none" rows="3" placeholder="Ej: Doble cara, color..."></textarea>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="button" onclick="validarArchivo()" class="btn btn-brand py-2">
+                                <i class="bi bi-printer me-2"></i>Enviar a Impresión
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalOverwrite" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Archivo ya existe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Ya tienes un archivo subido con este nombre. ¿Deseas sobreescribirlo con la nueva versión?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" onclick="confirmarYSubir()" class="btn btn-warning">Sí, Sobreescribir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function validarArchivo() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) {
+                alert("Por favor, selecciona un archivo.");
+                return;
+            }
+
+            const fileName = fileInput.files[0].name;
+
+            // Llamada AJAX al controlador para verificar existencia
+            fetch(`/Impresiones/ExisteArchivo?nombre=${encodeURIComponent(fileName)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        var myModal = new bootstrap.Modal(document.getElementById('modalOverwrite'));
+                        myModal.show();
+                    } else {
+                        document.getElementById('uploadForm').submit();
+                    }
+                });
+        }
+
+        function confirmarYSubir() {
+            document.getElementById('confirmOverwrite').value = "true";
+            document.getElementById('uploadForm').submit();
+        }
+    </script>
+}

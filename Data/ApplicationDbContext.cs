@@ -52,6 +52,8 @@ namespace BaseConLogin.Data
         public DbSet<FacturaLinea> FacturaLineas { get; set; }
         public DbSet<TiendaConfig> TiendaConfigs { get; set; }
 
+        public DbSet<TrabajoImpresion> TrabajosImpresion { get; set; }
+
 
         // =========================
         // Model configuration

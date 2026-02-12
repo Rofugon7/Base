@@ -1,0 +1,33 @@
+﻿@model IEnumerable<TrabajoImpresion>
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-file-earmark-text me-2"></i>Mis Trabajos de Impresión</h2>
+    <div class="table-responsive bg-white shadow-sm p-3 rounded">
+        <table class="table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Fecha</th>
+                    <th>Archivo</th>
+                    <th>Estado</th>
+                    <th>Notas</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.FechaSubida.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td><i class="bi bi-file-pdf text-danger me-2"></i>@item.NombreArchivoOriginal</td>
+                        <td>
+                            @{
+                                var color = item.Estado == "Pendiente" ? "bg-primary" :
+                                item.Estado == "En Proceso" ? "bg-warning text-dark" : "bg-success";
+                            }
+                            <span class="badge @color">@item.Estado</span>
+                        </td>
+                        <td class="small text-muted">@item.Notas</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

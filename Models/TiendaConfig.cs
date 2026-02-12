@@ -105,5 +105,14 @@ namespace BaseConLogin.Models
 
         [Display(Name = "Mapa incrustado")]
         public string? MapaIncrustado { get; set; } = string.Empty;
+
+        [Required]
+        [Display(Name = "Tamaño Máximo de Archivo (MB)")]
+        [Range(1, 500, ErrorMessage = "El tamaño debe estar entre 1 y 500 MB")]
+        public int MaxFileSizeMB { get; set; }
+
+        [Required]
+        [Display(Name = "Formatos Permitidos (separados por coma)")]
+        public string FormatosPermitidos { get; set; } = ".pdf,.jpg,.jpeg,.png";
     }
 }
