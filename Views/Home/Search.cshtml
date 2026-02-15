@@ -30,7 +30,7 @@
                 </div>
                 <div class="product-info">
                     <h5>@p.Nombre</h5>
-                    <p class="price">@p.Precio €</p>
+                    <p class="price">@p.CalcularPrecioFinal().ToString("C") €</p>
                     <div class="badges">
                         @if (p.EsNuevo)
                         {

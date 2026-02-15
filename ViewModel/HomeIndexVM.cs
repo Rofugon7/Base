@@ -15,5 +15,10 @@ namespace BaseConLogin.ViewModel
 
         public int? CategoriaSeleccionada { get; set; }
         public string? Busqueda { get; set; }
+
+
     }
+
+
+
 }

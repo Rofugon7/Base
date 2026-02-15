@@ -41,7 +41,7 @@ namespace BaseConLogin.Services.Pedidos
                 foreach (var item in carrito.Items)
                 {
                     // Buscamos el producto en DB para descontar stock
-                    var producto = await _context.ProductoSimples.FindAsync(item.ProductoBaseId);
+                    var producto = await _context.ProductosBase.FindAsync(item.ProductoBaseId);
                     if (producto != null)
                     {
                         if (producto.Stock < item.Cantidad)

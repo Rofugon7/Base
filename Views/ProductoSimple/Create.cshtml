@@ -78,6 +78,30 @@
 
     </div>
 
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Propiedades y Cálculo de Precio</h5>
+            <button type="button" onclick="agregarPropiedad()" class="btn btn-sm btn-brand">
+                <i class="bi bi-plus-circle me-1"></i> Añadir Propiedad
+            </button>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0" id="tablaPropiedades">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 30%">Propiedad / Nombre</th>
+                        <th>Valor</th>
+                        <th>Operación</th>
+                        <th style="width: 80px">Orden</th>
+                        <th>¿User?</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoPropiedades">
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -120,6 +144,42 @@
             });
 
         });
+
+                let contador = 0;
+
+        function agregarPropiedad() {
+            const cuerpo = document.getElementById('cuerpoPropiedades');
+            const fila = `
+                <tr>
+                    <td>
+                        <input type="text" name="Propiedades[${contador}].NombreEnProducto" class="form-control form-control-sm" placeholder="Ej: Barnizado" required />
+                    </td>
+                    <td>
+                        <input type="number" step="0.0001" name="Propiedades[${contador}].Valor" class="form-control form-control-sm" required />
+                    </td>
+                    <td>
+                        <select name="Propiedades[${contador}].Operacion" class="form-select form-select-sm">
+                            <option value="Suma">Suma (+)</option>
+                            <option value="Multiplicacion">Multiplicación (x)</option>
+                            <option value="Resta">Resta (-)</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" name="Propiedades[${contador}].Orden" class="form-control form-control-sm" value="${contador + 1}" />
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" name="Propiedades[${contador}].EsConfigurable" class="form-check-input" value="true" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            cuerpo.insertAdjacentHTML('beforeend', fila);
+            contador++;
+        }
 
     </script>
 }

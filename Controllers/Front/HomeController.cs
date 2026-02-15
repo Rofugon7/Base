@@ -42,47 +42,61 @@ namespace BaseConLogin.Controllers.Front
 
 
             // Todos los productos simples activos
-            var todosProductos = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .Where(p => p.Producto.Activo && p.Producto.TiendaId == tiendaId)
-                .OrderByDescending(p => p.Producto.FechaAlta)
+            var todosProductos = await _context.ProductosBase
+                .Include(p => p.PropiedadesExtendidas)
+                .AsNoTracking()
+                .Where(p => p.Activo && p.TiendaId == tiendaId)
+                .OrderByDescending(p => p.FechaAlta)
                 .ToListAsync();
+           
 
             // Destacados (primeros 3 en oferta)
             var destacados = todosProductos
-                .Where(p => p.Producto.Oferta && p.Producto.TiendaId == tiendaId)
+                .Where(p => p.Oferta && p.TiendaId == tiendaId)
                 .Take(3)
                 .Select(p => new ProductoSimpleVM
                 {
-                    ProductoBaseId = p.ProductoBaseId,
-                    Nombre = p.Producto.Nombre,
-                    Descripcion = p.Producto.Descripcion,
-                    PrecioBase = p.Producto.PrecioBase,
-                    ImagenPrincipal = p.Producto.ImagenPrincipal,
+                    ProductoBaseId = p.Id,
+                    Nombre = p.Nombre,
+                    Descripcion = p.Descripcion,
+                    PrecioBase = p.PrecioBase,
+                    ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
-                    Activo = p.Producto.Activo,
-                    EsNuevo = p.Producto.FechaAlta > DateTime.UtcNow.AddDays(-7),
-                    EsOferta = p.Producto.Oferta,
-                    CategoriaId = p.Producto.CategoriaId
+                    Activo = p.Activo,
+                    EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
+                    EsOferta = p.Oferta,
+                    CategoriaId = p.CategoriaId,
+                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
+                    {
+                        Valor = pe.Valor,
+                        Operacion = pe.Operacion,
+                        Orden = pe.Orden
+                    }).ToList()
                 })
                 .ToList();
 
             // Últimas unidades (menos de 5 unidades)
             var ultimasUnidades = todosProductos
-                .Where(p => p.Stock <= 5 && p.Producto.TiendaId == tiendaId)
-                .Take(3)
+                .Where(p => p.Stock <= 5 && p.TiendaId == tiendaId)
+                .Take(4)
                 .Select(p => new ProductoSimpleVM
                 {
-                    ProductoBaseId = p.ProductoBaseId,
-                    Nombre = p.Producto.Nombre,
-                    Descripcion = p.Producto.Descripcion,
-                    PrecioBase = p.Producto.PrecioBase,
-                    ImagenPrincipal = p.Producto.ImagenPrincipal,
+                    ProductoBaseId = p.Id,
+                    Nombre = p.Nombre,
+                    Descripcion = p.Descripcion,
+                    PrecioBase = p.PrecioBase,
+                    ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
-                    Activo = p.Producto.Activo,
-                    EsNuevo = p.Producto.FechaAlta > DateTime.UtcNow.AddDays(-7),
-                    EsOferta = p.Producto.Oferta,
-                    CategoriaId = p.Producto.CategoriaId
+                    Activo = p.Activo,
+                    EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
+                    EsOferta = p.Oferta,
+                    CategoriaId = p.CategoriaId,
+                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
+                    {
+                        Valor = pe.Valor,
+                        Operacion = pe.Operacion,
+                        Orden = pe.Orden
+                    }).ToList()
                 })
                 .ToList();
 
@@ -92,23 +106,29 @@ namespace BaseConLogin.Controllers.Front
                 .Take(itemsPorPagina)
                 .Select(p => new ProductoSimpleVM
                 {
-                    ProductoBaseId = p.ProductoBaseId,
-                    Nombre = p.Producto.Nombre,
-                    Descripcion = p.Producto.Descripcion,
-                    PrecioBase = p.Producto.PrecioBase,
-                    ImagenPrincipal = p.Producto.ImagenPrincipal,
+                    ProductoBaseId = p.Id,
+                    Nombre = p.Nombre,
+                    Descripcion = p.Descripcion,
+                    PrecioBase = p.PrecioBase,
+                    ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
-                    Activo = p.Producto.Activo,
-                    EsNuevo = p.Producto.FechaAlta > DateTime.UtcNow.AddDays(-7),
-                    EsOferta = p.Producto.Oferta,
-                    CategoriaId = p.Producto.CategoriaId
+                    Activo = p.Activo,
+                    EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
+                    EsOferta = p.Oferta,
+                    CategoriaId = p.CategoriaId,
+                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
+                    {
+                        Valor = pe.Valor,
+                        Operacion = pe.Operacion,
+                        Orden = pe.Orden
+                    }).ToList()
                 })
                 .ToList();
 
             if (categoria.HasValue)
             {
                 todosProductos = todosProductos.Where(p =>
-                    p.Producto.CategoriaId == categoria.Value).ToList();
+                    p.CategoriaId == categoria.Value).ToList();
                 destacados = destacados.Where(p =>
                     p.CategoriaId == categoria.Value).ToList();
                 ultimasUnidades = ultimasUnidades.Where(p =>
@@ -138,30 +158,36 @@ namespace BaseConLogin.Controllers.Front
             const int pageSize = 12;
             int tiendaId = ObtenerTiendaId();
 
-            var query = _context.ProductoSimples
-                .Include(p => p.Producto)
-                .Where(p => p.Producto.TiendaId == tiendaId);
+            var query = _context.ProductosBase
+                .Where(p => p.TiendaId == tiendaId);
 
             if (!string.IsNullOrEmpty(q))
-                query = query.Where(p => p.Producto.Nombre.Contains(q) || p.Producto.Descripcion.Contains(q));
+                query = query.Where(p => p.Nombre.Contains(q) || p.Descripcion.Contains(q));
 
             if (categoria.HasValue)
-                query = query.Where(p => p.Producto.CategoriaId == categoria);
+                query = query.Where(p => p.CategoriaId == categoria);
 
             int totalItems = await query.CountAsync();
 
             var productos = await query
-                .OrderByDescending(p => p.Producto.Id)
+                .OrderByDescending(p => p.Id)
+                .Include(p => p.PropiedadesExtendidas)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .Select(p => new ProductoCardVM
                 {
-                    Id = p.Producto.Id,
-                    Nombre = p.Producto.Nombre,
-                    Precio = p.Producto.PrecioBase,
-                    Imagen = p.Producto.ImagenPrincipal,
-                    EsNuevo = p.Producto.FechaAlta > DateTime.UtcNow.AddDays(-7),
-                    EsOferta = p.Producto.Oferta
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Precio = p.PrecioBase,
+                    Imagen = p.ImagenPrincipal,
+                    EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
+                    EsOferta = p.Oferta,
+                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
+                    {
+                        Valor = pe.Valor,
+                        Operacion = pe.Operacion,
+                        Orden = pe.Orden
+                    }).ToList()
                 })
                 .ToListAsync();
 

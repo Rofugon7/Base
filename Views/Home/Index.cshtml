@@ -78,7 +78,7 @@
                         <div class="card-body d-flex flex-column text-center">
                             <h5 class="fw-bold">@p.Nombre</h5>
                             <p class="text-muted small flex-grow-1">@p.Descripcion</p>
-                            <p class="h4 text-primary fw-bold">@p.PrecioBase.ToString("C")</p>
+                            <p class="h4 text-primary fw-bold">@p.CalcularPrecioFinal().ToString("C")</p>
                             <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-primary btn-view mt-3">
                                 <i class="bi bi-eye me-2"></i>Ver Detalles
                             </a>
@@ -105,7 +105,7 @@
                             </div>
                             <div class="card-body text-center p-2">
                                 <h6 class="mb-1 fw-bold">@p.Nombre</h6>
-                                <p class="mb-2 text-danger fw-bold small">@p.PrecioBase €</p>
+                                <p class="mb-2 text-danger fw-bold small">@p.CalcularPrecioFinal().ToString("C") €</p>
                                 <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-outline-danger rounded-pill px-3">Ver</a>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                         </div>
                         <h6 class="fw-bold text-truncate">@p.Nombre</h6>
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="h5 mb-0 fw-bold">@p.PrecioBase €</span>
+                            <span class="h5 mb-0 fw-bold">@p.CalcularPrecioFinal().ToString("C") €</span>
                             <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-dark rounded-circle shadow">
                                 <i class="bi bi-arrow-right"></i>
                             </a>

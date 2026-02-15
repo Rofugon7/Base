@@ -1,6 +1,7 @@
 ﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
 using BaseConLogin.Models.ViewModels;
+using BaseConLogin.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -27,28 +28,30 @@ namespace BaseConLogin.Controllers.Front
         public async Task<IActionResult> Index(string nombre, decimal? precioMin, decimal? precioMax, string activo, int page = 1)
         {
             int pageSize = 15;
-            var query = _context.ProductoSimples
-                .Include(p => p.Producto)
+            var query = _context.ProductosBase
+                .Include(p => p.Imagenes)
+        .Include(p => p.PropiedadesExtendidas) // <--- AÑADE ESTO para ver las características
+        .Include(p => p.Categoria)
                 .AsQueryable();
 
             // --- FILTROS ---
             if (!string.IsNullOrEmpty(nombre))
-                query = query.Where(p => p.Producto.Nombre.Contains(nombre));
+                query = query.Where(p => p.Nombre.Contains(nombre));
 
             if (precioMin.HasValue)
-                query = query.Where(p => p.Producto.PrecioBase >= precioMin.Value);
+                query = query.Where(p => p.PrecioBase >= precioMin.Value);
 
             if (precioMax.HasValue)
-                query = query.Where(p => p.Producto.PrecioBase <= precioMax.Value);
+                query = query.Where(p => p.PrecioBase <= precioMax.Value);
 
             if (!string.IsNullOrEmpty(activo) && activo != "todos")
             {
                 bool esActivo = activo == "activos";
-                query = query.Where(p => p.Producto.Activo == esActivo);
+                query = query.Where(p => p.Activo == esActivo);
             }
 
             // --- ORDENACIÓN ---
-            query = query.OrderBy(p => p.Producto.Nombre);
+            query = query.OrderBy(p => p.Nombre);
 
             // --- PAGINACIÓN ---
             int totalItems = await query.CountAsync();
@@ -82,24 +85,24 @@ namespace BaseConLogin.Controllers.Front
         [AllowAnonymous]
         public async Task<IActionResult> Details(int id, string returnUrl)
         {
-            var producto = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .ThenInclude(p => p.Imagenes) // <-- Importante incluir las imágenes
-                .FirstOrDefaultAsync(p => p.ProductoBaseId == id && p.Producto.Activo);
+            var producto = await _context.ProductosBase
+        .Include(p => p.Imagenes)
+        .Include(p => p.PropiedadesExtendidas) // <--- AÑADE ESTO para ver las características
+        .Include(p => p.Categoria)             // <--- AÑADE ESTO para ver la categoría
+        .FirstOrDefaultAsync(p => p.Id == id);
 
             if (producto == null) return NotFound();
 
             // Lógica de Productos Relacionados
-            var relacionados = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .Where(p => p.Producto.CategoriaId == producto.Producto.CategoriaId && p.ProductoBaseId != id && p.Producto.Activo)
+            var relacionados = await _context.ProductosBase
+                .Where(p => p.CategoriaId == producto.CategoriaId && p.Id != id && p.Activo)
                 .Take(4) // Limitamos a 4 para el diseño
                 .ToListAsync();
 
 
             ViewBag.Relacionados = relacionados;
             ViewBag.ReturnUrl = returnUrl;
-            ViewData["Title"] = producto.Producto.Nombre;
+            ViewData["Title"] = producto.Nombre;
 
             return View(producto);
         }
@@ -128,7 +131,9 @@ namespace BaseConLogin.Controllers.Front
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductoSimpleVM vm)
         {
+            // Eliminamos la validación de ImagenPrincipal ya que se gestiona manualmente
             ModelState.Remove("ImagenPrincipal");
+
             if (!ModelState.IsValid)
             {
                 vm.Categorias = await GetCategoriasAsync();
@@ -140,36 +145,35 @@ namespace BaseConLogin.Controllers.Front
             {
                 var tiendaId = ObtenerTiendaIdUsuario();
 
-                // 1. Crear el ProductoBase primero
-                var productoBase = new ProductoBase
+                // 1. Crear el objeto ProductoBase único
+                var producto = new ProductoBase
                 {
                     Nombre = vm.Nombre,
                     Descripcion = vm.Descripcion,
                     PrecioBase = vm.PrecioBase,
-                    TipoProducto = TipoProducto.Simple,
+                    Stock = vm.Stock, // El stock se guarda directamente aquí ahora
                     Activo = vm.Activo,
                     TiendaId = tiendaId,
                     CategoriaId = vm.CategoriaId,
                     SKU = vm.SKU,
-                    ImagenPrincipal = "/imagenes/ProductoSinImagen.png"
+                    TipoProducto = vm.TipoProducto, // Importante para saber si es Simple o Configurable
+                    ImagenPrincipal = "/imagenes/ProductoSinImagen.png",
+                    FechaAlta = DateTime.UtcNow
                 };
 
-                _context.ProductosBase.Add(productoBase);
+                _context.ProductosBase.Add(producto);
+                // Guardamos para obtener el ID que usaremos en imágenes y propiedades
                 await _context.SaveChangesAsync();
 
-                // 2. Procesar SOLO las imágenes que vienen en el Request
-                // Usamos Request.Form.Files para identificar exactamente qué slot envió qué archivo
+                // 2. Procesar Imágenes
                 var archivos = Request.Form.Files;
                 string principalPath = "/imagenes/ProductoSinImagen.png";
 
                 for (int i = 0; i < 4; i++)
                 {
-                    // Buscamos el archivo que tenga el nombre exacto "Imagenes[0]", "Imagenes[1]", etc.
                     var file = archivos.GetFile($"Imagenes[{i}]");
-
                     if (file != null && file.Length > 0)
                     {
-                        // Guardar archivo físico
                         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                         var path = Path.Combine(_env.WebRootPath, "uploads", fileName);
 
@@ -181,10 +185,9 @@ namespace BaseConLogin.Controllers.Front
                         var rutaRelativa = "uploads/" + fileName;
                         bool esEstaPrincipal = (i == vm.PrincipalIndex);
 
-                        // Insertar en ProductoImagenes
                         var nuevaImagen = new ProductoImagen
                         {
-                            ProductoBaseId = productoBase.Id,
+                            ProductoBaseId = producto.Id,
                             Ruta = rutaRelativa,
                             EsPrincipal = esEstaPrincipal
                         };
@@ -197,16 +200,29 @@ namespace BaseConLogin.Controllers.Front
                     }
                 }
 
-                // 3. Asignar la imagen principal al producto base y crear el ProductoSimple
-                productoBase.ImagenPrincipal = principalPath;
+                // Actualizamos la ruta de la imagen principal en el objeto ya rastreado
+                producto.ImagenPrincipal = principalPath;
 
-                var productoSimple = new ProductoSimple
+                // 3. Procesar Propiedades Extendidas (El nuevo motor de cálculo)
+                if (vm.Propiedades != null && vm.Propiedades.Any())
                 {
-                    ProductoBaseId = productoBase.Id,
-                    Stock = vm.Stock
-                };
-                _context.ProductoSimples.Add(productoSimple);
+                    foreach (var prop in vm.Propiedades.OrderBy(p => p.Orden))
+                    {
+                        var nuevaProp = new ProductoPropiedadConfigurada
+                        {
+                            ProductoBaseId = producto.Id,
+                            NombreEnProducto = prop.NombreEnProducto,
+                            Valor = prop.Valor,
+                            Operacion = prop.Operacion,
+                            Orden = prop.Orden,
+                            EsConfigurable = prop.EsConfigurable,
+                            PropiedadMaestraId = prop.PropiedadMaestraId // Por si viene de un maestro
+                        };
+                        _context.ProductoPropiedades.Add(nuevaProp);
+                    }
+                }
 
+                // Guardamos todos los cambios (ImagenPrincipal y Propiedades)
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -215,7 +231,7 @@ namespace BaseConLogin.Controllers.Front
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                ModelState.AddModelError("", "Error: " + ex.Message);
+                ModelState.AddModelError("", "Error al crear el producto: " + ex.Message);
                 vm.Categorias = await GetCategoriasAsync();
                 return View(vm);
             }
@@ -227,18 +243,19 @@ namespace BaseConLogin.Controllers.Front
         [Authorize(Roles = "Admin,AdministradorTienda")]
         public async Task<IActionResult> Edit(int id)
         {
-            var producto = await _context.ProductoSimples
-                .Include(p => p.Producto)
-                .Include(p => p.Producto.Imagenes)
-                .FirstOrDefaultAsync(p => p.ProductoBaseId == id);
+            var producto = await _context.ProductosBase
+                .Include(p => p.Imagenes)
+        .Include(p => p.PropiedadesExtendidas) // <--- AÑADE ESTO para ver las características
+        .Include(p => p.Categoria)             // <--- AÑADE ESTO para ver la categoría
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (producto == null)
                 return NotFound();
 
-            if (!PuedeGestionarProducto(producto.Producto.TiendaId))
+            if (!PuedeGestionarProducto(producto.TiendaId))
                 return Forbid();
 
-            var imagenes = producto.Producto.Imagenes
+            var imagenes = producto.Imagenes
                 .OrderBy(i => i.Id)
                 .ToList();
 
@@ -246,18 +263,27 @@ namespace BaseConLogin.Controllers.Front
             {
                 ProductoBaseId = id,
 
-                Nombre = producto.Producto.Nombre,
-                Descripcion = producto.Producto.Descripcion,
-                PrecioBase = producto.Producto.PrecioBase,
-                Activo = producto.Producto.Activo,
-                CategoriaId = producto.Producto.CategoriaId,
-                SKU = producto.Producto.SKU,
+                Nombre = producto.Nombre,
+                Descripcion = producto.Descripcion,
+                PrecioBase = producto.PrecioBase,
+                Activo = producto.Activo,
+                CategoriaId = producto.CategoriaId,
+                SKU = producto.SKU,
                 Stock = producto.Stock,
-
+                TipoProducto = producto.TipoProducto,
                 Categorias = await GetCategoriasAsync(),
-
+                EsOferta = producto.Oferta,
                 ImagenesActuales = imagenes,
                 SlotsIds = new List<int?>(),
+                Propiedades = producto.PropiedadesExtendidas.OrderBy(p => p.Orden).Select(p => new PropiedadFilaVM
+                {
+                    NombreEnProducto = p.NombreEnProducto,
+                    Valor = p.Valor,
+                    Operacion = p.Operacion,
+                    Orden = p.Orden,
+                    EsConfigurable = p.EsConfigurable,
+                    PropiedadMaestraId = p.PropiedadMaestraId
+                }).ToList(),
                 Imagenes = new List<IFormFile> { null, null, null, null }
             };
 
@@ -299,10 +325,11 @@ namespace BaseConLogin.Controllers.Front
 
             var productoBase = await _context.ProductosBase
                 .Include(p => p.Imagenes)
+                .Include(p => p.PropiedadesExtendidas)
                 .FirstOrDefaultAsync(p => p.Id == vm.ProductoBaseId);
 
-            var productoSimple = await _context.ProductoSimples
-                .FirstOrDefaultAsync(p => p.ProductoBaseId == vm.ProductoBaseId);
+            var productoSimple = await _context.ProductosBase
+                .FirstOrDefaultAsync(p => p.Id == vm.ProductoBaseId);
 
             if (productoBase == null || productoSimple == null) return NotFound();
 
@@ -399,6 +426,30 @@ namespace BaseConLogin.Controllers.Front
                 {
                     productoBase.ImagenPrincipal = "/imagenes/ProductoSinImagen.png";
                 }
+
+                if (productoBase.PropiedadesExtendidas != null && productoBase.PropiedadesExtendidas.Any())
+                {
+                    _context.ProductoPropiedades.RemoveRange(productoBase.PropiedadesExtendidas);
+                    await _context.SaveChangesAsync();
+
+                }
+
+                if (vm.Propiedades != null)
+                {
+                    foreach (var p in vm.Propiedades)
+                    {
+                        _context.ProductoPropiedades.Add(new ProductoPropiedadConfigurada
+                        {
+                            ProductoBaseId = productoBase.Id,
+                            NombreEnProducto = p.NombreEnProducto,
+                            Valor = p.Valor,
+                            Operacion = p.Operacion,
+                            Orden = p.Orden,
+                            EsConfigurable = p.EsConfigurable
+                        });
+                    }
+                }
+
 
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();

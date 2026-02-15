@@ -246,8 +246,8 @@ namespace BaseConLogin.Controllers.Front
 
             foreach (var itemPedido in pedidoAnterior.Items)
             {
-                var productoReal = await _context.ProductoSimples
-                    .FirstOrDefaultAsync(p => p.ProductoBaseId == itemPedido.ProductoBaseId);
+                var productoReal = await _context.ProductosBase
+                    .FirstOrDefaultAsync(p => p.Id == itemPedido.ProductoBaseId);
 
                 if (productoReal == null || productoReal.Stock <= 0) continue;
 
@@ -256,7 +256,7 @@ namespace BaseConLogin.Controllers.Front
 
                 // 3. Buscamos si el producto ya está en los ITEMS de ese carrito
                 var itemExistente = carrito.Items
-                    .FirstOrDefault(i => i.ProductoBaseId == productoReal.ProductoBaseId);
+                    .FirstOrDefault(i => i.ProductoBaseId == productoReal.Id);
 
                 if (itemExistente != null)
                 {
@@ -271,7 +271,7 @@ namespace BaseConLogin.Controllers.Front
                     var nuevoItem = new CarritoPersistenteItem
                     {
                         CarritoPersistenteId = carrito.Id,
-                        ProductoBaseId = productoReal.ProductoBaseId,
+                        ProductoBaseId = productoReal.Id,
                         Cantidad = cantidadAAnadir
                     };
                     _context.CarritoItems.Add(nuevoItem);
@@ -353,8 +353,8 @@ namespace BaseConLogin.Controllers.Front
                     foreach (var itemPedido in pedido.Items)
                     {
                         // Buscamos el producto simple para devolver las unidades
-                        var productoReal = await _context.ProductoSimples
-                            .FirstOrDefaultAsync(ps => ps.ProductoBaseId == itemPedido.ProductoBaseId);
+                        var productoReal = await _context.ProductosBase
+                            .FirstOrDefaultAsync(ps => ps.Id == itemPedido.ProductoBaseId);
 
                         if (productoReal != null)
                         {

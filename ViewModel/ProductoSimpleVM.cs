@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using BaseConLogin.Models;
+using BaseConLogin.ViewModel;
 
 namespace BaseConLogin.Models.ViewModels
 {
@@ -46,9 +47,44 @@ namespace BaseConLogin.Models.ViewModels
 
         public List<int?> SlotsIds { get; set; } = new(); // 4 posiciones
 
+        public List<PropiedadFilaVM> Propiedades { get; set; } = new List<PropiedadFilaVM>();
+
+        public TipoProducto TipoProducto { get; set; } = TipoProducto.Simple;
 
 
 
+
+
+        public decimal CalcularPrecioFinal()
+        {
+            decimal precioFinal = PrecioBase;
+
+            // Ordenamos por el campo 'Orden' para que las operaciones se apliquen en secuencia
+            var propiedadesOrdenadas = Propiedades.OrderBy(p => p.Orden).ToList();
+
+            foreach (var prop in propiedadesOrdenadas)
+            {
+                switch (prop.Operacion)
+                {
+                    case "Suma":
+                        precioFinal += prop.Valor;
+                        break;
+                    case "Resta":
+                        precioFinal -= prop.Valor;
+                        break;
+                    case "Multiplicacion":
+                        // Útil para porcentajes (ej: un valor de 1.10 incrementa un 10%)
+                        precioFinal *= prop.Valor;
+                        break;
+                    default:
+                        // Si no hay operación clara, por defecto sumamos
+                        precioFinal += prop.Valor;
+                        break;
+                }
+            }
+
+            return precioFinal;
+        }
 
 
     }

@@ -33,9 +33,6 @@ namespace BaseConLogin.Data
 
         public DbSet<ProductoBase> ProductosBase { get; set; }
 
-        public DbSet<ProductoSimple> ProductoSimples { get; set; } = null!;
-
-        public DbSet<ProductoConfigurable> ProductosConfigurables { get; set; }
         public DbSet<UsuarioTienda> UsuariosTiendas { get; set; }
 
         public DbSet<CarritoPersistente> Carritos { get; set; }
@@ -53,6 +50,9 @@ namespace BaseConLogin.Data
         public DbSet<TiendaConfig> TiendaConfigs { get; set; }
 
         public DbSet<TrabajoImpresion> TrabajosImpresion { get; set; }
+
+        public DbSet<PropiedadExtendidaMaestra> PropiedadesMaestras { get; set; }
+        public DbSet<ProductoPropiedadConfigurada> ProductoPropiedades { get; set; }
 
 
         // =========================
@@ -115,23 +115,7 @@ namespace BaseConLogin.Data
                 .HasForeignKey(p => p.TiendaId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // -------------------------
-            // ProductoBase <-> Proyectos (1:1)
-            // -------------------------
-            modelBuilder.Entity<Proyectos>()
-                .HasOne(p => p.Producto)
-                .WithOne()
-                .HasForeignKey<Proyectos>(p => p.ProductoBaseId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            // -------------------------
-            // ProductoBase <-> ProductoSimple (1:1)
-            // -------------------------
-            modelBuilder.Entity<ProductoSimple>()
-                .HasOne(p => p.Producto)
-                .WithOne()
-                .HasForeignKey<ProductoSimple>(p => p.ProductoBaseId)
-                .OnDelete(DeleteBehavior.Cascade);
+                      
 
             // -------------------------
             // ProductoBase <-> ProductoConfigurable (1:1)
@@ -185,8 +169,7 @@ namespace BaseConLogin.Data
             modelBuilder.Entity<UsuarioTienda>()
                 .HasQueryFilter(u => u.Tienda.Activa);
 
-            modelBuilder.Entity<ProductoSimple>()
-        .ToTable("productosSimples");
+           
 
             // -------------------------
             // Categorias
@@ -197,6 +180,14 @@ namespace BaseConLogin.Data
           .WithMany(c => c.Productos)
           .HasForeignKey(p => p.CategoriaId)
           .OnDelete(DeleteBehavior.SetNull);
+
+
+            // Configuración para el motor de precios
+            modelBuilder.Entity<ProductoPropiedadConfigurada>()
+                .HasOne(p => p.Producto)
+                .WithMany(b => b.PropiedadesExtendidas)
+                .HasForeignKey(p => p.ProductoBaseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿@model BaseConLogin.Models.ProductoSimple
+﻿@model BaseConLogin.Models.ProductoBase
 
 @{
-    ViewData["Title"] = Model.Producto.Nombre;
-    var imagenes = Model.Producto.Imagenes.OrderByDescending(i => i.EsPrincipal).ToList();
+    ViewData["Title"] = Model.Nombre;
+    var imagenes = Model.Imagenes.OrderByDescending(i => i.EsPrincipal).ToList();
     // Si no hay returnUrl, por defecto mandamos al Index o Home
     var urlRegreso = ViewBag.ReturnUrl ?? Url.Action("Index", "Home");
 
@@ -39,7 +39,7 @@
         }
 
         <div class="breadcrumb-item active">
-            @Model.Producto.Nombre
+            @Model.Nombre
         </div>
     </div>
 </nav>
@@ -49,7 +49,7 @@
         <div class="row g-0">
             <div class="col-md-6 bg-light p-4">
                 <div class="main-img-container shadow-sm rounded mb-3 bg-white">
-                    <img id="mainImage" src="@Model.Producto.ImagenPrincipal" alt="@Model.Producto.Nombre" class="img-fluid main-display">
+                    <img id="mainImage" src="@Model.ImagenPrincipal" alt="@Model.Nombre" class="img-fluid main-display">
                 </div>
 
                 <div class="d-flex gap-2 justify-content-center overflow-auto pb-2">
@@ -69,19 +69,19 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-2">
                         <li class="breadcrumb-item text-uppercase small text-muted">Producto Simple</li>
-                        <li class="breadcrumb-item active text-uppercase small" aria-current="page">@Model.Producto.Nombre</li>
+                        <li class="breadcrumb-item active text-uppercase small" aria-current="page">@Model.Nombre</li>
                     </ol>
                 </nav>
 
-                <h1 class="display-5 fw-bold mb-3 text-dark">@Model.Producto.Nombre</h1>
+                <h1 class="display-5 fw-bold mb-3 text-dark">@Model.Nombre</h1>
 
                 <div class="mb-4">
-                    <span class="h2 fw-light text-primary">@Model.Producto.PrecioBase.ToString("C2")</span>
+                    <span class="h2 fw-light text-primary">@Model.CalcularPrecioFinal().ToString("C2")</span>
                     <span class="text-muted ms-2 small">IVA incluido</span>
                 </div>
 
                 <p class="text-secondary mb-4 lh-lg">
-                    @Model.Producto.Descripcion
+                    @Model.Descripcion
                 </p>
 
                 <div class="mb-4">
@@ -105,8 +105,8 @@
                     @if (Model.Stock > 0)
                     {
                         <form id="formAñadirCarrito" method="post" asp-controller="Carrito" asp-action="Añadir">
-                            <input type="hidden" name="productoBaseId" value="@Model.ProductoBaseId" />
-                            <input type="hidden" name="tiendaId" value="@Model.Producto.TiendaId" />
+                            <input type="hidden" name="productoBaseId" value="@Model.Id" />
+                            <input type="hidden" name="tiendaId" value="@Model.TiendaId" />
 
                             <div class="input-group mb-3" style="max-width: 250px;">
                                 <input type="number" name="cantidad" value="1" min="1" max="@Model.Stock" class="form-control" />
@@ -134,7 +134,7 @@
                 @if (User.IsInRole("Admin") || User.IsInRole("AdministradorTienda"))
                 {
                     <div class="mt-4 pt-3 border-top border-dashed">
-                        <a asp-action="Edit" asp-route-id="@Model.ProductoBaseId" class="text-decoration-none text-warning small">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="text-decoration-none text-warning small">
                             <i class="bi bi-pencil-square"></i> Editar como administrador
                         </a>
                     </div>
@@ -151,20 +151,20 @@
     <h3 class="mb-4">También te podría gustar</h3>
 
     <div class="row">
-        @if (ViewBag.Relacionados is List<BaseConLogin.Models.ProductoSimple> relacionados && relacionados.Any())
+        @if (ViewBag.Relacionados is List<BaseConLogin.Models.ProductoBase> relacionados && relacionados.Any())
         {
             @foreach (var item in relacionados)
             {
                 <div class="col-md-3 col-sm-6 mb-4">
                     <div class="card h-100 shadow-sm border-0 product-card-hover">
-                        <img src="@item.Producto.ImagenPrincipal" class="card-img-top"
-                             style="height: 180px; object-fit: cover;" alt="@item.Producto.Nombre">
+                        <img src="@item.ImagenPrincipal" class="card-img-top"
+                             style="height: 180px; object-fit: cover;" alt="@item.Nombre">
                         <div class="card-body d-flex flex-column">
-                            <h6 class="card-title text-truncate">@item.Producto.Nombre</h6>
-                            <p class="text-primary fw-bold">@item.Producto.PrecioBase €</p>
+                            <h6 class="card-title text-truncate">@item.Nombre</h6>
+                            <p class="text-primary fw-bold">@item.PrecioBase €</p>
 
                             @* IMPORTANTE: Pasamos el returnUrl actual para que el hilo de navegación no se rompa *@
-                            <a asp-action="Details" asp-route-id="@item.ProductoBaseId"
+                            <a asp-action="Details" asp-route-id="@item.Id"
                                asp-route-returnUrl="@ViewBag.ReturnUrl"
                                class="btn btn-outline-primary btn-sm mt-auto">
                                 Ver más

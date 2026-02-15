@@ -8,6 +8,10 @@ namespace BaseConLogin.Models
         public int ProductoBaseId { get; set; }
 
         public ProductoBase Producto { get; set; } = null!;
+
+        public ICollection<ProductoPropiedadConfigurada> PropiedadesExtendidas { get; set; } = new List<ProductoPropiedadConfigurada>();
+
+        public int Stock { get; set; }
     }
 
 }

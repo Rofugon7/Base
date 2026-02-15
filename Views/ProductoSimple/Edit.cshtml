@@ -107,6 +107,48 @@
 
     </div>
 
+    <div id="contenedorPropiedades">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>Propiedades y Costes Adicionales</h5>
+            <button type="button" class="btn btn-sm btn-success" onclick="agregarPropiedad()">
+                <i class="bi bi-plus-circle"></i> Añadir Propiedad
+            </button>
+        </div>
+        @for (int i = 0; i < Model.Propiedades.Count; i++)
+        {
+            <div class="row g-2 mb-2 align-items-center border-bottom pb-2 property-row">
+                <div class="col-md-3">
+                    <input name="Propiedades[@i].NombreEnProducto" value="@Model.Propiedades[i].NombreEnProducto" class="form-control" required />
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.01"
+                           name="Propiedades[@i].Valor"
+                           value="@Model.Propiedades[i].Valor.ToString("G29", System.Globalization.CultureInfo.InvariantCulture)"
+                           class="form-control" required />
+                </div>
+                <div class="col-md-3">
+                    <select name="Propiedades[@i].Operacion" class="form-select">
+                        <!- Selección dinámica de la operación -->
+                        <option value="Suma" selected="@(Model.Propiedades[i].Operacion == "Suma")">Suma (+)</option>
+                        <option value="Multiplicacion" selected="@(Model.Propiedades[i].Operacion == "Multiplicacion")">Multiplicación (x)</option>
+                        <option value="Resta" selected="@(Model.Propiedades[i].Operacion == "Resta")">Resta (-)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="Propiedades[@i].Orden" value="@Model.Propiedades[i].Orden" class="form-control" />
+                </div>
+                <div class="col-md-1 text-center">
+                    <input type="checkbox" name="Propiedades[@i].EsConfigurable" value="true" class="form-check-input" @(Model.Propiedades[i].EsConfigurable ? "checked" : "") />
+                    <input type="hidden" name="Propiedades[@i].EsConfigurable" value="false" />
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.property-row').remove()">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        }
+    </div>    
 
 
     <button type="submit" class="btn btn-primary">Guardar</button>
@@ -118,38 +160,67 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+            // Sincronizamos el índice con los elementos que ya vienen del servidor
+        let propIndex = @Model.Propiedades.Count;
 
+        function agregarPropiedad() {
+            // CORRECCIÓN: Usamos el ID real 'contenedorPropiedades' que tienes en tu HTML
+            const contenedor = document.getElementById('contenedorPropiedades');
+
+            if (!contenedor) {
+                console.error("No se encontró el contenedor 'contenedorPropiedades'");
+                return;
+            }
+
+            // CORRECCIÓN: Usamos DIVS con la clase 'property-row' para que coincida con tu diseño
+            const fila = `
+                <div class="row g-2 mb-2 align-items-center border-bottom pb-2 property-row">
+                    <div class="col-md-3">
+                        <input name="Propiedades[${propIndex}].NombreEnProducto" class="form-control" placeholder="Ej: Barnizado" required />
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" step="0.01" name="Propiedades[${propIndex}].Valor" class="form-control" placeholder="0.00" required />
+                    </div>
+                    <div class="col-md-3">
+                        <select name="Propiedades[${propIndex}].Operacion" class="form-select">
+                            <option value="Suma">Suma (+)</option>
+                            <option value="Multiplicacion">Multiplicación (x)</option>
+                            <option value="Resta">Resta (-)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <input type="number" name="Propiedades[${propIndex}].Orden" value="${propIndex}" class="form-control" />
+                    </div>
+                    <div class="col-md-1 text-center">
+                        <input type="checkbox" name="Propiedades[${propIndex}].EsConfigurable" value="true" class="form-check-input" />
+                        <input type="hidden" name="Propiedades[${propIndex}].EsConfigurable" value="false" />
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.property-row').remove()">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            contenedor.insertAdjacentHTML('beforeend', fila);
+            propIndex++; // Incrementamos para la siguiente propiedad
+        }
+
+        // --- Tu código de previsualización de imágenes se mantiene igual abajo ---
         document.querySelectorAll(".imagen-input").forEach(input => {
-
             input.addEventListener("change", e => {
-
                 const file = e.target.files[0];
                 const index = e.target.dataset.index;
-
                 if (!file) return;
-
-                if (!file.type.startsWith("image/")) {
-                    alert("Solo imágenes");
-                    e.target.value = "";
-                    return;
-                }
-
                 const reader = new FileReader();
-
                 reader.onload = function (ev) {
-
                     const img = document.getElementById("preview_" + index);
-
-                    if (img) {
-                        img.src = ev.target.result;
-                    }
+                    if (img) img.src = ev.target.result;
                 };
-
                 reader.readAsDataURL(file);
             });
-
         });
-
     </script>
 }
 

@@ -9,7 +9,7 @@ namespace BaseConLogin.Services.Productos
 
         Task DesactivarProyectoAsync(int proyectoId);
 
-        Task<int> CrearProductoSimpleAsync(ProductoSimple producto, int tiendaId);
+        Task<int> CrearProductoSimpleAsync(ProductoBase producto, int tiendaId);
         Task<int> CrearProductoConfigurableAsync(ProductoConfigurable producto, int tiendaId);
     }
 }

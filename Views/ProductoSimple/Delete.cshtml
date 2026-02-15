@@ -1,4 +1,4 @@
-﻿@model BaseConLogin.Models.ProductoSimple
+﻿@model BaseConLogin.Models.ProductoBase
 
 @{
     ViewData["Title"] = "Eliminar Producto";
@@ -16,17 +16,17 @@
 
     <div class="col-md-4">
 
-        <img src="@Model.Producto.ImagenPrincipal"
+        <img src="@Model.ImagenPrincipal"
              class="img-fluid rounded" />
 
     </div>
 
     <div class="col-md-8">
 
-        <h4>@Model.Producto.Nombre</h4>
+        <h4>@Model.Nombre</h4>
 
         <p>
-            Precio: <strong>@Model.Producto.PrecioBase €</strong>
+            Precio: <strong>@Model.PrecioBase €</strong>
         </p>
 
         <p>
@@ -39,7 +39,7 @@
 
 <form asp-action="DeleteConfirmed" method="post">
 
-    <input type="hidden" name="id" value="@Model.ProductoBaseId" />
+    <input type="hidden" name="id" value="@Model.Id" />
 
 
     <button type="submit" class="btn btn-danger">

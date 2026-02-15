@@ -28,7 +28,6 @@ namespace BaseConLogin.Services.Productos
                     Nombre = proyecto.Producto.Nombre,
                     Descripcion = proyecto.Producto.Descripcion,
                     PrecioBase = 0,
-                    TipoProducto = TipoProducto.Proyecto,
                     Activo = true
                 };
 
@@ -112,7 +111,7 @@ namespace BaseConLogin.Services.Productos
             }
         }
 
-        public Task<int> CrearProductoSimpleAsync(ProductoSimple producto, int tiendaId)
+        public Task<int> CrearProductoSimpleAsync(ProductoBase producto, int tiendaId)
             => throw new NotImplementedException();
 
         public Task<int> CrearProductoConfigurableAsync(ProductoConfigurable producto, int tiendaId)

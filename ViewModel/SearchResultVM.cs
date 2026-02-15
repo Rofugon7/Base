@@ -9,6 +9,8 @@
 
         public int PaginaActual { get; set; }
         public int TotalPaginas { get; set; }
+
+
     }
 
 }
