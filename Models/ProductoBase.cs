@@ -1,4 +1,5 @@
 ﻿using BaseConLogin.Models.interfaces;
+using BaseConLogin.ViewModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -51,35 +52,46 @@ namespace BaseConLogin.Models
 
         public ICollection<ProductoPropiedadConfigurada> PropiedadesExtendidas { get; set; } = new List<ProductoPropiedadConfigurada>();
 
+        [NotMapped]
+        public List<PropiedadFilaVM> Propiedades { get; set; } = new List<PropiedadFilaVM>();
+
         public decimal CalcularPrecioFinal()
         {
             decimal precioFinal = PrecioBase;
 
-            // Ordenamos por el campo 'Orden' para que las operaciones se apliquen en secuencia
-            var propiedadesOrdenadas = PropiedadesExtendidas.OrderBy(p => p.Orden).ToList();
+            // 1. Decidimos qué fuente de datos usar. 
+            // Si la lista de la base de datos tiene elementos, usamos esa.
+            // Si no, miramos si hay algo en la lista temporal del VM.
+            var fuentePropiedades = (PropiedadesExtendidas != null && PropiedadesExtendidas.Any())
+                ? PropiedadesExtendidas.Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList()
+                : Propiedades.Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList();
 
-            foreach (var prop in propiedadesOrdenadas)
+            if (fuentePropiedades.Any())
             {
-                switch (prop.Operacion)
+                var propiedadesOrdenadas = fuentePropiedades.OrderBy(p => p.Orden).ToList();
+
+                foreach (var prop in propiedadesOrdenadas)
                 {
-                    case "Suma":
-                        precioFinal += prop.Valor;
-                        break;
-                    case "Resta":
-                        precioFinal -= prop.Valor;
-                        break;
-                    case "Multiplicacion":
-                        // Útil para porcentajes (ej: un valor de 1.10 incrementa un 10%)
-                        precioFinal *= prop.Valor;
-                        break;
-                    default:
-                        // Si no hay operación clara, por defecto sumamos
-                        precioFinal += prop.Valor;
-                        break;
+                    // Normalizamos el string de operación por si acaso (evitar fallos de mayúsculas)
+                    string operacion = prop.Operacion?.Trim();
+
+                    switch (operacion)
+                    {
+                        case "Suma":
+                            precioFinal += prop.Valor;
+                            break;
+                        case "Resta":
+                            precioFinal -= prop.Valor;
+                            break;
+                        case "Multiplicacion":
+                            precioFinal *= prop.Valor;
+                            break;
+                    }
                 }
             }
 
-            return precioFinal;
+            // Redondeo final a 2 decimales para dinero
+            return Math.Round(precioFinal, 2, MidpointRounding.AwayFromZero);
         }
     }
 

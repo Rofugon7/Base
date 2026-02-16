@@ -1,5 +1,8 @@
-﻿namespace BaseConLogin.ViewModel
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BaseConLogin.ViewModel
 {
+    [NotMapped]
     public class PropiedadFilaVM
     {
         public int? PropiedadMaestraId { get; set; }

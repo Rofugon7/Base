@@ -188,6 +188,10 @@ namespace BaseConLogin.Data
                 .WithMany(b => b.PropiedadesExtendidas)
                 .HasForeignKey(p => p.ProductoBaseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductoPropiedadConfigurada>()
+        .Property(p => p.Valor)
+        .HasPrecision(18, 8);
         }
     }
 }

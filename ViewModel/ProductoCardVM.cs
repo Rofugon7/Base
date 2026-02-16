@@ -20,19 +20,23 @@
         public decimal CalcularPrecioFinal()
         {
             decimal precioFinal = Precio;
-            var propiedadesOrdenadas = Propiedades.OrderBy(p => p.Orden).ToList();
 
-            foreach (var prop in propiedadesOrdenadas)
+            if (Propiedades != null && Propiedades.Any())
             {
-                switch (prop.Operacion)
+                var propiedadesOrdenadas = Propiedades.OrderBy(p => p.Orden).ToList();
+                foreach (var prop in propiedadesOrdenadas)
                 {
-                    case "Suma": precioFinal += prop.Valor; break;
-                    case "Resta": precioFinal -= prop.Valor; break;
-                    case "Multiplicacion": precioFinal *= prop.Valor; break;
-                    default: precioFinal += prop.Valor; break;
+                    switch (prop.Operacion)
+                    {
+                        case "Suma": precioFinal += prop.Valor; break;
+                        case "Resta": precioFinal -= prop.Valor; break;
+                        case "Multiplicacion": precioFinal *= prop.Valor; break;
+                    }
                 }
             }
-            return precioFinal;
+
+            // Redondeo exacto a 2 decimales para la visualización final
+            return Math.Round(precioFinal, 2, MidpointRounding.AwayFromZero);
         }
     }
 

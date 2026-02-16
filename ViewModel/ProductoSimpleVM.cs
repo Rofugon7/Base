@@ -59,31 +59,22 @@ namespace BaseConLogin.Models.ViewModels
         {
             decimal precioFinal = PrecioBase;
 
-            // Ordenamos por el campo 'Orden' para que las operaciones se apliquen en secuencia
-            var propiedadesOrdenadas = Propiedades.OrderBy(p => p.Orden).ToList();
-
-            foreach (var prop in propiedadesOrdenadas)
+            if (Propiedades != null && Propiedades.Any())
             {
-                switch (prop.Operacion)
+                var propiedadesOrdenadas = Propiedades.OrderBy(p => p.Orden).ToList();
+                foreach (var prop in propiedadesOrdenadas)
                 {
-                    case "Suma":
-                        precioFinal += prop.Valor;
-                        break;
-                    case "Resta":
-                        precioFinal -= prop.Valor;
-                        break;
-                    case "Multiplicacion":
-                        // Útil para porcentajes (ej: un valor de 1.10 incrementa un 10%)
-                        precioFinal *= prop.Valor;
-                        break;
-                    default:
-                        // Si no hay operación clara, por defecto sumamos
-                        precioFinal += prop.Valor;
-                        break;
+                    switch (prop.Operacion)
+                    {
+                        case "Suma": precioFinal += prop.Valor; break;
+                        case "Resta": precioFinal -= prop.Valor; break;
+                        case "Multiplicacion": precioFinal *= prop.Valor; break;
+                    }
                 }
             }
 
-            return precioFinal;
+            // Redondeo exacto a 2 decimales para la visualización final
+            return Math.Round(precioFinal, 2, MidpointRounding.AwayFromZero);
         }
 
 

@@ -91,6 +91,24 @@ builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(optio
     options.MultipartBodyLengthLimit = 104857600; // 100 MB por defecto en el servidor
 });
 
+
+var defaultCulture = new System.Globalization.CultureInfo("en-US");
+
+// Personalizamos la moneda de la cultura "en-US" para que use el Euro
+defaultCulture.NumberFormat.CurrencySymbol = "€";
+// Opcional: Si quieres que el símbolo aparezca a la derecha como en España:
+defaultCulture.NumberFormat.CurrencyPositivePattern = 3;
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(defaultCulture),
+    SupportedCultures = new List<System.Globalization.CultureInfo> { defaultCulture },
+    SupportedUICultures = new List<System.Globalization.CultureInfo> { defaultCulture }
+};
+
+// Después de app.UseRouting()
+
+
 var app = builder.Build();
 
 /* =========================
@@ -138,6 +156,7 @@ app.Use(async (context, next) =>
 });
 
 app.UseRouting();
+app.UseRequestLocalization(localizationOptions);
 
 // El orden de estos 4 es vital para el funcionamiento del Carrito y la Tienda
 app.UseSession();

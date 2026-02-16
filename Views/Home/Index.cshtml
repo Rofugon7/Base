@@ -105,8 +105,11 @@
                             </div>
                             <div class="card-body text-center p-2">
                                 <h6 class="mb-1 fw-bold">@p.Nombre</h6>
-                                <p class="mb-2 text-danger fw-bold small">@p.CalcularPrecioFinal().ToString("C") €</p>
-                                <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-outline-danger rounded-pill px-3">Ver</a>
+                                <p class="mb-2 text-danger fw-bold small">@p.CalcularPrecioFinal().ToString("C") </p>
+                                <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId"
+                                   class="btn btn-sm btn-outline-danger rounded-pill px-3" style="position: relative; z-index: 5;">
+                                    Ver Producto
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -137,7 +140,7 @@
                         </div>
                         <h6 class="fw-bold text-truncate">@p.Nombre</h6>
                         <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="h5 mb-0 fw-bold">@p.CalcularPrecioFinal().ToString("C") €</span>
+                            <span class="h5 mb-0 fw-bold">@p.CalcularPrecioFinal().ToString("C") </span>
                             <a asp-controller="ProductoSimple" asp-action="Details" asp-route-id="@p.ProductoBaseId" class="btn btn-sm btn-dark rounded-circle shadow">
                                 <i class="bi bi-arrow-right"></i>
                             </a>
