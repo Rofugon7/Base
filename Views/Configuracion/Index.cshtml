@@ -25,9 +25,11 @@
                 </div>
             }
 
-            <form id="configForm" asp-action="Index" method="post">
+            @* IMPORTANTE: enctype="multipart/form-data" para permitir envío de archivos *@
+            <form id="configForm" asp-action="Index" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="LogoPath" id="currentLogoPath" />
 
                 <div class="row g-4">
                     <div class="col-md-8">
@@ -61,13 +63,13 @@
                                 </div>
                                 <div class="col-12 mb-3">
                                     <label asp-for="Horario" class="form-label fw-bold">Horario</label>
-                                    <input asp-for="Horario" class="form-control" rows="2"></input>
+                                    <input asp-for="Horario" class="form-control" />
                                     <span asp-validation-for="Horario" class="text-danger small"></span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="card shadow-sm border-0">
+                        <div class="card shadow-sm border-0 mb-4">
                             <div class="card-header bg-white py-3">
                                 <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-telephone me-2"></i>Contacto de Soporte</h5>
                             </div>
@@ -85,16 +87,16 @@
                             </div>
                         </div>
 
-                        <div class="card shadow-sm border-0">
+                        <div class="card shadow-sm border-0 mb-4">
                             <div class="card-header bg-white py-3">
-                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-telephone me-2"></i>Contacto del Administrador</h5>
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-person-badge me-2"></i>Contacto del Administrador</h5>
                             </div>
                             <div class="card-body row">
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="EmailAdministrador" class="form-label fw-bold">Email</label>
                                     <input asp-for="EmailAdministrador" class="form-control" type="email" />
                                     <span asp-validation-for="EmailAdministrador" class="text-danger small"></span>
-                                </div> 
+                                </div>
                                 <div class="col-md-6 mb-3">
                                     <label asp-for="Representante" class="form-label fw-bold">Representante</label>
                                     <input asp-for="Representante" class="form-control" />
@@ -102,10 +104,81 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-pdf me-2"></i> Configuración de Impresiones</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="MaxFileSizeMB" class="form-label fw-bold"></label>
+                                        <div class="input-group">
+                                            <input asp-for="MaxFileSizeMB" type="number" class="form-control shadow-none" />
+                                            <span class="input-group-text">MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="FormatosPermitidos" class="form-label fw-bold"></label>
+                                        <input asp-for="FormatosPermitidos" class="form-control shadow-none" placeholder=".pdf,.jpg,.png" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="col-md-4">
-                        <div class="card shadow-sm border-0 mb-4 bg-light">
+                        @* SECCIÓN DE BRANDING Y LOGO *@
+                        <div class="card shadow-sm border-0 mb-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-palette me-2"></i>Branding</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-4 text-center">
+                                    <label class="form-label fw-bold d-block">Logotipo Actual</label>
+                                    <div class="bg-light p-3 rounded mb-3 border">
+                                        <img id="imgPreview" src="@(string.IsNullOrEmpty(Model.LogoPath) ? "/img/no-logo.png" : Model.LogoPath)"
+                                             class="img-fluid" style="max-height: 100px; object-fit: contain;" alt="Vista previa logo" />
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <label class="input-group-text" for="LogoFile"><i class="bi bi-upload"></i></label>
+                                        <input type="file" name="LogoFile" id="LogoFile" class="form-control" accept="image/*" />
+                                    </div>
+                                    <div class="form-text small">Suba un archivo (PNG, JPG) para actualizar.</div>
+                                </div>
+                                <hr />
+                                <div class="mb-3">
+                                    <label asp-for="ColorCorporativo" class="form-label fw-bold">Color Principal</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorCorporativo" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorCorporativo</code>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorBotones" class="form-label fw-bold">Color Botones</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorBotones" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorBotones</code>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorBotonesTexto" class="form-label fw-bold">Color Texto Botones</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorBotonesTexto" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorBotonesTexto</code>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="ColorEnlaces" class="form-label fw-bold">Color Enlaces</label>
+                                    <div class="d-flex align-items-center">
+                                        <input type="color" asp-for="ColorEnlaces" class="form-control form-control-color me-3" title="Elegir color" />
+                                        <code class="text-muted">@Model.ColorEnlaces</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow-sm border-0 mb-1 bg-light">
                             <div class="card-header bg-dark text-white py-3">
                                 <h5 class="mb-0 fw-bold"><i class="bi bi-receipt me-2"></i>Facturación</h5>
                             </div>
@@ -113,7 +186,7 @@
                                 <div class="mb-3">
                                     <label asp-for="PrefijoFactura" class="form-label fw-bold">Prefijo de Serie</label>
                                     <input asp-for="PrefijoFactura" class="form-control" placeholder="Ej: FAC-" />
-                                    <div class="form-text small">Para Verifactu: FAC2026/...</div>
+                                    <div class="form-text small">Verifactu: FAC2026/...</div>
                                 </div>
                                 <div class="mb-3">
                                     <label asp-for="IvaPorDefecto" class="form-label fw-bold">IVA General (%)</label>
@@ -124,69 +197,12 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card shadow-sm border-0">
-                            <div class="card-header bg-white py-3">
-                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-palette me-2"></i>Branding</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-4 text-center">
-                                    <label class="form-label fw-bold d-block">Logotipo Actual</label>
-                                    @if (!string.IsNullOrEmpty(Model.LogoPath))
-                                    {
-                                        <img src="@Model.LogoPath" class="img-thumbnail mb-2" style="max-height: 80px;" />
-                                    }
-                                    <input type="text" asp-for="LogoPath" class="form-control form-control-sm" placeholder="URL del logo" />
-                                </div>
-                                <hr />
-                                <div class="mb-3">
-                                    <label asp-for="ColorCorporativo" class="form-label fw-bold">Color Principal</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="color" asp-for="ColorCorporativo" class="form-control form-control-color me-3" title="Elegir color" />
-                                        <code class="text-muted">@Model.ColorCorporativo</code>
-                                    </div>
-                                    <div class="form-text small">Se usará en banners.</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="ColorBotones" class="form-label fw-bold">Color Botones</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="color" asp-for="ColorBotones" class="form-control form-control-color me-3" title="Elegir color" />
-                                        <code class="text-muted">@Model.ColorBotones</code>
-                                    </div>
-                                    <div class="form-text small">Se usará en botones.</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="ColorBotonesTexto" class="form-label fw-bold">Color Texto Botones</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="color" asp-for="ColorBotonesTexto" class="form-control form-control-color me-3" title="Elegir color" />
-                                        <code class="text-muted">@Model.ColorBotonesTexto</code>
-                                    </div>
-                                    <div class="form-text small">Se usará en el texto de los botones.</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="ColorEnlaces" class="form-label fw-bold">Color Enlaces</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="color" asp-for="ColorEnlaces" class="form-control form-control-color me-3" title="Elegir color" />
-                                        <code class="text-muted">@Model.ColorEnlaces</code>
-                                    </div>
-                                    <div class="form-text small">Se usará en los enlaces.</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label asp-for="ColorTextos" class="form-label fw-bold">Color Textos</label>
-                                    <div class="d-flex align-items-center">
-                                        <input type="color" asp-for="ColorTextos" class="form-control form-control-color me-3" title="Elegir color" />
-                                        <code class="text-muted">@Model.ColorTextos</code>
-                                    </div>
-                                    <div class="form-text small">Se usará en los textos.</div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="col-md-8">
                         <div class="card shadow-sm border-0 mb-4">
                             <div class="card-header bg-white py-3">
-                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-journal-text me-2"></i>Datos del Registro Mercantil</h5>
+                                <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-journal-text me-2"></i>Registro Mercantil</h5>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -199,7 +215,7 @@
                                         <input asp-for="Tomo" class="form-control" />
                                     </div>
                                     <div class="col-md-3 mb-3">
-                                        <label asp-for="Libro" class="form-label fw-bold">Libro/Hoja</label> @* Asumiendo Hoja *@
+                                        <label asp-for="Libro" class="form-label fw-bold">Libro/Hoja</label>
                                         <input asp-for="Libro" class="form-control" />
                                     </div>
                                     <div class="col-md-3 mb-3">
@@ -212,74 +228,43 @@
                                     </div>
                                     <div class="col-12">
                                         <label asp-for="Actividad" class="form-label fw-bold"></label>
-                                        <input asp-for="Actividad" class="form-control" placeholder="Ej: Comercio al por menor de artículos de papelería" />
+                                        <input asp-for="Actividad" class="form-control" placeholder="Ej: Comercio de papelería" />
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-8">
-                        <div class="card shadow-sm border-0">
+                        <div class="card shadow-sm border-0 mb-4">
                             <div class="card-header bg-white py-3">
                                 <h5 class="mb-0 text-dark fw-bold"><i class="bi bi-share me-2"></i>Redes Sociales</h5>
                             </div>
                             <div class="card-body">
-                                <div class="mb-2">
-                                    <label asp-for="Whatsapp" class="form-label small fw-bold"></label>
-                                    <input asp-for="Whatsapp" class="form-control form-control-sm" placeholder="600000000" />
-                                </div>
-                                <div class="mb-2">
-                                    <label asp-for="UrlInstagram" class="form-label small fw-bold">Instagram</label>
-                                    <input asp-for="UrlInstagram" class="form-control form-control-sm" />
-                                </div>
-                                <div class="mb-2">
-                                    <label asp-for="UrlFacebook" class="form-label small fw-bold">Facebook</label>
-                                    <input asp-for="UrlFacebook" class="form-control form-control-sm" />
-                                </div>
-                                <div class="mb-2">
-                                    <label asp-for="UrlX" class="form-label small fw-bold">X (Twitter)</label>
-                                    <input asp-for="UrlX" class="form-control form-control-sm" />
-                                </div>
-                                <div class="mb-2">
-                                    <label asp-for="UrlTikTok" class="form-label small fw-bold">TikTok</label>
-                                    <input asp-for="UrlTikTok" class="form-control form-control-sm" />
-                                </div>
-                                <div class="mb-2">
-                                    <label asp-for="Maps" class="form-label small fw-bold">Google Maps (URL)</label>
-                                    <textarea asp-for="Maps" class="form-control form-control-sm" rows="2"></textarea>
-                                </div>
-
-                                <div class="mb-2">
-                                    <label asp-for="MapaIncrustado" class="form-label small fw-bold">Google Maps incrustado (URL)</label>
-                                    <textarea asp-for="MapaIncrustado" class="form-control form-control-sm" rows="2"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card shadow-sm border-0 mb-4">
-                        <div class="card-header bg-white py-3">
-                            <h5 class="mb-0 fw-bold"><i class="bi bi-file-earmark-pdf me-2 icon-admin-brand"></i> Configuración de Impresiones</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="MaxFileSizeMB" class="form-label fw-bold"></label>
-                                    <div class="input-group">
-                                        <input asp-for="MaxFileSizeMB" type="number" class="form-control shadow-none" />
-                                        <span class="input-group-text">MB</span>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <label asp-for="Whatsapp" class="form-label small fw-bold"></label>
+                                        <input asp-for="Whatsapp" class="form-control form-control-sm" placeholder="600000000" />
                                     </div>
-                                    <span asp-validation-for="MaxFileSizeMB" class="text-danger small"></span>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label asp-for="FormatosPermitidos" class="form-label fw-bold"></label>
-                                    <input asp-for="FormatosPermitidos" class="form-control shadow-none" placeholder=".pdf,.jpg,.png" />
-                                    <div class="form-text">Escribe las extensiones incluyendo el punto y separadas por comas.</div>
-                                    <span asp-validation-for="FormatosPermitidos" class="text-danger small"></span>
+                                    <div class="col-md-6 mb-2">
+                                        <label asp-for="UrlInstagram" class="form-label small fw-bold">Instagram</label>
+                                        <input asp-for="UrlInstagram" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label asp-for="UrlFacebook" class="form-label small fw-bold">Facebook</label>
+                                        <input asp-for="UrlFacebook" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <label asp-for="UrlX" class="form-label small fw-bold">X (Twitter)</label>
+                                        <input asp-for="UrlX" class="form-control form-control-sm" />
+                                    </div>
+                                    <div class="col-12 mb-2">
+                                        <label asp-for="Maps" class="form-label small fw-bold">Google Maps (URL)</label>
+                                        <textarea asp-for="Maps" class="form-control form-control-sm" rows="1"></textarea>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+                        
                     </div>
                 </div>
             </form>
@@ -291,4 +276,24 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        // Lógica de previsualización de imagen
+        document.getElementById('LogoFile').onchange = function (evt) {
+            const [file] = this.files;
+            if (file) {
+                const url = URL.createObjectURL(file);
+
+                // 1. Actualizar la imagen en el panel (imgPreview)
+                document.getElementById('imgPreview').src = url;
+
+                // 2. Actualizar la imagen en la cabecera (Navbar)
+                // Buscamos la imagen dentro del enlace de la marca en la barra de navegación
+                const navbarLogo = document.querySelector('.navbar-brand img, .nav-logo img');
+                if (navbarLogo) {
+                    navbarLogo.src = url;
+                }
+            }
+        };
+    </script>
 }

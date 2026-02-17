@@ -26,10 +26,35 @@ namespace BaseConLogin.Controllers.Admin
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Index(TiendaConfig model)
+        public async Task<IActionResult> Index(TiendaConfig model, IFormFile? LogoFile)
         {
             if (ModelState.IsValid)
             {
+                if (LogoFile != null && LogoFile.Length > 0)
+                {
+                    // 1. Definir la ruta de la carpeta img
+                    string folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "img");
+
+                    // 2. SOLUCIÓN AL ERROR: Crear la carpeta si no existe
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+
+                    // 3. Generar el nombre del archivo (mantenemos la extensión original)
+                    string extension = Path.GetExtension(LogoFile.FileName);
+                    string fileName = "logo_tienda" + extension;
+                    string fullPath = Path.Combine(folderPath, fileName);
+
+                    // 4. Guardar el archivo físicamente
+                    using (var stream = new FileStream(fullPath, FileMode.Create))
+                    {
+                        await LogoFile.CopyToAsync(stream);
+                    }
+
+                    // 5. Guardar la ruta relativa en la base de datos
+                    model.LogoPath = "/img/" + fileName;
+                }
                 var configExistente = await _context.TiendaConfigs.FirstOrDefaultAsync();
 
                 if (configExistente == null)
