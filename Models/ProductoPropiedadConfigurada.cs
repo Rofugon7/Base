@@ -29,5 +29,8 @@ namespace BaseConLogin.Models
         public int Orden { get; set; }
 
         public bool EsConfigurable { get; set; } // Si el cliente puede verla/tocarla en la web
+
+        [Required]
+        public int TiendaId { get; set; }
     }
 }

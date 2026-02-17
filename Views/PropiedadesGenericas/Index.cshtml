@@ -1,0 +1,135 @@
+﻿@model IEnumerable<BaseConLogin.Models.PropiedadGenerica>
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Propiedades Genéricas</h2>
+        <a asp-action="Create" class="btn btn-primary rounded-pill">
+            <i class="bi bi-plus-circle me-2"></i>Nueva Propiedad
+        </a>
+    </div>
+
+    <table class="table table-hover align-middle shadow-sm bg-white rounded">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre (Interno)</th>
+                <th>Nombre (Cliente)</th>
+                <th>Valor</th>
+                <th>Operación</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="fw-bold">@item.NombreInterno</td>
+                    <td>@item.NombreEnProducto</td>
+                    <td>@item.Valor.ToString("N4")</td>
+                    <td>
+                        <span class="badge @(item.Operacion == "Suma" ? "bg-info" : "bg-warning text-dark")">
+                            @item.Operacion
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-success me-1"
+                                onclick="abrirModalAsignar(@item.Id, '@item.NombreInterno')">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Asignar
+                        </button>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Borrar propiedad?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="modal fade" id="modalAsignar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="ProcesarAsignacion" method="post">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Asignación de Propiedad</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="PropiedadGenericaId" id="modalPropId" />
+                    <p class="mb-3">Asignando: <strong id="modalPropNombre" class="text-primary"></strong></p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">¿Dónde quieres asignarla?</label>
+                        <select class="form-select" id="tipoAsignacion" onchange="alternarCampos()">
+                            <option value="categoria">A una Categoría completa</option>
+                            <option value="producto">A un Producto individual</option>
+                        </select>
+                    </div>
+
+                    <div id="divCategoria" class="mb-3">
+                        <label class="form-label fw-bold">Selecciona Categoría</label>
+                        <select name="CategoriaId" class="form-select" asp-items="ViewBag.Categorias">
+                            <option value="">-- Seleccionar Categoría --</option>
+                        </select>
+                    </div>
+
+                    <div id="divProducto" class="mb-3" style="display:none;">
+                        <label class="form-label fw-bold">Selecciona Producto</label>
+                        <select name="ProductoId" class="form-select" asp-items="ViewBag.Productos">
+                            <option value="">-- Seleccionar Producto --</option>
+                        </select>
+                    </div>
+
+                    <div class="alert alert-warning p-2 small">
+                        <i class="bi bi-exclamación-triangle me-1"></i>
+                        Si el producto ya tiene esta propiedad, se omitirá para evitar duplicados.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success px-4">Ejecutar Asignación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function abrirModalAsignar(id, nombre) {
+            document.getElementById('modalPropId').value = id;
+            document.getElementById('modalPropNombre').innerText = nombre;
+            // Resetear el modal al abrir
+            document.getElementById('tipoAsignacion').value = 'categoria';
+            alternarCampos();
+
+            new bootstrap.Modal(document.getElementById('modalAsignar')).show();
+        }
+
+        function alternarCampos() {
+            const tipo = document.getElementById('tipoAsignacion').value;
+            const divCat = document.getElementById('divCategoria');
+            const divProd = document.getElementById('divProducto');
+
+            if (tipo === 'categoria') {
+                divCat.style.display = 'block';
+                divProd.style.display = 'none';
+                divProd.querySelector('select').value = ""; // Limpiar el otro select
+            } else {
+                divCat.style.display = 'none';
+                divProd.style.display = 'block';
+                divCat.querySelector('select').value = ""; // Limpiar el otro select
+            }
+        }
+    </script>
+}

@@ -116,5 +116,40 @@ namespace BaseConLogin.Services.Productos
 
         public Task<int> CrearProductoConfigurableAsync(ProductoConfigurable producto, int tiendaId)
             => throw new NotImplementedException();
+
+        public async Task AsignarPropiedadACategoria(int propiedadGenericaId, int categoriaId)
+        {
+            var propiedadG = await _context.PropiedadesGenericas.FindAsync(propiedadGenericaId);
+            var productos = await _context.ProductosBase
+                .Include(p => p.PropiedadesExtendidas)
+                .Where(p => p.CategoriaId == categoriaId)
+                .ToListAsync();
+
+            foreach (var producto in productos)
+            {
+                await AsignarPropiedadAProducto(propiedadG, producto);
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AsignarPropiedadAProducto(PropiedadGenerica pg, ProductoBase producto)
+        {
+            // Calculamos el último orden actual
+            int ultimoOrden = producto.PropiedadesExtendidas.Any()
+                ? producto.PropiedadesExtendidas.Max(x => x.Orden)
+                : 0;
+
+            var nuevaPropiedad = new ProductoPropiedadConfigurada
+            {
+                ProductoBaseId = producto.Id,
+                NombreEnProducto = pg.NombreEnProducto,
+                Valor = pg.Valor,
+                Operacion = pg.Operacion,
+                Orden = ultimoOrden + 1, // Siempre al final
+                TiendaId = pg.TiendaId
+            };
+
+            _context.ProductoPropiedades.Add(nuevaPropiedad);
+        }
     }
 }

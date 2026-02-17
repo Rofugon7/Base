@@ -11,5 +11,9 @@ namespace BaseConLogin.Services.Productos
 
         Task<int> CrearProductoSimpleAsync(ProductoBase producto, int tiendaId);
         Task<int> CrearProductoConfigurableAsync(ProductoConfigurable producto, int tiendaId);
+
+        Task AsignarPropiedadACategoria(int propiedadGenericaId, int categoriaId);
+
+        Task AsignarPropiedadAProducto(PropiedadGenerica pg, ProductoBase producto);
     }
 }

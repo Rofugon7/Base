@@ -53,6 +53,7 @@ namespace BaseConLogin.Data
 
         public DbSet<PropiedadExtendidaMaestra> PropiedadesMaestras { get; set; }
         public DbSet<ProductoPropiedadConfigurada> ProductoPropiedades { get; set; }
+        public DbSet<PropiedadGenerica> PropiedadesGenericas { get; set; }
 
 
         // =========================
@@ -192,6 +193,14 @@ namespace BaseConLogin.Data
             modelBuilder.Entity<ProductoPropiedadConfigurada>()
         .Property(p => p.Valor)
         .HasPrecision(18, 8);
+
+
+            modelBuilder.Entity<PropiedadGenerica>()
+    .HasQueryFilter(p => !p.IsDeleted);
+
+            modelBuilder.Entity<PropiedadGenerica>()
+                .Property(p => p.Valor)
+                .HasPrecision(18, 8);
         }
     }
 }
