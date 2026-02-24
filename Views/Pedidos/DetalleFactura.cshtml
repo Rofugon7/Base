@@ -51,10 +51,10 @@
         </div>
 
         <table class="table table-striped">
-            <thead class="bg-light">
+            <thead>
                 <tr>
                     <th>Descripción</th>
-                    <th class="text-center">Cant.</th>
+                    <th class="text-center">Cantidad</th>
                     <th class="text-end">Precio Unit.</th>
                     <th class="text-end">Total</th>
                 </tr>
@@ -63,10 +63,27 @@
                 @foreach (var linea in Model.Lineas)
                 {
                     <tr>
-                        <td>@linea.Descripcion</td>
+                        <td>
+                            <div class="fw-bold">@linea.Descripcion</div>
+
+                            @* DESGLOSE DE OPCIONES CONFIGURADAS *@
+                            @if (@linea.PedidoItem?.PropiedadesElegidas != null && linea.PedidoItem.PropiedadesElegidas.Any())
+                            {
+                                <div class="ms-3 small text-muted italic">
+                                    @foreach (var prop in linea.PedidoItem.PropiedadesElegidas)
+                                    {
+                                        <div>
+                                            <i class="bi bi-arrow-return-right me-1"></i>
+                                            <span>@prop.NombrePropiedad: <strong>@prop.ValorSeleccionado</strong></span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            @* Si no usas la relación directa, podemos leer del campo "Opciones" si lo guardaste en la descripción *@
+                        </td>
                         <td class="text-center">@linea.Cantidad</td>
-                        <td class="text-end">@linea.PrecioUnitario.ToString("N2")€</td>
-                        <td class="text-end">@linea.Subtotal.ToString("N2")€</td>
+                        <td class="text-end">@linea.PrecioUnitario.ToString("C")</td>
+                        <td class="text-end">@((linea.Cantidad * linea.PrecioUnitario).ToString("C"))</td>
                     </tr>
                 }
             </tbody>

@@ -51,7 +51,7 @@ namespace BaseConLogin.Models.ViewModels
 
         public TipoProducto TipoProducto { get; set; } = TipoProducto.Simple;
 
-
+        public List<SelectListItem> GruposDisponibles { get; set; } = new();
 
 
 

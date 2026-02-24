@@ -59,12 +59,15 @@ namespace BaseConLogin.Models
         {
             decimal precioFinal = PrecioBase;
 
-            // 1. Decidimos qué fuente de datos usar. 
-            // Si la lista de la base de datos tiene elementos, usamos esa.
-            // Si no, miramos si hay algo en la lista temporal del VM.
+            // 1. Decidimos qué fuente de datos usar.
+            // IMPORTANTE: Ahora filtramos para que solo entren en el cálculo las NO configurables
             var fuentePropiedades = (PropiedadesExtendidas != null && PropiedadesExtendidas.Any())
-                ? PropiedadesExtendidas.Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList()
-                : Propiedades.Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList();
+                ? PropiedadesExtendidas
+                    .Where(p => !p.EsConfigurable) // <--- FILTRO CLAVE
+                    .Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList()
+                : Propiedades
+                    .Select(p => new { p.Valor, p.Operacion, p.Orden }).ToList();
+            // Nota: Si 'Propiedades' es del VM, asegúrate de filtrar ahí también si es necesario
 
             if (fuentePropiedades.Any())
             {
@@ -72,7 +75,6 @@ namespace BaseConLogin.Models
 
                 foreach (var prop in propiedadesOrdenadas)
                 {
-                    // Normalizamos el string de operación por si acaso (evitar fallos de mayúsculas)
                     string operacion = prop.Operacion?.Trim();
 
                     switch (operacion)
@@ -90,7 +92,6 @@ namespace BaseConLogin.Models
                 }
             }
 
-            // Redondeo final a 2 decimales para dinero
             return Math.Round(precioFinal, 2, MidpointRounding.AwayFromZero);
         }
     }

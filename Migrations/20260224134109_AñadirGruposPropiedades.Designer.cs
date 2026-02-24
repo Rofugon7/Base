@@ -4,6 +4,7 @@ using BaseConLogin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaseConLogin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260224134109_AñadirGruposPropiedades")]
+    partial class AñadirGruposPropiedades
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -737,15 +740,9 @@ namespace BaseConLogin.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("EsConfigurable")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Grupo")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("GrupoPropiedadId")
-                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -775,8 +772,6 @@ namespace BaseConLogin.Migrations
                         .HasColumnType("decimal(18,8)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GrupoPropiedadId");
 
                     b.HasIndex("TiendaId");
 
@@ -1469,17 +1464,11 @@ namespace BaseConLogin.Migrations
 
             modelBuilder.Entity("BaseConLogin.Models.PropiedadGenerica", b =>
                 {
-                    b.HasOne("BaseConLogin.Models.GrupoPropiedad", "GrupoPropiedad")
-                        .WithMany()
-                        .HasForeignKey("GrupoPropiedadId");
-
                     b.HasOne("BaseConLogin.Models.Tienda", "Tienda")
                         .WithMany()
                         .HasForeignKey("TiendaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("GrupoPropiedad");
 
                     b.Navigation("Tienda");
                 });

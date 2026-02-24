@@ -22,5 +22,8 @@ namespace BaseConLogin.Models
         public int Cantidad { get; set; }
 
         public decimal Total => PrecioUnitario * Cantidad;
+
+        public virtual ICollection<PedidoDetallePropiedad> PropiedadesElegidas { get; set; } = new List<PedidoDetallePropiedad>();
+
     }
 }

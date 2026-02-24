@@ -16,15 +16,16 @@
             <form asp-action="Create">
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Nombre Interno</label>
+                        <label class="form-label fw-bold">Nombre Interno (Uso Administrativo)</label>
                         <input asp-for="NombreInterno" class="form-control" placeholder="Ej: Barnizado Premium" />
                         <span asp-validation-for="NombreInterno" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label fw-bold">Nombre en Producto (Cliente)</label>
-                        <input asp-for="NombreEnProducto" class="form-control" placeholder="Ej: Acabado en Barniz" />
+                        <label class="form-label fw-bold">Nombre en Producto (Nombre de la Opción)</label>
+                        <input asp-for="NombreEnProducto" class="form-control" placeholder="Ej: Barniz UV Mate" />
                         <span asp-validation-for="NombreEnProducto" class="text-danger small"></span>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Valor / Precio</label>
                         <div class="input-group">
@@ -32,6 +33,7 @@
                             <span class="input-group-text">€</span>
                         </div>
                     </div>
+
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Operación</label>
                         <select asp-for="Operacion" class="form-select">
@@ -39,6 +41,28 @@
                             <option value="Resta">Resta (-)</option>
                             <option value="Multiplicacion">Multiplicación (x)</option>
                         </select>
+                    </div>
+
+                    <div class="col-12 mt-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input asp-for="EsConfigurable" class="form-check-input" type="checkbox" id="chkEsConfigurable">
+                                    <label class="form-check-label fw-bold" for="chkEsConfigurable">
+                                        ¿Es una opción seleccionable por el cliente?
+                                    </label>
+                                    <div class="form-text">Si se marca, aparecerá como opción en la ficha del producto.</div>
+                                </div>
+
+                                <div id="divGrupoSeleccion" style="display:none;">
+                                    <label class="form-label fw-bold">Asignar a Grupo de Propiedades</label>
+                                    <select asp-for="GrupoPropiedadId" asp-items="ViewBag.Grupos" class="form-select">
+                                        <option value="">-- Selecciona un grupo (Ej: Tipo de Papel, Acabados...) --</option>
+                                    </select>
+                                    <span asp-validation-for="GrupoPropiedadId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -50,3 +74,26 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function toggleGrupo() {
+                if ($('#chkEsConfigurable').is(':checked')) {
+                    $('#divGrupoSeleccion').slideDown();
+                } else {
+                    $('#divGrupoSeleccion').slideUp();
+                    $('#GrupoPropiedadId').val(''); // Resetea el grupo si no es configurable
+                }
+            }
+
+            $('#chkEsConfigurable').change(function () {
+                toggleGrupo();
+            });
+
+            // Ejecutar al cargar por si hay errores de validación y el check quedó marcado
+            toggleGrupo();
+        });
+    </script>
+}

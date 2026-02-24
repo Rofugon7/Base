@@ -4,6 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BaseConLogin.Models
 {
+    public enum TipoPropiedad
+    {
+        CosteInterno = 1,  // Desgaste, luz, etc. (Invisible al cliente)
+        OpcionCliente = 2  // Gramaje, acabado, etc. (Botones en la web)
+    }
+
     public class PropiedadGenerica : ITenantEntity
     {
         public int Id { get; set; }
@@ -18,6 +24,14 @@ namespace BaseConLogin.Models
         [Required, MaxLength(100)]
         public string NombreEnProducto { get; set; } = string.Empty; // Lo que ve el cliente
 
+        // Nuevo: Para agrupar en la interfaz (ej: "Tipo de Papel")
+        [MaxLength(100)]
+        public string? Grupo { get; set; }
+
+        // Nuevo: Para distinguir entre coste oculto y opción seleccionable
+        [Required]
+        public TipoPropiedad Tipo { get; set; } = TipoPropiedad.CosteInterno;
+
         [Column(TypeName = "decimal(18,8)")]
         public decimal Valor { get; set; }
 
@@ -26,6 +40,10 @@ namespace BaseConLogin.Models
 
         public bool IsDeleted { get; set; } = false; // Borrado lógico
 
+        public int? GrupoPropiedadId { get; set; }
+        public virtual GrupoPropiedad GrupoPropiedad { get; set; }
+
+        public bool EsConfigurable { get; set; }
 
     }
 }

@@ -1,0 +1,29 @@
+﻿<form asp-action="AsignarPropiedad" method="post">
+    <input type="hidden" name="ProductoBaseId" value="@Model.Id" />
+
+    <div class="row">
+        <div class="col-md-3">
+            <label>Grupo (Ej: Papel)</label>
+            <input name="NombrePropiedad" class="form-control" placeholder="Ej: Tipo de Papel" required />
+        </div>
+        <div class="col-md-3">
+            <label>Opción (Ej: Mate)</label>
+            <input name="NombreEnProducto" class="form-control" placeholder="Ej: Mate Premium" required />
+        </div>
+        <div class="col-md-2">
+            <label>Operación</label>
+            <select name="Operacion" class="form-control">
+                <option value="Suma">Suma (+)</option>
+                <option value="Multiplicacion">Multiplicación (x)</option>
+                <option value="Resta">Resta (-)</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Valor</label>
+            <input name="Valor" type="number" step="0.01" class="form-control" value="0.00" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-success w-100">Añadir Opción</button>
+        </div>
+    </div>
+</form>

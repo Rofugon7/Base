@@ -4,221 +4,308 @@
     ViewData["Title"] = Model.ProductoBaseId == 0 ? "Crear Producto" : "Editar Producto";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    /* Ocultar flechas de inputs numéricos */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
-<form asp-action="@((Model.ProductoBaseId == 0) ? "Create" : "Edit")" method="post" enctype="multipart/form-data">
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
 
-    <input type="hidden" asp-for="ProductoBaseId" />
+    .preview-img {
+        max-width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+    }
 
-    <div class="mb-3">
-        <label>Nombre</label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
-    </div>
+    .card-header-brand {
+        background-color: #212529;
+        color: white;
+    }
 
-    <div class="mb-3">
-        <label>Descripción</label>
-        <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
-        <span asp-validation-for="Descripcion" class="text-danger"></span>
-    </div>
+    .table th {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
 
-    <div class="row">
-        <div class="col">
-            <label>Precio Base (€)</label>
-            @* USO DE TEXTO: Evitamos bloqueos del navegador. Formato "0.00" fuerza SIEMPRE 2 decimales *@
-            <input type="text" inputmode="decimal"
-                   name="PrecioBase"
-                   value="@Model.PrecioBase.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
-                   class="form-control decimal-input" />
-            <span asp-validation-for="PrecioBase" class="text-danger"></span>
+    .select-grupo:disabled {
+        background-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+</style>
+
+<div class="container">
+    <h2 class="mb-4">@ViewData["Title"]</h2>
+
+    <form asp-action="@(Model.ProductoBaseId == 0 ? "Create" : "Edit")" method="post" enctype="multipart/form-data" id="formProducto">
+
+        <input type="hidden" asp-for="ProductoBaseId" />
+
+        <div class="mb-3">
+            <label class="fw-bold">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
         </div>
-        <div class="col">
-            <label>Stock</label>
-            <input asp-for="Stock" type="number" class="form-control" />
-            <span asp-validation-for="Stock" class="text-danger"></span>
+
+        <div class="mb-3">
+            <label class="fw-bold">Descripción</label>
+            <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Descripcion" class="text-danger"></span>
         </div>
-    </div>
 
-    <div class="mb-3">
-        <label>SKU</label>
-        <input asp-for="SKU" class="form-control" />
-        <span asp-validation-for="SKU" class="text-danger"></span>
-    </div>
+        <div class="row">
+            <div class="col">
+                <label class="fw-bold">Precio Base (€)</label>
+                <input type="text" name="PrecioBase"
+                       value="@Model.PrecioBase.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                       class="form-control decimal-input" required />
+                <span asp-validation-for="PrecioBase" class="text-danger"></span>
+            </div>
+            <div class="col">
+                <label class="fw-bold">Stock</label>
+                <input asp-for="Stock" type="number" class="form-control" />
+            </div>
+        </div>
 
-    <div class="mb-3">
-        <label>Categoría</label>
-        <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-control">
-            <option value="">-- Selecciona categoría --</option>
-        </select>
-    </div>
+        <div class="mb-3 mt-3">
+            <label class="fw-bold">SKU</label>
+            <input asp-for="SKU" class="form-control" />
+        </div>
 
-    <div class="mb-3">
-        <label>Producto activo</label>
-        <input asp-for="Activo" type="checkbox" />
-    </div>
+        <div class="mb-3">
+            <label class="fw-bold">Categoría</label>
+            <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-control">
+                <option value="">-- Selecciona categoría --</option>
+            </select>
+        </div>
 
-    <div class="row g-2">
-        @for (int i = 0; i < 4; i++)
-        {
-            <div class="col-3 text-center">
-                <input type="hidden" name="SlotsIds[@i]" value="@(i<Model.SlotsIds.Count? Model.SlotsIds[i] : null)" />
-                <input type="file" name="Imagenes[@i]" class="form-control imagen-input" data-index="@i" accept="image/*" />
+        <div class="mb-3 form-check">
+            <input asp-for="Activo" type="checkbox" class="form-check-input" />
+            <label class="form-check-label">Producto activo</label>
+        </div>
 
-                <div class="form-check mt-1">
-                    <input class="form-check-input" type="radio" name="PrincipalIndex" value="@i" @(i == Model.PrincipalIndex ? "checked" : "") />
-                    <label class="small">Principal</label>
-                </div>
+        @* SECCIÓN IMÁGENES *@
+        <h5 class="mt-4">Imágenes del Producto</h5>
+        <div class="row g-2 mb-4">
+            @for (int i = 0; i < 4; i++)
+            {
+                <div class="col-3 text-center border p-2 bg-light">
+                    <input type="hidden" name="SlotsIds[@i]" value="@(i<Model.SlotsIds.Count? Model.SlotsIds[i]?.ToString() : "")" />
+                    <input type="file" name="Imagenes[@i]" class="form-control form-control-sm imagen-input" data-index="@i" accept="image/*" />
 
-                @if (i < Model.SlotsIds.Count && Model.SlotsIds[i] != null)
-                {
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="ImagenesBorrar" value="@Model.SlotsIds[i]" />
-                        <label class="small">Borrar</label>
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="radio" name="PrincipalIndex" value="@i" @(i == Model.PrincipalIndex ? "checked" : "") />
+                        <label class="small">Principal</label>
                     </div>
-                }
 
-                <img id="preview_@i"
-                     src="@(i < Model.ImagenesActuales.Count ? "/" + Model.ImagenesActuales[i].Ruta : "/imagenes/ProductoSinImagen.png")"
-                     class="preview-img" style="max-width: 100%; height: auto;" />
-            </div>
-        }
-    </div>
+                    @if (i < Model.SlotsIds.Count && Model.SlotsIds[i].HasValue)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="ImagenesBorrar" value="@Model.SlotsIds[i]" />
+                            <label class="small text-danger">Borrar</label>
+                        </div>
+                    }
 
-    <div id="contenedorPropiedades">
-        <div class="card-header d-flex justify-content-between align-items-center mt-4">
-            <h5>Propiedades y Costes Adicionales</h5>
-            <button type="button" class="btn btn-sm btn-success" onclick="agregarPropiedad()">
-                <i class="bi bi-plus-circle"></i> Añadir Propiedad
-            </button>
+                    <img id="preview_@i"
+                         src="@(i < Model.ImagenesActuales.Count ? "/" + Model.ImagenesActuales[i].Ruta : "/imagenes/ProductoSinImagen.png")"
+                         class="preview-img" />
+                </div>
+            }
         </div>
-        @for (int i = 0; i < Model.Propiedades.Count; i++)
-        {
-            <div class="row g-2 mb-2 align-items-center border-bottom pb-2 property-row">
-                <div class="col-md-3">
-                    <input name="Propiedades[@i].NombreEnProducto" value="@Model.Propiedades[i].NombreEnProducto" class="form-control" required />
-                </div>
-                <div class="col-md-2">
-                    @* USO DE TEXTO: Formato "0.########" permite HASTA 8 decimales, sin forzar ceros inútiles *@
-                    <input type="text" inputmode="decimal"
-                           name="Propiedades[@i].Valor"
-                           value="@Model.Propiedades[i].Valor.ToString("0.########", System.Globalization.CultureInfo.InvariantCulture)"
-                           class="form-control decimal-input" required />
-                </div>
-                <div class="col-md-3">
-                    <select name="Propiedades[@i].Operacion" class="form-select">
-                        <option value="Suma" selected="@(Model.Propiedades[i].Operacion == "Suma")">Suma (+)</option>
-                        <option value="Multiplicacion" selected="@(Model.Propiedades[i].Operacion == "Multiplicacion")">Multiplicación (x)</option>
-                        <option value="Resta" selected="@(Model.Propiedades[i].Operacion == "Resta")">Resta (-)</option>
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="Propiedades[@i].Orden" value="@Model.Propiedades[i].Orden" class="form-control" />
-                </div>
-                <div class="col-md-1 text-center">
-                    <input type="checkbox" name="Propiedades[@i].EsConfigurable" value="true" class="form-check-input" @(Model.Propiedades[i].EsConfigurable ? "checked" : "") />
-                    <input type="hidden" name="Propiedades[@i].EsConfigurable" value="false" />
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.property-row').remove()">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            </div>
-        }
-    </div>
 
-    <div class="mt-4">
-        <button type="submit" class="btn btn-primary">Guardar</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-    </div>
-</form>
+        @* --- GESTIÓN DE PROPIEDADES --- *@
+        <div class="card shadow-sm border-0 mt-5">
+            <div class="card-header card-header-brand d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Configuración de Opciones y Precios</h5>
+                <button type="button" onclick="agregarPropiedad()" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Añadir Nueva Opción
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%">Grupo (Si es Config)</th>
+                            <th style="width: 20%">Opción (Ej: Kraft)</th>
+                            <th>Valor/Precio</th>
+                            <th>Operación</th>
+                            <th style="width: 80px">Orden</th>
+                            <th class="text-center">¿Config?</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoPropiedades">
+                        @for (int i = 0; i < Model.Propiedades.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @* ID oculto necesario para la edición *@
+                                    <input type="hidden" name="Propiedades[@i].Id" value="@Model.Propiedades[i].Id" />
+
+                                    <select name="Propiedades[@i].GrupoPropiedadId" class="form-select form-select-sm select-grupo">
+                                        <option value="">-- Sin Grupo --</option>
+                                        @foreach (var grupo in Model.GruposDisponibles)
+                                        {
+                                            @* Forzamos el selected comparando el valor actual del modelo con el del select *@
+                                            if (Model.Propiedades[i].GrupoPropiedadId?.ToString() == grupo.Value)
+                                            {
+                                                <option value="@grupo.Value" selected="selected">@grupo.Text</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@grupo.Value">@grupo.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" name="Propiedades[@i].NombrePropiedad" value="@Model.Propiedades[i].NombrePropiedad" class="form-control form-control-sm" required />
+                                </td>
+                                <td>
+                                    <input type="text" name="Propiedades[@i].Valor"
+                                           value="@Model.Propiedades[i].Valor.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture)"
+                                           class="form-control form-control-sm decimal-input" required />
+                                </td>
+                                <td>
+                                    <select name="Propiedades[@i].Operacion" class="form-select form-select-sm">
+                                        <option value="Suma" selected="@(Model.Propiedades[i].Operacion == "Suma")">Suma (+)</option>
+                                        <option value="Multiplicacion" selected="@(Model.Propiedades[i].Operacion == "Multiplicacion")">Multiplicación (x)</option>
+                                        <option value="Resta" selected="@(Model.Propiedades[i].Operacion == "Resta")">Resta (-)</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" name="Propiedades[@i].Orden" value="@Model.Propiedades[i].Orden" class="form-control form-control-sm" />
+                                </td>
+                                <td class="text-center">
+                                    <input type="checkbox" name="Propiedades[@i].EsConfigurable" value="true" class="form-check-input chk-configurable" @(Model.Propiedades[i].EsConfigurable ? "checked" : "") />
+                                    <input type="hidden" name="Propiedades[@i].EsConfigurable" value="false" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.closest('tr').remove()">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg">Guardar Cambios</button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg">Volver</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-        let propIndex = @Model.Propiedades.Count;
+        // Convertimos los grupos del Model a una variable JS para usarlos en agregarPropiedad()
+        const gruposDisponibles = @Html.Raw(Json.Serialize(Model.GruposDisponibles));
+        let contador = @Model.Propiedades.Count;
 
         function agregarPropiedad() {
-            const contenedor = document.getElementById('contenedorPropiedades');
+            let optionsHtml = '<option value="">-- Selecciona Grupo --</option>';
+            gruposDisponibles.forEach(g => {
+                optionsHtml += `<option value="${g.value}">${g.text}</option>`;
+            });
+
+            const cuerpo = document.getElementById('cuerpoPropiedades');
             const fila = `
-                <div class="row g-2 mb-2 align-items-center border-bottom pb-2 property-row">
-                    <div class="col-md-3">
-                        <input name="Propiedades[${propIndex}].NombreEnProducto" class="form-control" placeholder="Ej: Barnizado" required />
-                    </div>
-                    <div class="col-md-2">
-                        <input type="text" inputmode="decimal" name="Propiedades[${propIndex}].Valor" class="form-control decimal-input" placeholder="0.00" required />
-                    </div>
-                    <div class="col-md-3">
-                        <select name="Propiedades[${propIndex}].Operacion" class="form-select">
+                <tr>
+                    <td>
+                        <select name="Propiedades[${contador}].GrupoPropiedadId" class="form-select form-select-sm select-grupo" disabled>
+                            ${optionsHtml}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="text" name="Propiedades[${contador}].NombrePropiedad" class="form-control form-control-sm" placeholder="Ej: Kraft" required />
+                    </td>
+                    <td>
+                        <input type="text" name="Propiedades[${contador}].Valor" class="form-control form-control-sm decimal-input" placeholder="0.00" required />
+                    </td>
+                    <td>
+                        <select name="Propiedades[${contador}].Operacion" class="form-select form-select-sm">
                             <option value="Suma">Suma (+)</option>
                             <option value="Multiplicacion">Multiplicación (x)</option>
                             <option value="Resta">Resta (-)</option>
                         </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="number" name="Propiedades[${propIndex}].Orden" value="${propIndex}" class="form-control" />
-                    </div>
-                    <div class="col-md-1 text-center">
-                        <input type="checkbox" name="Propiedades[${propIndex}].EsConfigurable" value="true" class="form-check-input" />
-                        <input type="hidden" name="Propiedades[${propIndex}].EsConfigurable" value="false" />
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.property-row').remove()">
+                    </td>
+                    <td>
+                        <input type="number" name="Propiedades[${contador}].Orden" class="form-control form-control-sm" value="${contador + 1}" />
+                    </td>
+                    <td class="text-center">
+                        <input type="checkbox" name="Propiedades[${contador}].EsConfigurable" class="form-check-input chk-configurable" value="true" />
+                        <input type="hidden" name="Propiedades[${contador}].EsConfigurable" value="false" />
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.closest('tr').remove()">
                             <i class="bi bi-trash"></i>
                         </button>
-                    </div>
-                </div>
+                    </td>
+                </tr>
             `;
-            contenedor.insertAdjacentHTML('beforeend', fila);
-            propIndex++;
+            cuerpo.insertAdjacentHTML('beforeend', fila);
+            contador++;
         }
 
-        // ==========================================
-        // LA MAGIA: Interceptamos antes de enviar
-        // ==========================================
-        document.querySelector('form').addEventListener('submit', function (e) {
-
-            // 1. Convertir todas las comas en puntos
-            document.querySelectorAll('.decimal-input').forEach(input => {
-                if (input.value) {
-                    input.value = input.value.replace(',', '.').trim();
+        $(document).ready(function () {
+            // Inicializar estados al cargar (para el modo edición)
+            document.querySelectorAll(".chk-configurable").forEach(chk => {
+                const fila = chk.closest("tr");
+                const selectGrupo = fila.querySelector(".select-grupo");
+                if (!chk.checked) {
+                    selectGrupo.disabled = true;
+                    selectGrupo.style.backgroundColor = "#e9ecef";
                 }
             });
 
-            // 2. Re-indexación de propiedades para evitar fallos de lista rota
-            const filas = document.querySelectorAll('.property-row');
-            filas.forEach((fila, index) => {
-                fila.querySelectorAll('input, select').forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name && name.includes('Propiedades')) {
-                        input.setAttribute('name', name.replace(/\[\d+\]/, `[${index}]`));
+            // Delegación de eventos para el cambio de checkbox "EsConfigurable"
+            $(document).on("change", ".chk-configurable", function () {
+                const fila = $(this).closest("tr");
+                const selectGrupo = fila.find(".select-grupo");
+
+                if (!this.checked) {
+                    selectGrupo.val("").prop("disabled", true).css("background-color", "#e9ecef");
+                } else {
+                    selectGrupo.prop("disabled", false).css("background-color", "#fff");
+                }
+            });
+
+            // Validación decimal y limpieza
+            if ($.validator) {
+                $.validator.methods.number = function (value, element) {
+                    return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
+                };
+            }
+
+            $("#formProducto").on("submit", function () {
+                $(this).find('.decimal-input').each(function() {
+                    if ($(this).val()) {
+                        let v = $(this).val().replace(',', '.').trim();
+                        $(this).val(v);
                     }
                 });
             });
 
-            // 3. Desactivamos validación client-side estricta para asegurar que viaja al servidor
-            $(this).validate().cancelSubmit = true;
-        });
-
-        // 4. Domamos la validación de jQuery para que NO moleste mientras el usuario escribe
-        if ($.validator) {
-            $.validator.methods.number = function (value, element) {
-                // Acepta tanto coma como punto visualmente sin mostrar texto rojo
-                return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
-            }
-        }
-
-        // Previsualización de imágenes (Sin cambios)
-        document.querySelectorAll(".imagen-input").forEach(input => {
-            input.addEventListener("change", e => {
-                const file = e.target.files[0];
-                const index = e.target.dataset.index;
+            // Preview de imágenes
+            $(document).on("change", ".imagen-input", function() {
+                const file = this.files[0];
+                const index = $(this).data("index");
                 if (!file) return;
                 const reader = new FileReader();
-                reader.onload = function (ev) {
-                    const img = document.getElementById("preview_" + index);
-                    if (img) img.src = ev.target.result;
+                reader.onload = ev => {
+                    $(`#preview_${index}`).attr("src", ev.target.result);
                 };
                 reader.readAsDataURL(file);
             });

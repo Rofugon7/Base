@@ -8,16 +8,18 @@
         <div class="card-body p-4">
             <form asp-action="Edit">
                 <input type="hidden" asp-for="Id" />
-                <input type="hidden" asp-for="TiendaId" /> @* Importante mantener el ID de la tienda *@
+                <input type="hidden" asp-for="TiendaId" />
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nombre Interno</label>
                         <input asp-for="NombreInterno" class="form-control" />
+                        <span asp-validation-for="NombreInterno" class="text-danger small"></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nombre en Producto</label>
                         <input asp-for="NombreEnProducto" class="form-control" />
+                        <span asp-validation-for="NombreEnProducto" class="text-danger small"></span>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label fw-bold">Valor</label>
@@ -31,18 +33,60 @@
                             <option value="Multiplicacion">Multiplicación (x)</option>
                         </select>
                     </div>
+
+                    @* SECCIÓN DE CONFIGURACIÓN Y GRUPOS *@
+                    <div class="col-12 mt-3">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <div class="form-check form-switch mb-3">
+                                    <input asp-for="EsConfigurable" class="form-check-input" type="checkbox" id="chkEsConfigurable">
+                                    <label class="form-check-label fw-bold" for="chkEsConfigurable">
+                                        ¿Es una opción seleccionable por el cliente?
+                                    </label>
+                                </div>
+
+                                <div id="divGrupoSeleccion" style="display:none;">
+                                    <label class="form-label fw-bold">Grupo Asignado:</label>
+                                    <select asp-for="GrupoPropiedadId" asp-items="ViewBag.Grupos" class="form-select">
+                                        <option value="">-- Selecciona un grupo --</option>
+                                    </select>
+                                    <span asp-validation-for="GrupoPropiedadId" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="alert alert-info mt-3 small">
+                <div class="alert alert-info mt-4 small">
                     <i class="bi bi-info-circle me-2"></i>
-                    Nota: Los cambios aquí no afectarán a los productos que ya tienen esta propiedad asignada.
+                    <strong>Nota:</strong> Los cambios realizados aquí se aplicarán a futuras asignaciones masivas. Los productos que ya tienen esta propiedad no se verán afectados automáticamente.
                 </div>
 
                 <div class="mt-4 pt-3 border-top">
-                    <button type="submit" class="btn btn-dark px-5">Actualizar</button>
+                    <button type="submit" class="btn btn-dark px-5">Actualizar Propiedad</button>
                     <a asp-action="Index" class="btn btn-link text-secondary">Volver al listado</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function toggleGrupo() {
+                if ($('#chkEsConfigurable').is(':checked')) {
+                    $('#divGrupoSeleccion').slideDown();
+                } else {
+                    $('#divGrupoSeleccion').slideUp();
+                    // No reseteamos el ID aquí en edición por si el usuario se equivoca al hacer clic,
+                    // se enviará el valor que el usuario deje al dar a "Actualizar".
+                }
+            }
+
+            $('#chkEsConfigurable').change(toggleGrupo);
+            toggleGrupo(); // Estado inicial al cargar
+        });
+    </script>
+}

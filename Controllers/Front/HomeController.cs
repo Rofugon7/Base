@@ -27,80 +27,96 @@ namespace BaseConLogin.Controllers.Front
         [HttpGet("")]
         public async Task<IActionResult> Index(int? categoria, string? search, int page = 1, int itemsPorPagina = 9)
         {
-            var tiendaSlug = "mi-tienda"; // obtener dinámicamente de ITiendaContext
+            var tiendaId = ObtenerTiendaId();
+            var tiendaSlug = "mi-tienda"; // obtener dinámicamente de ITiendaContext si es necesario
+
             ViewData["Canonical"] = _canonical.Build($"t/{tiendaSlug}");
             ViewData["Title"] = $"Home de {tiendaSlug}";
-            ViewData["Description"] = $"pagina principal de {tiendaSlug}.";
+            ViewData["Description"] = $"Página principal de {tiendaSlug}.";
 
-            var tiendaId = ObtenerTiendaId();
-
-            // Categorías visibles
+            // 1. Categorías visibles
             var categorias = await _context.Categorias
                 .Where(c => c.TiendaId == tiendaId && c.Activa)
                 .OrderBy(c => c.Nombre)
                 .ToListAsync();
 
-
-            // Todos los productos simples activos
-            var todosProductos = await _context.ProductosBase
+            // 2. Obtener productos base incluyendo sus propiedades
+            var query = _context.ProductosBase
                 .Include(p => p.PropiedadesExtendidas)
                 .AsNoTracking()
-                .Where(p => p.Activo && p.TiendaId == tiendaId)
-                .OrderByDescending(p => p.FechaAlta)
-                .ToListAsync();
-           
+                .Where(p => p.Activo && p.TiendaId == tiendaId);
+
+            // Aplicar filtro de búsqueda si existe
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.Nombre.Contains(search) || p.Descripcion.Contains(search));
+            }
+
+            // Aplicar filtro de categoría si existe
+            if (categoria.HasValue)
+            {
+                query = query.Where(p => p.CategoriaId == categoria.Value);
+            }
+
+            var todosProductos = await query.OrderByDescending(p => p.FechaAlta).ToListAsync();
+
+            // ========================================================
+            // FUNCIÓN DE AYUDA: Calcular precio con propiedades FIJAS
+            // ========================================================
+            decimal CalcularPrecioConFijos(decimal basePrice, IEnumerable<ProductoPropiedadConfigurada> props)
+            {
+                decimal precioFinal = basePrice;
+                // Solo procesamos las que NO son configurables por el usuario
+                var propiedadesFijas = props.Where(pe => !pe.EsConfigurable).OrderBy(pe => pe.Orden);
+
+                foreach (var prop in propiedadesFijas)
+                {
+                    if (prop.Operacion == "Suma") precioFinal += prop.Valor;
+                    else if (prop.Operacion == "Resta") precioFinal -= prop.Valor;
+                    else if (prop.Operacion == "Multiplicacion") precioFinal *= prop.Valor;
+                }
+                return precioFinal;
+            }
+
+            // 3. Mapeo a ProductoSimpleVM aplicando el cálculo de precios fijos
 
             // Destacados (primeros 3 en oferta)
             var destacados = todosProductos
-                .Where(p => p.Oferta && p.TiendaId == tiendaId)
+                .Where(p => p.Oferta)
                 .Take(3)
                 .Select(p => new ProductoSimpleVM
                 {
                     ProductoBaseId = p.Id,
                     Nombre = p.Nombre,
                     Descripcion = p.Descripcion,
-                    PrecioBase = p.PrecioBase,
+                    PrecioBase = CalcularPrecioConFijos(p.PrecioBase, p.PropiedadesExtendidas),
                     ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
                     Activo = p.Activo,
                     EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
                     EsOferta = p.Oferta,
-                    CategoriaId = p.CategoriaId,
-                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
-                    {
-                        Valor = pe.Valor,
-                        Operacion = pe.Operacion,
-                        Orden = pe.Orden
-                    }).ToList()
-                })
-                .ToList();
+                    CategoriaId = p.CategoriaId
+                }).ToList();
 
-            // Últimas unidades (menos de 5 unidades)
+            // Últimas unidades (stock <= 5)
             var ultimasUnidades = todosProductos
-                .Where(p => p.Stock <= 5 && p.TiendaId == tiendaId)
+                .Where(p => p.Stock <= 5)
                 .Take(4)
                 .Select(p => new ProductoSimpleVM
                 {
                     ProductoBaseId = p.Id,
                     Nombre = p.Nombre,
                     Descripcion = p.Descripcion,
-                    PrecioBase = p.PrecioBase,
+                    PrecioBase = CalcularPrecioConFijos(p.PrecioBase, p.PropiedadesExtendidas),
                     ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
                     Activo = p.Activo,
                     EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
                     EsOferta = p.Oferta,
-                    CategoriaId = p.CategoriaId,
-                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
-                    {
-                        Valor = pe.Valor,
-                        Operacion = pe.Operacion,
-                        Orden = pe.Orden
-                    }).ToList()
-                })
-                .ToList();
+                    CategoriaId = p.CategoriaId
+                }).ToList();
 
-            // Paginación
+            // Paginación principal
             var productosPagina = todosProductos
                 .Skip((page - 1) * itemsPorPagina)
                 .Take(itemsPorPagina)
@@ -109,34 +125,16 @@ namespace BaseConLogin.Controllers.Front
                     ProductoBaseId = p.Id,
                     Nombre = p.Nombre,
                     Descripcion = p.Descripcion,
-                    PrecioBase = p.PrecioBase,
+                    PrecioBase = CalcularPrecioConFijos(p.PrecioBase, p.PropiedadesExtendidas),
                     ImagenPrincipal = p.ImagenPrincipal,
                     Stock = p.Stock,
                     Activo = p.Activo,
                     EsNuevo = p.FechaAlta > DateTime.UtcNow.AddDays(-7),
                     EsOferta = p.Oferta,
-                    CategoriaId = p.CategoriaId,
-                    Propiedades = p.PropiedadesExtendidas.Select(pe => new PropiedadFilaVM
-                    {
-                        Valor = pe.Valor,
-                        Operacion = pe.Operacion,
-                        Orden = pe.Orden
-                    }).ToList()
-                })
-                .ToList();
+                    CategoriaId = p.CategoriaId
+                }).ToList();
 
-            if (categoria.HasValue)
-            {
-                todosProductos = todosProductos.Where(p =>
-                    p.CategoriaId == categoria.Value).ToList();
-                destacados = destacados.Where(p =>
-                    p.CategoriaId == categoria.Value).ToList();
-                ultimasUnidades = ultimasUnidades.Where(p =>
-                    p.CategoriaId == categoria.Value).ToList();
-                productosPagina = productosPagina.Where(p =>
-                    p.CategoriaId == categoria.Value).ToList();
-            }
-
+            // 4. Construcción del ViewModel Final
             var vm = new HomeIndexVM
             {
                 Productos = productosPagina,

@@ -23,6 +23,9 @@ namespace BaseConLogin.Models
 
         [ForeignKey("ProductoBaseId")]
         public virtual ProductoBase ProductoBase { get; set; }
+
+        public decimal PrecioPersonalizado { get; set; }
+        public string? DetallesOpciones { get; set; }
     }
 
 }

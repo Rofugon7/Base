@@ -16,6 +16,9 @@ namespace BaseConLogin.Models
         public PropiedadExtendidaMaestra? PropiedadMaestra { get; set; }
 
         [Required, MaxLength(100)]
+        public string NombrePropiedad { get; set; } = string.Empty;
+
+        [Required, MaxLength(100)]
         public string NombreEnProducto { get; set; } = string.Empty;
 
         [Required]
@@ -32,5 +35,8 @@ namespace BaseConLogin.Models
 
         [Required]
         public int TiendaId { get; set; }
+
+        public int? GrupoPropiedadId { get; set; } // Foreign Key opcional
+        public virtual GrupoPropiedad GrupoPropiedad { get; set; }
     }
 }

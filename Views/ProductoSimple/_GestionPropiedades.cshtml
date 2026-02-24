@@ -1,0 +1,65 @@
+﻿@model BaseConLogin.Models.ViewModels.ProductoSimpleVM
+
+<div class="card shadow-sm border-dark">
+    <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">Propiedades y Variantes Guardadas</h5>
+    </div>
+    <div class="card-body">
+        @* ... (Mantenemos tu tabla de listado igual) ... *@
+
+        <div class="bg-light p-3 rounded mt-4 border">
+            <h6 class="fw-bold">Añadir Nueva Opción Directa</h6>
+            <form id="formNuevaPropiedad" asp-action="AsignarPropiedad" method="post" class="row g-2 align-items-end">
+                <input type="hidden" name="ProductoBaseId" value="@Model.ProductoBaseId" />
+                <input type="hidden" name="TiendaId" value="1" />
+                <input type="hidden" name="Orden" value="0" />
+                <input type="hidden" name="EsConfigurable" value="true" />
+
+                <div class="col-md-3">
+                    <label class="small fw-bold">Grupo (Ej: Papel)</label>
+                    <input name="NombrePropiedad" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-bold">Opción (Ej: Mate)</label>
+                    <input name="NombreEnProducto" class="form-control form-control-sm" required />
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold">Operación</label>
+                    <select name="Operacion" class="form-select form-select-sm">
+                        <option value="Suma">Suma (+)</option>
+                        <option value="Multiplicacion">Multiplicación (x)</option>
+                        <option value="Resta">Resta (-)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold">Precio/Valor</label>
+                    <input type="text"
+                           name="ValorTexto"
+                           id="ValorPropiedadNueva"
+                           class="form-control form-control-sm valor-propiedad-input"
+                           placeholder="0.00"
+                           autocomplete="off"
+                           required />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-success btn-sm w-100">
+                        <i class="fa-solid fa-plus"></i> Grabar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Limpieza específica para este formulario
+    document.getElementById('formNuevaPropiedad').addEventListener('submit', function (e) {
+        // Buscamos el input por la clase que acabamos de añadir
+        const inputValor = this.querySelector('.valor-propiedad-input');
+        if (inputValor && inputValor.value) {
+            // Convertimos coma en punto para que C# no falle
+            inputValor.value = inputValor.value.replace(',', '.').trim();
+        }
+        // Permitimos el envío
+    });
+</script>

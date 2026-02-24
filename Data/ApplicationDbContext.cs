@@ -54,6 +54,10 @@ namespace BaseConLogin.Data
         public DbSet<PropiedadExtendidaMaestra> PropiedadesMaestras { get; set; }
         public DbSet<ProductoPropiedadConfigurada> ProductoPropiedades { get; set; }
         public DbSet<PropiedadGenerica> PropiedadesGenericas { get; set; }
+        public DbSet<PedidoDetallePropiedad> PedidoDetallePropiedades { get; set; }
+        // Debe estar así para que coincida con tu código del controlador
+        public DbSet<ProductoPropiedadConfigurada> ProductoPropiedadesConfiguradas { get; set; }
+        public DbSet<GrupoPropiedad> GrupoPropiedades { get; set; }
 
 
         // =========================
@@ -201,6 +205,14 @@ namespace BaseConLogin.Data
             modelBuilder.Entity<PropiedadGenerica>()
                 .Property(p => p.Valor)
                 .HasPrecision(18, 8);
+
+            modelBuilder.Entity<PedidoDetallePropiedad>()
+        .HasOne(p => p.PedidoDetalle)
+        .WithMany(d => d.PropiedadesElegidas)
+        .HasForeignKey(p => p.PedidoDetalleId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductoPropiedadConfigurada>().ToTable("ProductoPropiedadesConfiguradas");
         }
     }
 }

@@ -9,5 +9,6 @@
         public int Cantidad { get; set; }
         public decimal Subtotal => PrecioUnitario * Cantidad;
         public string ImagenRuta { get; set; } = string.Empty;
+        public string? OpcionesSeleccionadas { get; set; }
     }
 }

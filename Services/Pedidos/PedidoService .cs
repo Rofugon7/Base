@@ -1,4 +1,4 @@
-﻿using BaseConLogin.Data; // Tu ApplicationDbContext
+﻿using BaseConLogin.Data;
 using BaseConLogin.Models;
 using BaseConLogin.Models.enumerados;
 using BaseConLogin.Models.ViewModels;
@@ -27,7 +27,7 @@ namespace BaseConLogin.Services.Pedidos
                     TiendaId = tiendaId,
                     Fecha = DateTime.Now,
                     Total = carrito.Total,
-                    Estado = EstadoPedido.Pendiente, // Se cambiará a "Pagado" tras la simulación de pago
+                    Estado = EstadoPedido.Pendiente,
                     NombreCompleto = datosEnvio.NombreCompleto,
                     Direccion = datosEnvio.Direccion,
                     Ciudad = datosEnvio.Ciudad,
@@ -37,10 +37,14 @@ namespace BaseConLogin.Services.Pedidos
                     Items = new List<PedidoItem>()
                 };
 
-                // 2. Mapear items del carrito a PedidoItems y actualizar stock
+                // Añadimos el pedido primero para que EF genere el ID
+                _context.Pedidos.Add(nuevoPedido);
+                await _context.SaveChangesAsync();
+
+                // 2. Mapear items del carrito a PedidoItems y sus Propiedades
                 foreach (var item in carrito.Items)
                 {
-                    // Buscamos el producto en DB para descontar stock
+                    // Descontar stock
                     var producto = await _context.ProductosBase.FindAsync(item.ProductoBaseId);
                     if (producto != null)
                     {
@@ -50,20 +54,35 @@ namespace BaseConLogin.Services.Pedidos
                         producto.Stock -= item.Cantidad;
                     }
 
-                    nuevoPedido.Items.Add(new PedidoItem
+                    // Creamos el Item del Pedido
+                    var nuevoItem = new PedidoItem
                     {
+                        PedidoId = nuevoPedido.Id,
                         ProductoBaseId = item.ProductoBaseId,
                         NombreProducto = item.Nombre,
                         PrecioUnitario = item.PrecioUnitario,
                         Cantidad = item.Cantidad
-                    });
+                    };
+
+                    _context.PedidoItems.Add(nuevoItem);
+                    await _context.SaveChangesAsync(); // Guardamos para obtener el ID del item
+
+                    // 3. NUEVO: Guardar las propiedades elegidas (Configuración dinámica)
+                    if (!string.IsNullOrEmpty(item.OpcionesSeleccionadas))
+                    {
+                        var propiedadElegida = new PedidoDetallePropiedad
+                        {
+                            PedidoDetalleId = nuevoItem.Id, // Vinculamos a la línea de pedido
+                            NombrePropiedad = "Configuración",
+                            ValorSeleccionado = item.OpcionesSeleccionadas,
+                            PrecioAplicado = 0 // El precio extra ya va incluido en el PrecioUnitario del item
+                        };
+                        _context.PedidoDetallePropiedades.Add(propiedadElegida);
+                    }
                 }
 
-                // 3. Guardar en la base de datos
-                _context.Pedidos.Add(nuevoPedido);
+                // Guardamos las propiedades y confirmamos
                 await _context.SaveChangesAsync();
-
-                // 4. Confirmar transacción
                 await transaction.CommitAsync();
 
                 return nuevoPedido.Id;
@@ -79,6 +98,7 @@ namespace BaseConLogin.Services.Pedidos
         {
             return await _context.Pedidos
                 .Include(p => p.Items)
+                    .ThenInclude(i => i.PropiedadesElegidas) // Incluimos las opciones para la vista de resumen
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
     }

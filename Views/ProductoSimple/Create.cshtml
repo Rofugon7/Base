@@ -4,158 +4,238 @@
     ViewData["Title"] = Model.ProductoBaseId == 0 ? "Crear Producto" : "Editar Producto";
 }
 
-<h2>@ViewData["Title"]</h2>
+<style>
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
 
-<form asp-action="@((Model.ProductoBaseId == 0) ? "Create" : "Edit")"
-      method="post" enctype="multipart/form-data">
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
 
-    <input type="hidden" asp-for="ProductoBaseId" />
+    .preview-img {
+        max-width: 100%;
+        height: 80px;
+        object-fit: cover;
+        border: 1px solid #ddd;
+        margin-top: 5px;
+    }
 
-    <div class="mb-3">
-        <label>Nombre</label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
-    </div>
+    .select-grupo:disabled {
+        background-color: #e9ecef !important;
+        cursor: not-allowed;
+    }
+</style>
 
-    <div class="mb-3">
-        <label>Descripción</label>
-        <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
-        <span asp-validation-for="Descripcion" class="text-danger"></span>
-    </div>
+<div class="container">
+    <h2>@ViewData["Title"]</h2>
 
-    <div class="row">
-        <div class="col">
-            <label>Precio (€)</label>
-            <input asp-for="PrecioBase" type="number" step="0.01" class="form-control" />
-            <span asp-validation-for="PrecioBase" class="text-danger"></span>
+    <form asp-action="@((Model.ProductoBaseId == 0) ? "Create" : "Edit")"
+          method="post" enctype="multipart/form-data" id="formProducto">
+
+        <input type="hidden" asp-for="ProductoBaseId" />
+
+        <div class="mb-3">
+            <label class="fw-bold">Nombre</label>
+            <input asp-for="Nombre" class="form-control" />
+            <span asp-validation-for="Nombre" class="text-danger"></span>
         </div>
-        <div class="col">
-            <label>Stock</label>
-            <input asp-for="Stock" type="number" class="form-control" />
-            <span asp-validation-for="Stock" class="text-danger"></span>
+
+        <div class="mb-3">
+            <label class="fw-bold">Descripción</label>
+            <textarea asp-for="Descripcion" class="form-control" rows="3"></textarea>
+            <span asp-validation-for="Descripcion" class="text-danger"></span>
         </div>
-    </div>
 
-    <div class="mb-3">
-        <label>SKU</label>
-        <input asp-for="SKU" class="form-control" />
-        <span asp-validation-for="SKU" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label>Categoría</label>
-        <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-control">
-            <option value="">-- Selecciona categoría --</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label>Producto activo</label>
-        <input asp-for="Activo" type="checkbox" />
-    </div>
-
-    <div class="row g-2">
-
-        @for (int i = 0; i < 4; i++)
-        {
-            <div class="col-3 text-center">
-                <input type="file"
-                       name="Imagenes[@i]"
-                       class="form-control imagen-input"
-                       data-index="@i"
-                       accept="image/*" />
-
-                <div class="form-check mt-1">
-                    <input class="form-check-input" type="radio"
-                           name="PrincipalIndex" value="@i"
-                           @(i == 0 ? "checked" : "") />
-                    <label class="small">Principal</label>
-                </div>
-
-                <img id="preview_@i" src="/imagenes/ProductoSinImagen.png" class="preview-img" />
+        <div class="row">
+            <div class="col">
+                <label class="fw-bold">Precio Base (€)</label>
+                <input type="text" name="PrecioBase"
+                       value="@Model.PrecioBase.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)"
+                       class="form-control decimal-input" required />
+                <span asp-validation-for="PrecioBase" class="text-danger"></span>
             </div>
-        }
-
-    </div>
-
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Propiedades y Cálculo de Precio</h5>
-            <button type="button" onclick="agregarPropiedad()" class="btn btn-sm btn-brand">
-                <i class="bi bi-plus-circle me-1"></i> Añadir Propiedad
-            </button>
+            <div class="col">
+                <label class="fw-bold">Stock</label>
+                <input asp-for="Stock" type="number" class="form-control" />
+                <span asp-validation-for="Stock" class="text-danger"></span>
+            </div>
         </div>
-        <div class="card-body p-0">
-            <table class="table table-hover mb-0" id="tablaPropiedades">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 30%">Propiedad / Nombre</th>
-                        <th>Valor</th>
-                        <th>Operación</th>
-                        <th style="width: 80px">Orden</th>
-                        <th>¿User?</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpoPropiedades">
-                </tbody>
-            </table>
+
+        <div class="mb-3 mt-3">
+            <label class="fw-bold">SKU</label>
+            <input asp-for="SKU" class="form-control" />
+            <span asp-validation-for="SKU" class="text-danger"></span>
         </div>
-    </div>
 
+        <div class="mb-3">
+            <label class="fw-bold">Categoría</label>
+            <select asp-for="CategoriaId" asp-items="Model.Categorias" class="form-control">
+                <option value="">-- Selecciona categoría --</option>
+            </select>
+        </div>
 
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+        <div class="mb-3 form-check">
+            <input asp-for="Activo" type="checkbox" class="form-check-input" />
+            <label class="form-check-label">Producto activo</label>
+        </div>
+
+        <h5 class="mt-4">Imágenes del Producto</h5>
+        <div class="row g-2 mb-4">
+            @for (int i = 0; i < 4; i++)
+            {
+                <div class="col-3 text-center border p-2 bg-light">
+                    <input type="file" name="Imagenes[@i]" class="form-control form-control-sm imagen-input" data-index="@i" accept="image/*" />
+                    <div class="form-check mt-1">
+                        <input class="form-check-input" type="radio" name="PrincipalIndex" value="@i" @(i == Model.PrincipalIndex ? "checked" : "") />
+                        <label class="small">Principal</label>
+                    </div>
+                    @if (Model.ImagenesActuales != null && i < Model.ImagenesActuales.Count)
+                    {
+                        <img id="preview_@i" src="/@Model.ImagenesActuales[i].Ruta" class="preview-img" />
+                        <input type="hidden" name="SlotsIds[@i]" value="@Model.ImagenesActuales[i].Id" />
+                    }
+                    else
+                    {
+                        <img id="preview_@i" src="/imagenes/ProductoSinImagen.png" class="preview-img" />
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Propiedades y Cálculo de Precio</h5>
+                <button type="button" onclick="agregarPropiedad()" class="btn btn-sm btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Añadir Propiedad
+                </button>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0" id="tablaPropiedades">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 20%">Grupo (Si es User)</th>
+                            <th style="width: 20%">Nombre Opción</th>
+                            <th>Valor</th>
+                            <th>Operación</th>
+                            <th style="width: 80px">Orden</th>
+                            <th class="text-center">¿User?</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpoPropiedades">
+                        @if (Model.Propiedades != null)
+                        {
+                            for (int i = 0; i < Model.Propiedades.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" name="Propiedades[@i].Id" value="@Model.Propiedades[i].Id" />
+                                        <select name="Propiedades[@i].GrupoPropiedadId" class="form-select form-select-sm select-grupo" asp-items="Model.GruposDisponibles">
+                                            <option value="">-- Sin Grupo --</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="Propiedades[@i].NombrePropiedad" value="@Model.Propiedades[i].NombrePropiedad" class="form-control form-control-sm" required />
+                                    </td>
+                                    <td>
+                                        <input type="text" name="Propiedades[@i].Valor" value="@Model.Propiedades[i].Valor.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" class="form-control form-control-sm decimal-input" required />
+                                    </td>
+                                    <td>
+                                        <select name="Propiedades[@i].Operacion" class="form-select form-select-sm">
+                                            <option value="Suma" selected="@(Model.Propiedades[i].Operacion == "Suma")">Suma (+)</option>
+                                            <option value="Multiplicacion" selected="@(Model.Propiedades[i].Operacion == "Multiplicacion")">Multiplicación (x)</option>
+                                            <option value="Resta" selected="@(Model.Propiedades[i].Operacion == "Resta")">Resta (-)</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" name="Propiedades[@i].Orden" value="@Model.Propiedades[i].Orden" class="form-control form-control-sm" />
+                                    </td>
+                                    <td class="text-center">
+                                        <input type="checkbox" name="Propiedades[@i].EsConfigurable" class="form-check-input chk-configurable" value="true" @(Model.Propiedades[i].EsConfigurable ? "checked" : "") />
+                                        <input type="hidden" name="Propiedades[@i].EsConfigurable" value="false" />
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.closest('tr').remove()">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mt-4 mb-5">
+            <button type="submit" class="btn btn-primary btn-lg">Guardar Producto</button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg">Cancelar</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
-
     <partial name="_ValidationScriptsPartial" />
 
     <script>
+        // Pasar los grupos de C# a JS para usarlos en filas dinámicas
+        const opcionesGrupos = `@Html.Raw(Json.Serialize(Model.GruposDisponibles))`;
+        const gruposJson = JSON.parse(opcionesGrupos);
 
-        document.querySelectorAll(".imagen-input").forEach(input => {
+        let contador = @(Model.Propiedades?.Count ?? 0);
 
-            input.addEventListener("change", e => {
-
-                const file = e.target.files[0];
-                const index = e.target.dataset.index;
-
-                if (!file) return;
-
-                if (!file.type.startsWith("image/")) {
-                    alert("Solo imágenes");
-                    e.target.value = "";
-                    return;
-                }
-
-                const reader = new FileReader();
-
-                reader.onload = function (ev) {
-
-                    const img = document.getElementById("preview_" + index);
-
-                    if (img) {
-                        img.src = ev.target.result;
-                    }
+        $(document).ready(function () {
+            // Validación de decimales
+            if ($.validator) {
+                $.validator.methods.number = function (value, element) {
+                    return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
                 };
+            }
 
-                reader.readAsDataURL(file);
-            });
-
+            // Inicializar estados de los selects al cargar
+            document.querySelectorAll(".chk-configurable").forEach(chk => actualizaEstadoFila(chk));
         });
 
-                let contador = 0;
+        function actualizaEstadoFila(chk) {
+            const fila = chk.closest("tr");
+            const selectGrupo = fila.querySelector(".select-grupo");
+            if (!chk.checked) {
+                selectGrupo.value = "";
+                selectGrupo.disabled = true;
+            } else {
+                selectGrupo.disabled = false;
+            }
+        }
+
+        // Delegación de eventos para checkboxes
+        document.addEventListener("change", function (e) {
+            if (e.target && e.target.classList.contains("chk-configurable")) {
+                actualizaEstadoFila(e.target);
+            }
+        });
 
         function agregarPropiedad() {
+            let optionsHtml = '<option value="">-- Sin Grupo --</option>';
+            gruposJson.forEach(g => {
+                optionsHtml += `<option value="${g.value}">${g.text}</option>`;
+            });
+
             const cuerpo = document.getElementById('cuerpoPropiedades');
             const fila = `
                 <tr>
                     <td>
-                        <input type="text" name="Propiedades[${contador}].NombreEnProducto" class="form-control form-control-sm" placeholder="Ej: Barnizado" required />
+                        <select name="Propiedades[${contador}].GrupoPropiedadId" class="form-select form-select-sm select-grupo" disabled>
+                            ${optionsHtml}
+                        </select>
                     </td>
                     <td>
-                        <input type="number" step="0.00000001" name="Propiedades[${contador}].Valor" class="form-control form-control-sm" required />
+                        <input type="text" name="Propiedades[${contador}].NombrePropiedad" class="form-control form-control-sm" placeholder="Ej: Kraft / Barniz" required />
+                    </td>
+                    <td>
+                        <input type="text" name="Propiedades[${contador}].Valor" class="form-control form-control-sm decimal-input" placeholder="0.00" required />
                     </td>
                     <td>
                         <select name="Propiedades[${contador}].Operacion" class="form-select form-select-sm">
@@ -168,11 +248,12 @@
                         <input type="number" name="Propiedades[${contador}].Orden" class="form-control form-control-sm" value="${contador + 1}" />
                     </td>
                     <td class="text-center">
-                        <input type="checkbox" name="Propiedades[${contador}].EsConfigurable" class="form-check-input" value="true" />
+                        <input type="checkbox" name="Propiedades[${contador}].EsConfigurable" class="form-check-input chk-configurable" value="true" />
+                        <input type="hidden" name="Propiedades[${contador}].EsConfigurable" value="false" />
                     </td>
                     <td>
-                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove()">
-                            <i class="bi bi-x"></i>
+                        <button type="button" class="btn btn-sm btn-outline-danger border-0" onclick="this.closest('tr').remove()">
+                            <i class="bi bi-trash"></i>
                         </button>
                     </td>
                 </tr>
@@ -181,6 +262,27 @@
             contador++;
         }
 
+        // Previsualización y limpieza de decimales al enviar
+        $("#formProducto").on("submit", function () {
+            $(this).find('.decimal-input').each(function() {
+                if ($(this).val()) {
+                    let valorLimpio = $(this).val().replace(',', '.').trim();
+                    $(this).val(valorLimpio);
+                }
+            });
+        });
+
+        document.querySelectorAll(".imagen-input").forEach(input => {
+            input.addEventListener("change", e => {
+                const file = e.target.files[0];
+                const index = e.target.dataset.index;
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    document.getElementById("preview_" + index).src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        });
     </script>
 }
-

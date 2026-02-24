@@ -44,27 +44,24 @@ namespace BaseConLogin.Services.Carritos
             return ObtenerCarritoSesion(tiendaId).Items.Sum(i => i.Cantidad);
         }
 
-        public async Task AñadirProductoAsync(int tiendaId, int productoBaseId, int cantidad = 1)
+        public async Task AñadirProductoAsync(int tiendaId, int productoBaseId, int cantidad = 1, decimal? precioPersonalizado = null, string detallesOpciones = "")
         {
             var producto = await _context.ProductosBase.AsNoTracking().FirstOrDefaultAsync(p => p.Id == productoBaseId);
             if (producto == null) return;
             if (tiendaId <= 0) tiendaId = producto.TiendaId;
 
-            // 1. Buscamos el ProductoSimple para comprobar el Stock real
-            var productoSimple = await _context.ProductosBase
-                .FirstOrDefaultAsync(ps => ps.Id == productoBaseId);
-
-            // Si el producto no existe o no tiene stock, cancelamos la operación
+            var productoSimple = await _context.ProductosBase.FirstOrDefaultAsync(ps => ps.Id == productoBaseId);
             if (productoSimple == null || productoSimple.Stock <= 0) return;
 
-            // Si el usuario pide más de lo que hay, limitamos a lo disponible
             if (cantidad > productoSimple.Stock) cantidad = productoSimple.Stock;
+
+            // Determinamos qué precio usar: el personalizado de la vista o el base del producto
+            decimal precioAFijar = precioPersonalizado ?? producto.PrecioBase;
 
             var user = _httpContextAccessor.HttpContext?.User;
             if (user != null && user.Identity!.IsAuthenticated)
             {
                 var userId = _userManager.GetUserId(user);
-                // Cargamos el carrito con sus items para operar en memoria
                 var cp = await _context.Carritos.Include(c => c.Items).FirstOrDefaultAsync(c => c.UserId == userId && c.TiendaId == tiendaId);
 
                 if (cp == null)
@@ -73,10 +70,21 @@ namespace BaseConLogin.Services.Carritos
                     _context.Carritos.Add(cp);
                 }
 
-                var existente = cp.Items.FirstOrDefault(i => i.ProductoBaseId == productoBaseId);
+                // Buscamos si ya existe el MISMO producto con las MISMAS opciones
+                // (Si las opciones cambian, lo tratamos como un item nuevo en el carrito)
+                var existente = cp.Items.FirstOrDefault(i =>
+                    i.ProductoBaseId == productoBaseId &&
+                    (i.DetallesOpciones == detallesOpciones)); // Asumiendo que añades esta prop a tu modelo
+
                 if (existente == null)
                 {
-                    cp.Items.Add(new CarritoPersistenteItem { ProductoBaseId = productoBaseId, Cantidad = cantidad });
+                    cp.Items.Add(new CarritoPersistenteItem
+                    {
+                        ProductoBaseId = productoBaseId,
+                        Cantidad = cantidad,
+                        PrecioPersonalizado = precioAFijar, // Debes añadir esta prop al modelo
+                        DetallesOpciones = detallesOpciones // Debes añadir esta prop al modelo
+                    });
                 }
                 else
                 {
@@ -87,8 +95,13 @@ namespace BaseConLogin.Services.Carritos
             }
             else
             {
+                // MODO INVITADO (SESIÓN)
                 var carrito = ObtenerCarritoSesion(tiendaId);
-                var item = carrito.Items.FirstOrDefault(i => i.ProductoBaseId == productoBaseId);
+
+                // En sesión es más fácil: buscamos por ID y opciones
+                var item = carrito.Items.FirstOrDefault(i =>
+                    i.ProductoBaseId == productoBaseId &&
+                    i.OpcionesSeleccionadas == detallesOpciones);
 
                 if (item == null)
                 {
@@ -96,9 +109,10 @@ namespace BaseConLogin.Services.Carritos
                     {
                         ProductoBaseId = productoBaseId,
                         Nombre = producto.Nombre,
-                        PrecioUnitario = producto.PrecioBase,
+                        PrecioUnitario = precioAFijar, // Aquí usamos el precio calculado
                         Cantidad = cantidad,
-                        ImagenRuta = producto.ImagenPrincipal ?? ""
+                        ImagenRuta = producto.ImagenPrincipal ?? "",
+                        OpcionesSeleccionadas = detallesOpciones // Asegúrate de que CarritoSessionItem tenga esta prop
                     });
                 }
                 else
@@ -228,29 +242,25 @@ namespace BaseConLogin.Services.Carritos
 
         private async Task<CarritoSession> MapCarritoAsync(CarritoPersistente cp)
         {
-            // Obtenemos los IDs de los productos que están en el carrito persistente
             var ids = cp.Items.Select(i => i.ProductoBaseId).ToList();
-
-            // Traemos la información de los productos desde la tabla ProductosBase
-            var productos = await _context.ProductosBase
-                .AsNoTracking()
-                .Where(p => ids.Contains(p.Id))
-                .ToDictionaryAsync(p => p.Id);
+            var productos = await _context.ProductosBase.AsNoTracking()
+                .Where(p => ids.Contains(p.Id)).ToDictionaryAsync(p => p.Id);
 
             var carrito = new CarritoSession { TiendaId = cp.TiendaId };
 
             foreach (var item in cp.Items)
             {
-                // Verificamos si el producto existe en la base de datos antes de añadirlo
                 if (productos.TryGetValue(item.ProductoBaseId, out var p))
                 {
                     carrito.Items.Add(new CarritoSessionItem
                     {
                         ProductoBaseId = p.Id,
                         Nombre = p.Nombre,
-                        PrecioUnitario = p.PrecioBase,
+                        // PRIORIDAD: Si hay un precio guardado en el item del carrito, lo usamos
+                        PrecioUnitario = item.PrecioPersonalizado > 0 ? item.PrecioPersonalizado : p.PrecioBase,
                         Cantidad = item.Cantidad,
-                        ImagenRuta = p.ImagenPrincipal
+                        ImagenRuta = p.ImagenPrincipal,
+                        OpcionesSeleccionadas = item.DetallesOpciones // Pasamos las opciones guardadas
                     });
                 }
             }

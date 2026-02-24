@@ -10,7 +10,10 @@
     }
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Propiedades Genéricas</h2>
+        <div>
+            <h2 class="mb-0">Propiedades Genéricas</h2>
+            <p class="text-muted">Plantillas de propiedades para asignar a productos</p>
+        </div>
         <a asp-action="Create" class="btn btn-primary rounded-pill">
             <i class="bi bi-plus-circle me-2"></i>Nueva Propiedad
         </a>
@@ -21,8 +24,8 @@
             <tr>
                 <th>Nombre (Interno)</th>
                 <th>Nombre (Cliente)</th>
-                <th>Valor</th>
-                <th>Operación</th>
+                <th>Valor / Operación</th>
+                <th>Configuración / Grupo</th>
                 <th class="text-center">Acciones</th>
             </tr>
         </thead>
@@ -32,23 +35,45 @@
                 <tr>
                     <td class="fw-bold">@item.NombreInterno</td>
                     <td>@item.NombreEnProducto</td>
-                    <td>@item.Valor.ToString("N4")</td>
                     <td>
-                        <span class="badge @(item.Operacion == "Suma" ? "bg-info" : "bg-warning text-dark")">
+                        <span class="fw-bold">@item.Valor.ToString("N4")€</span>
+                        <br />
+                        <small class="badge @(item.Operacion == "Suma" ? "bg-info" : "bg-warning text-dark")">
                             @item.Operacion
-                        </span>
+                        </small>
+                    </td>
+                    <td>
+                        @if (item.EsConfigurable)
+                        {
+                            <span class="badge bg-success mb-1"><i class="bi bi-gear-fill me-1"></i>Configurable</span>
+                            <br />
+                            <small class="text-muted">
+                                <i class="bi bi-folder2-open me-1"></i>
+                                @(item.GrupoPropiedadId.HasValue ? "Grupo asignado" : "Sin grupo")
+                            </small>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Propiedad Fija</span>
+                        }
                     </td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-outline-success me-1"
-                                onclick="abrirModalAsignar(@item.Id, '@item.NombreInterno')">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Asignar
-                        </button>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
-                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Borrar propiedad?')">
-                                <i class="bi bi-trash"></i>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-outline-success"
+                                    onclick="abrirModalAsignar(@item.Id, '@item.NombreInterno', @item.EsConfigurable.ToString().ToLower())"
+                                    title="Asignar a productos">
+                                <i class="bi bi-box-arrow-in-right"></i>
                             </button>
-                        </form>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
+                                        onclick="return confirm('¿Borrar propiedad genérica?')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             }
@@ -56,48 +81,56 @@
     </table>
 </div>
 
+@* Modal de Asignación (Mantiene la estructura pero con aviso de configuración) *@
 <div class="modal fade" id="modalAsignar" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <form asp-action="ProcesarAsignacion" method="post">
                 <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Asignación de Propiedad</h5>
+                    <h5 class="modal-title">Asignación Masiva</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="PropiedadGenericaId" id="modalPropId" />
-                    <p class="mb-3">Asignando: <strong id="modalPropNombre" class="text-primary"></strong></p>
+
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="flex-grow-1">
+                            <p class="mb-0">Propiedad:</p>
+                            <strong id="modalPropNombre" class="fs-5 text-primary"></strong>
+                        </div>
+                        <div id="badgeConfigurableModal"></div>
+                    </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-bold">¿Dónde quieres asignarla?</label>
+                        <label class="form-label fw-bold">Destino de la asignación:</label>
                         <select class="form-select" id="tipoAsignacion" onchange="alternarCampos()">
-                            <option value="categoria">A una Categoría completa</option>
-                            <option value="producto">A un Producto individual</option>
+                            <option value="categoria">Toda una Categoría</option>
+                            <option value="producto">Un Producto específico</option>
                         </select>
                     </div>
 
                     <div id="divCategoria" class="mb-3">
-                        <label class="form-label fw-bold">Selecciona Categoría</label>
+                        <label class="form-label">Seleccionar Categoría</label>
                         <select name="CategoriaId" class="form-select" asp-items="ViewBag.Categorias">
-                            <option value="">-- Seleccionar Categoría --</option>
+                            <option value="">-- Seleccionar --</option>
                         </select>
                     </div>
 
                     <div id="divProducto" class="mb-3" style="display:none;">
-                        <label class="form-label fw-bold">Selecciona Producto</label>
+                        <label class="form-label">Seleccionar Producto</label>
                         <select name="ProductoId" class="form-select" asp-items="ViewBag.Productos">
-                            <option value="">-- Seleccionar Producto --</option>
+                            <option value="">-- Seleccionar --</option>
                         </select>
                     </div>
 
-                    <div class="alert alert-warning p-2 small">
-                        <i class="bi bi-exclamación-triangle me-1"></i>
-                        Si el producto ya tiene esta propiedad, se omitirá para evitar duplicados.
+                    <div class="alert alert-light border small text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Si la propiedad es <strong>Configurable</strong>, se asignará respetando el grupo definido en la plantilla.
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success px-4">Ejecutar Asignación</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success px-4">Confirmar Asignación</button>
                 </div>
             </form>
         </div>
@@ -106,10 +139,18 @@
 
 @section Scripts {
     <script>
-        function abrirModalAsignar(id, nombre) {
+        function abrirModalAsignar(id, nombre, esConfigurable) {
             document.getElementById('modalPropId').value = id;
             document.getElementById('modalPropNombre').innerText = nombre;
-            // Resetear el modal al abrir
+
+            // Mostrar badge de estado en el modal
+            const badgeDiv = document.getElementById('badgeConfigurableModal');
+            if(esConfigurable) {
+                badgeDiv.innerHTML = '<span class="badge bg-success">Configurable</span>';
+            } else {
+                badgeDiv.innerHTML = '<span class="badge bg-secondary">Fija</span>';
+            }
+
             document.getElementById('tipoAsignacion').value = 'categoria';
             alternarCampos();
 
@@ -121,15 +162,11 @@
             const divCat = document.getElementById('divCategoria');
             const divProd = document.getElementById('divProducto');
 
-            if (tipo === 'categoria') {
-                divCat.style.display = 'block';
-                divProd.style.display = 'none';
-                divProd.querySelector('select').value = ""; // Limpiar el otro select
-            } else {
-                divCat.style.display = 'none';
-                divProd.style.display = 'block';
-                divCat.querySelector('select').value = ""; // Limpiar el otro select
-            }
+            divCat.style.display = (tipo === 'categoria') ? 'block' : 'none';
+            divProd.style.display = (tipo === 'producto') ? 'block' : 'none';
+
+            if (tipo === 'categoria') divProd.querySelector('select').value = "";
+            else divCat.querySelector('select').value = "";
         }
     </script>
 }

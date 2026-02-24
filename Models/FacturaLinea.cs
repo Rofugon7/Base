@@ -1,4 +1,6 @@
-﻿namespace BaseConLogin.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BaseConLogin.Models
 {
     public class FacturaLinea
     {
@@ -12,5 +14,9 @@
         public int Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
         public decimal Subtotal => Cantidad * PrecioUnitario;
+        public int? PedidoItemId { get; set; } // Opcional, por si hay líneas manuales
+
+        [ForeignKey("PedidoItemId")]
+        public virtual PedidoItem? PedidoItem { get; set; }
     }
 }

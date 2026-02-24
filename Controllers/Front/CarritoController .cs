@@ -1,8 +1,10 @@
-﻿using BaseConLogin.Models;
+﻿using BaseConLogin.Data;
+using BaseConLogin.Models;
 using BaseConLogin.Services.Carritos;
 using BaseConLogin.Services.Seo;
 using BaseConLogin.Services.Tiendas;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace BaseConLogin.Controllers.Front
 {
@@ -12,15 +14,18 @@ namespace BaseConLogin.Controllers.Front
         private readonly ICarritoService _carritoService;
         private readonly ITiendaContext _tiendaContext;
         private readonly ICanonicalService _canonical;
+        private readonly ApplicationDbContext _context;
 
         public CarritoController(
             ICarritoService carritoService,
             ITiendaContext tiendaContext,
-            ICanonicalService canonical)
+            ICanonicalService canonical,
+            ApplicationDbContext context)
         {
             _carritoService = carritoService;
             _tiendaContext = tiendaContext;
             _canonical = canonical;
+            _context = context;
         }
 
         //[HttpGet("")]
@@ -68,26 +73,65 @@ namespace BaseConLogin.Controllers.Front
             }
         }
 
-        // ==========================================
-        // MÉTODO PARA AÑADIR (CORREGIDO Y RENOMBRADO)
-        // ==========================================
         [HttpPost("añadir")]
-        public async Task<IActionResult> Añadir(int productoBaseId, int cantidad = 1, int? tiendaId = null)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Añadir(int productoBaseId, int tiendaId, int cantidad, decimal precioCalculado, string detallesOpciones)
         {
-            // Priorizamos el tiendaId del formulario, si no, usamos el contexto
-            var idFinalTienda = tiendaId ?? _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+            // 1. Cargamos el producto y TODAS sus propiedades extendidas
+            var producto = await _context.ProductosBase
+                .Include(p => p.PropiedadesExtendidas)
+                .FirstOrDefaultAsync(p => p.Id == productoBaseId);
 
-            try
-            {
-                await _carritoService.AñadirProductoAsync(idFinalTienda, productoBaseId, cantidad);
-                int nuevoTotal = await _carritoService.ObtenerCantidadItemsAsync(idFinalTienda);
+            if (producto == null) return NotFound();
 
-                return Json(new { success = true, total = nuevoTotal });
-            }
-            catch (Exception ex)
+            decimal precioRealServidor = producto.PrecioBase;
+
+            if (!string.IsNullOrEmpty(detallesOpciones))
             {
-                return Json(new { success = false, message = ex.Message });
+                // Separamos las opciones. Ejemplo: "Papel: Kraft" -> queremos "Kraft"
+                var opcionesSeleccionadas = detallesOpciones.Split(',')
+                    .Select(o => o.Contains(':') ? o.Split(':').Last().Trim() : o.Trim())
+                    .ToList();
+
+                foreach (var nombreOpt in opcionesSeleccionadas)
+                {
+                    // BUSQUEDA ROBUSTA: 
+                    // Buscamos la propiedad cuyo NombrePropiedad coincida con lo que envió el usuario
+                    var propiedadDb = producto.PropiedadesExtendidas
+                .FirstOrDefault(pc => pc.NombrePropiedad != null &&
+                                     pc.NombrePropiedad.Trim().Equals(nombreOpt, StringComparison.OrdinalIgnoreCase));
+
+                    if (propiedadDb != null)
+                    {
+                        // Aplicamos la operación según la DB
+                        switch (propiedadDb.Operacion)
+                        {
+                            case "Suma":
+                                precioRealServidor += propiedadDb.Valor;
+                                break;
+                            case "Resta":
+                                precioRealServidor -= propiedadDb.Valor;
+                                break;
+                            case "Multiplicacion":
+                                precioRealServidor *= propiedadDb.Valor;
+                                break;
+                        }
+                    }
+                    // Si llega aquí y propiedadDb es null, es que el nombre enviado 
+                    // no coincide con NINGÚN NombrePropiedad de la tabla ProductoPropiedadesConfiguradas
+                }
             }
+
+            // 3. Validación de precio
+            if (Math.Abs(precioRealServidor - precioCalculado) > 0.01m)
+            {
+                precioCalculado = precioRealServidor;
+            }
+
+            await _carritoService.AñadirProductoAsync(tiendaId, productoBaseId, cantidad, precioCalculado, detallesOpciones);
+
+            TempData["Success"] = "Añadido: " + precioCalculado.ToString("C2");
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet("cantidad")]

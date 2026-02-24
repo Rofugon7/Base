@@ -43,10 +43,12 @@ namespace BaseConLogin.Controllers.Front
         public async Task<IActionResult> Detalle(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            var isAdmin = User.IsInRole("Admin") || User.IsInRole("AdministradorTienda");
 
             var pedido = await _context.Pedidos
                 .Include(p => p.Items)
-                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == user.Id);
+                    .ThenInclude(i => i.PropiedadesElegidas) // <-- CARGAMOS LAS OPCIONES AQUÍ
+                .FirstOrDefaultAsync(p => p.Id == id && (p.UserId == user.Id || isAdmin));
 
             if (pedido == null) return NotFound();
 
@@ -220,6 +222,7 @@ namespace BaseConLogin.Controllers.Front
 
             var pedidoAnterior = await _context.Pedidos
                 .Include(p => p.Items)
+                .ThenInclude(i => i.PropiedadesElegidas)
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (pedidoAnterior == null) return NotFound();
@@ -246,35 +249,34 @@ namespace BaseConLogin.Controllers.Front
 
             foreach (var itemPedido in pedidoAnterior.Items)
             {
-                var productoReal = await _context.ProductosBase
-                    .FirstOrDefaultAsync(p => p.Id == itemPedido.ProductoBaseId);
+                // 1. Recuperamos el string de opciones de las propiedades guardadas
+                // Asumiendo que guardamos la configuración en la propiedad "Configuración"
+                var opcionesTexto = itemPedido.PropiedadesElegidas
+                    .FirstOrDefault(pr => pr.NombrePropiedad == "Configuración")?.ValorSeleccionado ?? "";
 
+                // 2. Buscamos el producto
+                var productoReal = await _context.ProductosBase.FirstOrDefaultAsync(p => p.Id == itemPedido.ProductoBaseId);
                 if (productoReal == null || productoReal.Stock <= 0) continue;
 
-                int cantidadAAnadir = itemPedido.Cantidad;
-                if (productoReal.Stock < cantidadAAnadir) cantidadAAnadir = productoReal.Stock;
-
-                // 3. Buscamos si el producto ya está en los ITEMS de ese carrito
-                var itemExistente = carrito.Items
-                    .FirstOrDefault(i => i.ProductoBaseId == productoReal.Id);
+                // 3. Al añadir al carrito, incluimos el precio y las opciones originales
+                var itemExistente = carrito.Items.FirstOrDefault(i =>
+                    i.ProductoBaseId == productoReal.Id &&
+                    i.DetallesOpciones == opcionesTexto); // Buscamos coincidencia exacta de opciones
 
                 if (itemExistente != null)
                 {
-                    if (itemExistente.Cantidad + cantidadAAnadir <= productoReal.Stock)
-                        itemExistente.Cantidad += cantidadAAnadir;
-                    else
-                        itemExistente.Cantidad = productoReal.Stock;
+                    itemExistente.Cantidad += Math.Min(itemPedido.Cantidad, productoReal.Stock);
                 }
                 else
                 {
-                    // 4. Creamos el item vinculado al ID del carrito que encontramos/creamos arriba
-                    var nuevoItem = new CarritoPersistenteItem
+                    _context.CarritoItems.Add(new CarritoPersistenteItem
                     {
                         CarritoPersistenteId = carrito.Id,
                         ProductoBaseId = productoReal.Id,
-                        Cantidad = cantidadAAnadir
-                    };
-                    _context.CarritoItems.Add(nuevoItem);
+                        Cantidad = Math.Min(itemPedido.Cantidad, productoReal.Stock),
+                        PrecioPersonalizado = itemPedido.PrecioUnitario, // Mantenemos el precio calculado
+                        DetallesOpciones = opcionesTexto // Restauramos las opciones elegidas
+                    });
                 }
                 productosAgregados++;
             }
@@ -299,13 +301,14 @@ namespace BaseConLogin.Controllers.Front
 
             var factura = await _context.Facturas
                 .Include(f => f.Lineas)
-                .Include(f => f.FacturaOriginal)
+                    .ThenInclude(l => l.PedidoItem) // Necesitamos el item del pedido
+                        .ThenInclude(pi => pi.PropiedadesElegidas) // Y sus propiedades
                 .Include(f => f.Pedido)
                 .FirstOrDefaultAsync(f => f.PedidoId == id
                                      && f.EsRectificativa == esRectificativa
                                      && (f.Pedido.UserId == userId || isAdmin));
 
-            if (factura == null) return NotFound("La factura aún no ha sido generada (el pedido debe estar Pagado).");
+            if (factura == null) return NotFound();
 
             return View("DetalleFactura", factura);
         }
@@ -489,6 +492,7 @@ namespace BaseConLogin.Controllers.Front
             {
                 factura.Lineas.Add(new FacturaLinea
                 {
+                    PedidoItemId = item.Id,
                     Descripcion = item.NombreProducto,
                     Cantidad = item.Cantidad,
                     PrecioUnitario = item.PrecioUnitario

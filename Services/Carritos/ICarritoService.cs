@@ -9,7 +9,7 @@ namespace BaseConLogin.Services.Carritos
         Task<CarritoSession> ObtenerCarritoAsync(int tiendaId);
 
         // Acciones principales
-        Task AñadirProductoAsync(int tiendaId, int productoBaseId, int cantidad = 1);
+        Task AñadirProductoAsync(int tiendaId, int productoId, int cantidad, decimal? precioPersonalizado = null, string opciones = "");
         Task ActualizarCantidadAsync(int tiendaId, int productoBaseId, int cantidad);
         Task EliminarProductoAsync(int tiendaId, int productoBaseId);
         Task VaciarAsync(int tiendaId);
