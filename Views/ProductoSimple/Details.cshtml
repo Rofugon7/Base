@@ -128,7 +128,7 @@
                                     <span class="input-group-text bg-white">Cant.</span>
                                     <input type="number" name="cantidad" value="1" min="1" max="@Model.Stock" class="form-control text-center" />
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-lg flex-grow-1 shadow">
+                                <button type="button" id="btnAñadirCarrito" class="btn btn-primary btn-lg flex-grow-1 shadow">
                                     <i class="fa-solid fa-cart-plus me-2"></i>Añadir al pedido
                                 </button>
                             </div>
@@ -211,5 +211,36 @@
         }
 
         document.addEventListener('DOMContentLoaded', recalcularPrecio);
+
+        $(document).ready(function () {
+            $('#btnAñadirCarrito').on('click', function (e) {
+                e.preventDefault(); // Evita que la página se recargue
+
+                // Buscamos el formulario que envuelve al botón
+                var $form = $(this).closest('form');
+
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: 'POST',
+                    data: $form.serialize(), // Envía todos los inputs (ID, cantidad, etc.)
+                    success: function (response) {
+                        // 1. Llamamos a la función del Layout para el pulso amarillo
+                        if (typeof actualizarContadorCarrito === "function") {
+                            actualizarContadorCarrito();
+                        }
+
+                        // 2. Mostramos el Toast del Layout
+                        if (typeof mostrarNotificacion === "function") {
+                            mostrarNotificacion("¡Producto añadido al pedido!");
+                        }
+                    },
+                    error: function () {
+                        if (typeof mostrarNotificacion === "function") {
+                            mostrarNotificacion("Hubo un error al añadir el producto", true);
+                        }
+                    }
+                });
+            });
+        });
     </script>
 }

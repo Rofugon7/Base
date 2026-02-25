@@ -3,25 +3,21 @@
 @inject BaseConLogin.Services.Carritos.ICarritoService CarritoService
 
 @{
-    // Obtenemos el TiendaId
     var claimTiendaId = User.FindFirst("TiendaId")?.Value;
     int tIdHeader = !string.IsNullOrEmpty(claimTiendaId) ? int.Parse(claimTiendaId) : 0;
-
-    // Obtenemos el objeto CarritoSession esperando la tarea
     var miCarritoData = await CarritoService.ObtenerCarritoAsync(tIdHeader);
+    var countItems = miCarritoData?.Items?.Count ?? 0;
 }
 
-<li class="nav-item dropdown" id="cartHoverContainer">
+
     <a asp-controller="Carrito" asp-action="Index" class="nav-link cart-wrapper p-2 position-relative">
         <i class="fa-solid fa-cart-shopping fs-5 text-white"></i>
 
-        @* Acceso directo al conteo para evitar errores de contexto *@
-        @if (miCarritoData?.Items != null && miCarritoData.Items.Count > 0)
-        {
-            <span id="cart-badge" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
-                @miCarritoData.Items.Count
-            </span>
-        }
+        @* Badge simplificado: el JS se encargará del resto *@
+        <span id="cart-badge" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger"
+              style="@(countItems > 0 ? "display: inline-block !important;" : "display:none;")">
+            @countItems
+        </span>
     </a>
 
     <div class="dropdown-menu dropdown-menu-end shadow-lg p-0 cart-preview-panel" style="width: 320px; border: none;">
@@ -34,7 +30,7 @@
             {
                 @foreach (var item in miCarritoData.Items)
                 {
-                    <div class="d-flex align-items-center p-2 mb-1 border-bottom">
+                    <div class="d-flex align-items-center p-2 mb-1 border-bottom-faded">
                         <img src="@item.ImagenRuta" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='/images/no-image.png'">
                         <div class="ms-3 flex-grow-1">
                             <div class="small fw-bold text-dark text-truncate" style="max-width: 160px;">@item.Nombre</div>
@@ -62,4 +58,3 @@
             }
         </div>
     </div>
-</li>

@@ -77,48 +77,40 @@ namespace BaseConLogin.Controllers.Front
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Añadir(int productoBaseId, int tiendaId, int cantidad, decimal precioCalculado, string detallesOpciones)
         {
-            // 1. Cargamos el producto y TODAS sus propiedades extendidas
             var producto = await _context.ProductosBase
-                .Include(p => p.PropiedadesExtendidas)
-                .FirstOrDefaultAsync(p => p.Id == productoBaseId);
+                 .Include(p => p.PropiedadesExtendidas)
+                 .FirstOrDefaultAsync(p => p.Id == productoBaseId);
 
             if (producto == null) return NotFound();
 
             decimal precioRealServidor = producto.PrecioBase;
 
+            // 1. APLICAR PROPIEDADES NO CONFIGURABLES (Las que no elige el cliente)
+            var propsFijas = producto.PropiedadesExtendidas
+                .Where(pc => pc.EsConfigurable == false); // Ajusta el nombre de la propiedad 'EsConfigurable' si es distinto
+
+            foreach (var prop in propsFijas)
+            {
+                precioRealServidor = CalcularPrecio(precioRealServidor, prop.Operacion, prop.Valor);
+            }
+
+            // 2. APLICAR PROPIEDADES SELECCIONADAS POR EL CLIENTE
             if (!string.IsNullOrEmpty(detallesOpciones))
             {
-                // Separamos las opciones. Ejemplo: "Papel: Kraft" -> queremos "Kraft"
                 var opcionesSeleccionadas = detallesOpciones.Split(',')
-                    .Select(o => o.Contains(':') ? o.Split(':').Last().Trim() : o.Trim())
-                    .ToList();
+                     .Select(o => o.Contains(':') ? o.Split(':').Last().Trim() : o.Trim())
+                     .ToList();
 
                 foreach (var nombreOpt in opcionesSeleccionadas)
                 {
-                    // BUSQUEDA ROBUSTA: 
-                    // Buscamos la propiedad cuyo NombrePropiedad coincida con lo que envió el usuario
                     var propiedadDb = producto.PropiedadesExtendidas
-                .FirstOrDefault(pc => pc.NombrePropiedad != null &&
-                                     pc.NombrePropiedad.Trim().Equals(nombreOpt, StringComparison.OrdinalIgnoreCase));
+                        .FirstOrDefault(pc => pc.NombrePropiedad != null &&
+                                         pc.NombrePropiedad.Trim().Equals(nombreOpt, StringComparison.OrdinalIgnoreCase));
 
                     if (propiedadDb != null)
                     {
-                        // Aplicamos la operación según la DB
-                        switch (propiedadDb.Operacion)
-                        {
-                            case "Suma":
-                                precioRealServidor += propiedadDb.Valor;
-                                break;
-                            case "Resta":
-                                precioRealServidor -= propiedadDb.Valor;
-                                break;
-                            case "Multiplicacion":
-                                precioRealServidor *= propiedadDb.Valor;
-                                break;
-                        }
+                        precioRealServidor = CalcularPrecio(precioRealServidor, propiedadDb.Operacion, propiedadDb.Valor);
                     }
-                    // Si llega aquí y propiedadDb es null, es que el nombre enviado 
-                    // no coincide con NINGÚN NombrePropiedad de la tabla ProductoPropiedadesConfiguradas
                 }
             }
 
@@ -130,8 +122,25 @@ namespace BaseConLogin.Controllers.Front
 
             await _carritoService.AñadirProductoAsync(tiendaId, productoBaseId, cantidad, precioCalculado, detallesOpciones);
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true, message = "Añadido: " + precioCalculado.ToString("C2") });
+            }
+
             TempData["Success"] = "Añadido: " + precioCalculado.ToString("C2");
             return RedirectToAction("Index", "Home");
+        }
+
+        // Función auxiliar local para no repetir el switch
+        private decimal CalcularPrecio(decimal actual, string operacion, decimal valor)
+        {
+            return operacion switch
+            {
+                "Suma" => actual + valor,
+                "Resta" => actual - valor,
+                "Multiplicacion" => actual * valor,
+                _ => actual
+            };
         }
 
         [HttpGet("cantidad")]
@@ -168,6 +177,14 @@ namespace BaseConLogin.Controllers.Front
             return Json(carrito);
         }
 
-        
+        [HttpGet("GetCartPreview")]
+        public IActionResult GetCartPreview()
+        {
+            // Esto devuelve el ViewComponent que ya tienes creado
+            // para que el HTML se refresque con los datos actuales de la DB
+            return ViewComponent("CartPreview");
+        }
+
+
     }
 }

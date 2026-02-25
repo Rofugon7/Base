@@ -383,7 +383,7 @@
     <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
         <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">
+                <div class="toast-body" id="toastMessage">
                     <i class="bi bi-check-circle-fill me-2"></i>
                     ¡Producto añadido al carrito!
                 </div>
@@ -395,49 +395,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // Función para actualizar el badge visualmente
-                function actualizarContadorCarrito() {
-            fetch('/carrito/cantidad')
-                .then(response => {
-                    if (!response.ok) throw new Error("Error en red");
-                    return response.json();
-                })
-                .then(data => {
-                    const badge = document.getElementById('cart-badge');
-                    if (badge) {
-                        // Intentamos leer 'total' o 'Total' por si acaso
-                        const cantidad = data.total !== undefined ? data.total : data.Total;
-
-                        badge.innerText = cantidad;
-
-                        // Forzamos la visibilidad si hay más de 0
-                        if (cantidad > 0) {
-                            badge.setAttribute("style", "display: inline-block !important;");
-                        } else {
-                            badge.style.display = 'none';
-                        }
-                        console.log("Contador actualizado a:", cantidad);
-                    }
-                })
-                .catch(err => console.error("Fallo al actualizar badge:", err));
-        }
-
-        // Función para mostrar notificaciones Toast
-        function mostrarNotificacion(mensaje, esError = false) {
-            const toastEl = document.getElementById('cartToast');
-            const toastMessage = document.getElementById('toastMessage');
-
-            toastMessage.innerText = mensaje;
-            toastEl.classList.remove('bg-success', 'bg-danger');
-            toastEl.classList.add(esError ? 'bg-danger' : 'bg-success');
-
-            const toast = new bootstrap.Toast(toastEl);
-            toast.show();
-        }
-
-        
-    </script>
+   
 
     @RenderSection("Scripts", required: false)
 
@@ -478,6 +436,55 @@
                 document.getElementById("cookie-banner").classList.add("d-none");
             });
         });
+
+                    // Función unificada para actualizar el badge y el panel desplegable
+           function actualizarContadorCarrito() {
+            // 1. Actualizar el Badge (Número)
+            fetch('/carrito/cantidad')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('cart-badge');
+                    if (badge) {
+                        const cantidad = data.total !== undefined ? data.total : (data.Total || 0);
+
+                        // Efecto de rebote (pulse) si la cantidad cambia
+                        if (parseInt(badge.innerText) !== cantidad) {
+                            badge.classList.remove('cart-bump');
+                            void badge.offsetWidth; // Trigger reflow para reiniciar animación
+                            badge.classList.add('cart-bump');
+                        }
+
+                        badge.innerText = cantidad;
+                        // Uso de !important para sobreescribir clases de Bootstrap si es necesario
+                        badge.style.setProperty("display", cantidad > 0 ? "inline-block" : "none", "important");
+                    }
+                })
+                .catch(err => console.error("Error al obtener cantidad:", err));
+
+            // 2. Refrescar el panel desplegable (Vista Parcial)
+            const $panelContenedor = $('#cartHoverContainer');
+            if ($panelContenedor.length > 0) {
+                $.get('/carrito/GetCartPreview', function (html) {
+                    $panelContenedor.html(html);
+                });
+            }
+        }
+
+        // Función única para notificaciones
+        function mostrarNotificacion(mensaje, esError = false) {
+            const toastEl = document.getElementById('cartToast');
+            const toastBody = document.getElementById('toastMessage');
+
+            if (toastBody) {
+                toastBody.innerHTML = `<i class="bi ${esError ? 'bi-exclamation-triangle' : 'bi-check-circle-fill'} me-2"></i> ${mensaje}`;
+            }
+
+            toastEl.classList.remove('bg-success', 'bg-danger');
+            toastEl.classList.add(esError ? 'bg-danger' : 'bg-success');
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
     </script>
 </body>
 </html>
