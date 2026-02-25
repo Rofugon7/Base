@@ -1,6 +1,9 @@
 ﻿@using BaseConLogin.Services.Tiendas
 @using BaseConLogin.Services.Carritos
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
+@using System.Security.Claims
 @inherits Microsoft.AspNetCore.Mvc.Razor.RazorPage<dynamic>
 
 @inject ITiendaContext TiendaContext
@@ -16,6 +19,7 @@
     var colorEnlaces = string.IsNullOrEmpty(tiendaConfig.ColorEnlaces) ? "#dc3545" : tiendaConfig.ColorEnlaces;
     var colorTexto = string.IsNullOrEmpty(tiendaConfig.ColorTextos) ? "#dc3545" : tiendaConfig.ColorTextos;
 }
+
 
 @{
     string usuarioConectado = "";
@@ -36,6 +40,22 @@
 
     // Conteo inicial al cargar la página (Server-side)
     carritoCount = await CarritoService.ObtenerCantidadItemsAsync(tiendaId);
+}
+
+@{
+    // 1. Obtener el TiendaId de los claims (necesario para el método del servicio)
+    var claimTienda = User.FindFirst("TiendaId")?.Value;
+    int tId = !string.IsNullOrEmpty(claimTienda) ? int.Parse(claimTienda) : 0;
+
+    // 2. LLAMADA ASÍNCRONA CORRECTA
+    // Al usar 'await', el resultado deja de ser Task<CarritoSession> y pasa a ser CarritoSession
+    var miCarrito = await CarritoService.ObtenerCarritoAsync(tId);
+
+    // 3. Extraer datos con seguridad (null-check)
+    // Si 'Items' falla, es posible que en tu modelo la lista se llame diferente (ej. CarritoItems)
+    var listaItems = miCarrito?.Items ?? new List<BaseConLogin.Models.CarritoSessionItem>();
+    var totalItemsCount = listaItems.Count;
+    var precioTotalCarrito = miCarrito?.Total ?? 0;
 }
 
 <!DOCTYPE html>
@@ -145,6 +165,56 @@
             transform: scale(1.1);
             transition: all 0.2s ease-in-out;
         }
+
+        /* Contenedor principal */
+        #cartHoverContainer {
+            position: relative;
+        }
+
+            /* Mostrar dropdown al pasar el ratón */
+            #cartHoverContainer:hover .cart-preview-panel {
+                display: block;
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+            }
+
+        /* Estilo del panel de preview */
+        .cart-preview-panel {
+            display: block;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(15px);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            right: 0;
+            top: 100%;
+        }
+
+            /* Puente invisible para evitar que el menú se cierre al mover el mouse al dropdown */
+            .cart-preview-panel::before {
+                content: "";
+                position: absolute;
+                top: -20px;
+                left: 0;
+                width: 100%;
+                height: 20px;
+            }
+
+        .border-bottom-faded {
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        /* Scrollbar sutil */
+        .cart-preview-items::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .cart-preview-items::-webkit-scrollbar-thumb {
+            background: #e0e0e0;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -164,7 +234,7 @@
                             }
                         </a>
                     </li>
-                    <li class="nav-item"><a class="nav-link" asp-controller="Proyectos" asp-action="Index">Proyectos</a></li>
+                    @* <li class="nav-item"><a class="nav-link" asp-controller="Proyectos" asp-action="Index">Proyectos</a></li> *@
                     @await Component.InvokeAsync("CategoriasMenu")
                     <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">Contacto</a></li>
                     @if (SignInManager.IsSignedIn(User))
@@ -191,10 +261,10 @@
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item py-2" asp-controller="ProductoSimple" asp-action="Index"><i class="bi bi-box-seam me-2 text-secondary"></i> Productos</a></li>
-                                <li><a class="dropdown-item py-2" asp-controller="Categorias" asp-action="Index"><i class="bi bi-tags-fill me-2 text-secondary"></i> Categorias</a></li>
+                                <li><a class="dropdown-item py-2" asp-controller="Categorias" asp-action="Index"><i class="bi bi-tags-fill me-2 text-secondary"></i> Categorias de productos</a></li>
                                 <li>
                                     <a class="dropdown-item py-2" asp-controller="GrupoPropiedades" asp-action="Index">
-                                        <i class="bi bi-tags-fill me-2 text-secondary"></i> Grupos de Propiedades
+                                        <i class="bi bi-grid-fill me-2 text-secondary"></i> Grupos de Propiedades
                                     </a>
                                 </li>
                                 <li><a class="dropdown-item py-2" asp-controller="PropiedadesGenericas" asp-action="Index"><i class="bi bi-gear-wide-connected me-2 text-secondary"></i>Propiedades Genéricas</a></li>
@@ -231,7 +301,7 @@
                 </div>
 
                 <ul class="navbar-nav ms-auto flex-row align-items-center gap-3">
-                    <li class="nav-item">
+                    @* <li class="nav-item">
                         <a asp-controller="Carrito" asp-action="Index" class="nav-link cart-wrapper p-2">
                             <i class="fa-solid fa-cart-shopping fs-5 text-white"></i>
                             <span id="cart-badge" class="position-absolute top-0 start-50 badge rounded-pill bg-danger"
@@ -239,6 +309,10 @@
                                 @carritoCount
                             </span>
                         </a>
+                    </li> *@
+
+                    <li class="nav-item dropdown" id="cartHoverContainer">
+                        @await Component.InvokeAsync("CartPreview")
                     </li>
 
                     <ul class="navbar-nav">

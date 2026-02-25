@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BaseConLogin.ViewComponents
 {
-    public class HeaderSearchViewComponent : ViewComponent
+    public class HeaderSearchViewComponent : Microsoft.AspNetCore.Mvc.ViewComponent
     {
         private readonly ApplicationDbContext _context;
 

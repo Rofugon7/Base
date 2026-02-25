@@ -39,6 +39,24 @@
         background-color: #e9ecef !important;
         cursor: not-allowed;
     }
+    /* Estilo base para botones de administración dinámicos */
+    .btn-custom-admin {
+        transition: all 0.2s ease-in-out;
+        padding: 0.5rem 1rem;
+        border-radius: 8px; /* Bordes redondeados modernos */
+        border-width: 2px;
+    }
+
+        .btn-custom-admin:hover {
+            filter: brightness(90%); /* Oscurece ligeramente el color dinámico al pasar el raton */
+            transform: translateY(-2px); /* Efecto de elevación */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+            color: white;
+        }
+
+        .btn-custom-admin:active {
+            transform: translateY(0);
+        }
 </style>
 
 <div class="container">
@@ -124,8 +142,12 @@
         <div class="card shadow-sm border-0 mt-5">
             <div class="card-header card-header-brand d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Configuración de Opciones y Precios</h5>
-                <button type="button" onclick="agregarPropiedad()" class="btn btn-sm btn-success">
-                    <i class="bi bi-plus-circle me-1"></i> Añadir Nueva Opción
+                <button type="button"
+                        onclick="agregarPropiedad()"
+                        class="btn btn-sm btn-custom-admin shadow-sm d-inline-flex align-items-center"
+                        style="background-color: @(ViewBag.ColorPrimario ?? "#198754"); border-color: @(ViewBag.ColorPrimario ?? "#198754"); color: white;">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    <span class="fw-bold">Añadir Nueva Opción</span>
                 </button>
             </div>
             <div class="card-body p-0">

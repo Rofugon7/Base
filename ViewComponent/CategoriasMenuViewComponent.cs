@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BaseConLogin.ViewComponents
 {
-    public class CategoriasMenuViewComponent : ViewComponent
+    public class CategoriasMenuViewComponent : Microsoft.AspNetCore.Mvc.ViewComponent
     {
         private readonly ApplicationDbContext _context;
 

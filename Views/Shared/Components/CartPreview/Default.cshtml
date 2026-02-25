@@ -1,0 +1,65 @@
+﻿@using Microsoft.AspNetCore.Http
+@using System.Security.Claims
+@inject BaseConLogin.Services.Carritos.ICarritoService CarritoService
+
+@{
+    // Obtenemos el TiendaId
+    var claimTiendaId = User.FindFirst("TiendaId")?.Value;
+    int tIdHeader = !string.IsNullOrEmpty(claimTiendaId) ? int.Parse(claimTiendaId) : 0;
+
+    // Obtenemos el objeto CarritoSession esperando la tarea
+    var miCarritoData = await CarritoService.ObtenerCarritoAsync(tIdHeader);
+}
+
+<li class="nav-item dropdown" id="cartHoverContainer">
+    <a asp-controller="Carrito" asp-action="Index" class="nav-link cart-wrapper p-2 position-relative">
+        <i class="fa-solid fa-cart-shopping fs-5 text-white"></i>
+
+        @* Acceso directo al conteo para evitar errores de contexto *@
+        @if (miCarritoData?.Items != null && miCarritoData.Items.Count > 0)
+        {
+            <span id="cart-badge" class="position-absolute top-0 start-50 translate-middle badge rounded-pill bg-danger">
+                @miCarritoData.Items.Count
+            </span>
+        }
+    </a>
+
+    <div class="dropdown-menu dropdown-menu-end shadow-lg p-0 cart-preview-panel" style="width: 320px; border: none;">
+        <div class="p-3 bg-light border-bottom rounded-top">
+            <h6 class="mb-0 text-dark fw-bold">Mi Carrito</h6>
+        </div>
+
+        <div class="cart-preview-items p-2" style="max-height: 350px; overflow-y: auto;">
+            @if (miCarritoData?.Items != null && miCarritoData.Items.Any())
+            {
+                @foreach (var item in miCarritoData.Items)
+                {
+                    <div class="d-flex align-items-center p-2 mb-1 border-bottom">
+                        <img src="@item.ImagenRuta" class="rounded border" style="width: 50px; height: 50px; object-fit: cover;" onerror="this.src='/images/no-image.png'">
+                        <div class="ms-3 flex-grow-1">
+                            <div class="small fw-bold text-dark text-truncate" style="max-width: 160px;">@item.Nombre</div>
+                            <div class="small text-muted">@item.Cantidad x @item.PrecioUnitario.ToString("C2")</div>
+                        </div>
+                    </div>
+                }
+
+                <div class="p-3">
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span class="text-muted">Total:</span>
+                        <span class="text-primary">@miCarritoData.Total.ToString("C2")</span>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Carrito" asp-action="Index" class="btn btn-sm btn-dark text-white text-center text-decoration-none">Ver todo el carrito</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-4 text-muted">
+                    <i class="fa-solid fa-cart-arrow-down fs-2 opacity-25 mb-2"></i>
+                    <p class="small mb-0">Tu carrito está vacío</p>
+                </div>
+            }
+        </div>
+    </div>
+</li>
