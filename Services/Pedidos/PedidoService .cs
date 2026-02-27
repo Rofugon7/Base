@@ -26,7 +26,7 @@ namespace BaseConLogin.Services.Pedidos
                     UserId = userId,
                     TiendaId = tiendaId,
                     Fecha = DateTime.Now,
-                    Total = carrito.Total,
+                    Total = carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad) + datosEnvio.GastosEnvio,
                     Estado = EstadoPedido.Pendiente,
                     NombreCompleto = datosEnvio.NombreCompleto,
                     Direccion = datosEnvio.Direccion,
@@ -35,8 +35,9 @@ namespace BaseConLogin.Services.Pedidos
                     Telefono = datosEnvio.Telefono,
                     DniCif = datosEnvio.DniCif,
                     Items = new List<PedidoItem>(),
-                    GastosEnvio = datosEnvio.GastosEnvio
-                    
+                    GastosEnvio = datosEnvio.GastosEnvio,
+                    TipoEnvioSeleccionado = datosEnvio.TipoEnvioSeleccionado
+
                 };
 
                 // Añadimos el pedido primero para que EF genere el ID

@@ -310,6 +310,12 @@ namespace BaseConLogin.Controllers.Front
 
             if (factura == null) return NotFound();
 
+            if (factura.Pedido != null)
+            {
+                factura.GastosEnvio = factura.Pedido.GastosEnvio;
+                factura.TipoEnvioSeleccionado = factura.Pedido.TipoEnvioSeleccionado;
+            }
+
             return View("DetalleFactura", factura);
         }
 
@@ -485,7 +491,9 @@ namespace BaseConLogin.Controllers.Front
                 HashAnterior = hashPrevio,
                 HashActual = nuevoHash,
                 QRUrl = $"https://www2.agenciatributaria.gob.es/...&hash={nuevoHash}",
-                MotivoRectificacion = string.Empty 
+                MotivoRectificacion = string.Empty,
+                GastosEnvio = pedido.GastosEnvio,
+                TipoEnvioSeleccionado = pedido.TipoEnvioSeleccionado,
             };
 
             foreach (var item in pedido.Items)

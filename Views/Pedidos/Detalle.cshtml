@@ -48,6 +48,29 @@
                         </tr>
                     }
                 </tbody>
+                <tfoot class="border-top">
+                    <tr>
+                        <td colspan="3" class="text-end text-muted">Subtotal Productos:</td>
+                        <td class="text-end">@Model.Items.Sum(i => i.Total).ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" class="text-end text-muted">Gastos de Envío:</td>
+                        <td class="text-end">
+                            @if (Model.GastosEnvio == 0)
+                            {
+                                <span class="text-success fw-bold">Gratis</span>
+                            }
+                            else
+                            {
+                                @Model.GastosEnvio.ToString("C")
+                            }
+                        </td>
+                    </tr>
+                    <tr class="table-light">
+                        <td colspan="3" class="text-end fw-bold fs-5">TOTAL:</td>
+                        <td class="text-end fw-bold fs-5 text-success">@Model.Total.ToString("C")</td>
+                    </tr>
+                </tfoot>
             </table>
 
             <div class="text-end mt-4">

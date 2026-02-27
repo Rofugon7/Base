@@ -9,7 +9,7 @@
     <form asp-action="Confirmar" asp-route-tiendaId="@Model.TiendaId" method="post">
         @Html.AntiForgeryToken()
 
-        <input type="hidden" asp-for="TiendaId" value="@Model.Carrito.TiendaId" />
+        <input type="hidden" asp-for="TiendaId" />
         <div class="row g-5">
             <div class="col-md-7">
                 <div class="card shadow-sm border-0 p-4">
@@ -116,7 +116,7 @@
                         <li class="list-group-item d-flex justify-content-between bg-transparent">
                             <strong class="fs-5">Total</strong>
                             <strong id="displayTotal" class="fs-5 text-success">
-                                @((Model.Subtotal + Model.PrecioEstandar).ToString("C"))
+                                @((Model.Carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad) + Model.PrecioEstandar).ToString("C2"))
                             </strong>
                         </li>
                     </ul>
@@ -141,16 +141,22 @@
         $(document).ready(function () {
             $('input[name="TipoEnvioSeleccionado"]').change(function () {
                 // 1. Obtener datos
-                var precioEnvio = parseFloat($(this).data('precio'));
-                // Forzamos el subtotal a usar punto como decimal para JS
-                var subtotal = parseFloat("@Model.Subtotal.ToString().Replace(",", ".")");
+                        // Dentro de tu script en la sección de cambio de radio button:
+        var precioEnvio = parseFloat($(this).data('precio'));
 
-                // 2. Calcular nuevo total
-                var nuevoTotal = subtotal + precioEnvio;
+        // Usa una variable limpia para el subtotal del producto
+        // Asegúrate de que este valor sea SOLO el de los productos (4.00 en tu caso)
+        var subtotalProductos = parseFloat("@Model.Carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad).ToString().Replace(",", ".")");
 
-                // 3. Formatear moneda
-                var formatoMoneda = { style: 'currency', currency: 'EUR' };
+        var nuevoTotal = subtotalProductos + precioEnvio;
 
+        // Actualizar el texto del total
+        $('#displayTotal').text(nuevoTotal.toLocaleString('es-ES', {
+            style: 'currency',
+            currency: 'EUR'
+        }));
+
+        var formatoMoneda = { style: 'currency', currency: 'EUR' };
                 // 4. Actualizar Interfaz
                 if (precioEnvio === 0) {
                     $('#displayGastosEnvio').text("Gratis").addClass("text-success fw-bold");

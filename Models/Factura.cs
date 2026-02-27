@@ -44,5 +44,8 @@ namespace BaseConLogin.Models
         public virtual Factura FacturaOriginal { get; set; }
 
         public string MotivoRectificacion { get; set; } // Ejemplo: "Devolución de mercancía"
+
+        public decimal GastosEnvio { get; set; }
+        public string TipoEnvioSeleccionado { get; set; }
     }
 }

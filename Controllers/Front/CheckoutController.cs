@@ -79,16 +79,17 @@ public class CheckoutController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Confirmar(CheckoutViewModel model)
     {
-        // 1. Intentamos obtener el carrito de cualquier forma posible
-        // Primero probamos con el ID que viene (aunque sea 0)
+
+        if (model.TiendaId == 0)
+        {
+            model.TiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
+        }
+
+        // 1. RECUPEAR EL CARRITO PRIMERO (Igual que antes)
         var carrito = await _carritoService.ObtenerCarritoAsync(model.TiendaId);
 
-        // 2. TRUCO DE SEGURIDAD: Si el carrito está vacío y el ID era 0, 
-        // es muy probable que el ID real esté en la sesión pero bajo otro nombre.
-        // Muchos sistemas guardan la tienda actual en una cookie o Claim.
         if (carrito == null || !carrito.Items.Any())
         {
-            // Si el TiendaContext funciona en otros lados, lo usamos aquí
             int tiendaIdRecuperada = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
             if (tiendaIdRecuperada > 0)
             {
@@ -97,19 +98,38 @@ public class CheckoutController : Controller
             }
         }
 
-        // 3. Verificación final
         if (carrito == null || !carrito.Items.Any())
         {
             return RedirectToAction("Index", "Carrito");
         }
 
-        // --- RECALCULAR ENVÍO POR SEGURIDAD ---
-        decimal precioEnvio = 5.00m;
-        decimal umbralGratis = 50.00m;
-        decimal subtotal = carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad);
-        model.GastosEnvio = (subtotal >= umbralGratis) ? 0 : precioEnvio;
+        // --- PASO CLAVE: ASIGNAR EL CARRITO AL MODELO ANTES DE NADA ---
+        // Esto evita el NullReferenceException cuando el ViewModel intente calcular totales
+        model.Carrito = carrito;
 
-        // Si el ID del modelo era 0 pero el carrito traía el ID correcto (porque lo recuperamos de sesión)
+        // 2. OBTENER CONFIGURACIÓN
+        var config = await _context.TiendaConfigs.FirstOrDefaultAsync();
+        if (config == null) throw new Exception("Configuración de tienda no encontrada.");
+
+        // Usamos el carrito que ya tenemos cargado
+        decimal subtotal = carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad);
+
+        // 3. RECALCULAR ENVÍO
+        switch (model.TipoEnvioSeleccionado)
+        {
+            case "Urgente":
+                model.GastosEnvio = config.EnvioUrgente;
+                break;
+            case "Recogida":
+                model.GastosEnvio = 0;
+                break;
+            case "Estandar":
+            default:
+                model.GastosEnvio = (subtotal >= config.EnvioGratisDesde) ? 0 : config.EnvioEstandar;
+                break;
+        }
+
+        // Reparar ID
         if (model.TiendaId == 0 && carrito.TiendaId > 0)
         {
             model.TiendaId = carrito.TiendaId.Value;
@@ -117,25 +137,26 @@ public class CheckoutController : Controller
 
         if (!ModelState.IsValid)
         {
-            model.Carrito = carrito;
+            // Rellenar datos para volver a la vista en caso de error de validación
+            model.PrecioEstandar = (subtotal >= config.EnvioGratisDesde) ? 0 : config.EnvioEstandar;
+            model.PrecioUrgente = config.EnvioUrgente;
+            model.PermitirRecogidaTienda = config.PermitirRecogidaTienda;
+            // Si Subtotal tiene 'set', lo asignamos. Si no, no pasa nada porque ya tiene el Carrito.
             return View("Index", model);
         }
 
         try
         {
             var user = await _userManager.GetUserAsync(User);
-
-            // Usamos model.TiendaId que ya debería estar reparado arriba
             int pedidoId = await _pedidoService.CrearPedidoDesdeCarritoAsync(user.Id, model.TiendaId, carrito, model);
 
             await _carritoService.LimpiarCarritoAsync(model.TiendaId);
-
             return RedirectToAction("Gracias", new { id = pedidoId });
         }
         catch (Exception ex)
         {
             ModelState.AddModelError("", "Error al procesar: " + ex.Message);
-            model.Carrito = carrito;
+            // El model ya tiene el carrito asignado arriba, así que la vista cargará bien
             return View("Index", model);
         }
     }

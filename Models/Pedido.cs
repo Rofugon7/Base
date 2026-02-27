@@ -29,7 +29,8 @@ namespace BaseConLogin.Models
         [Required]
         public string DniCif { get; set; }
 
-        public decimal GastosEnvio { get; set; } 
-        
+        public decimal GastosEnvio { get; set; }
+        public string TipoEnvioSeleccionado { get; set; }
+
     }
 }

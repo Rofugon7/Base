@@ -84,6 +84,15 @@
                         <td class="text-center">@linea.Cantidad</td>
                         <td class="text-end">@linea.PrecioUnitario.ToString("C")</td>
                         <td class="text-end">@((linea.Cantidad * linea.PrecioUnitario).ToString("C"))</td>
+                    </tr>                    
+                }
+                @if (Model.GastosEnvio > 0)
+                {
+                    <tr>
+                        <td>Gastos de Envío (@Model.TipoEnvioSeleccionado)</td>
+                        <td class="text-center">1</td>
+                        <td class="text-end">@Model.GastosEnvio.ToString("C2")</td>
+                        <td class="text-end">@Model.GastosEnvio.ToString("C2")</td>
                     </tr>
                 }
             </tbody>

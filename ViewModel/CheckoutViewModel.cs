@@ -32,7 +32,7 @@ namespace BaseConLogin.Models.ViewModels
         public string DniCif { get; set; }
 
         public decimal GastosEnvio { get; set; }
-        public decimal Subtotal => Carrito?.Items.Sum(i => i.PrecioUnitario * i.Cantidad) ?? 0; // O PrecioPersonalizado
+        public decimal Subtotal { get; set; }
         public decimal Total => Subtotal + GastosEnvio;
 
         // Opciones de configuración que vienen de la BD
@@ -44,5 +44,10 @@ namespace BaseConLogin.Models.ViewModels
         // El tipo que el usuario selecciona (puedes usar un string o enum)
         // Valores: "Estandar", "Urgente", "Recogida"
         public string TipoEnvioSeleccionado { get; set; } = "Estandar";
+
+        public decimal PrecioEnvioSeleccionado { get; set; } // Lo que viene del input hidden
+
+        // Propiedad calculada para mostrar siempre la suma real
+        public decimal TotalFinal => ((Carrito?.Items?.Sum(i => i.PrecioUnitario * i.Cantidad)) ?? 0) + GastosEnvio;
     }
 }
