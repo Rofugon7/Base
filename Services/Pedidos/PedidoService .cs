@@ -34,7 +34,9 @@ namespace BaseConLogin.Services.Pedidos
                     CodigoPostal = datosEnvio.CodigoPostal,
                     Telefono = datosEnvio.Telefono,
                     DniCif = datosEnvio.DniCif,
-                    Items = new List<PedidoItem>()
+                    Items = new List<PedidoItem>(),
+                    GastosEnvio = datosEnvio.GastosEnvio
+                    
                 };
 
                 // Añadimos el pedido primero para que EF genere el ID
@@ -61,7 +63,8 @@ namespace BaseConLogin.Services.Pedidos
                         ProductoBaseId = item.ProductoBaseId,
                         NombreProducto = item.Nombre,
                         PrecioUnitario = item.PrecioUnitario,
-                        Cantidad = item.Cantidad
+                        Cantidad = item.Cantidad,
+                        OpcionesSeleccionadas = item.OpcionesSeleccionadas
                     };
 
                     _context.PedidoItems.Add(nuevoItem);

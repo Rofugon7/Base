@@ -30,5 +30,19 @@ namespace BaseConLogin.Models.ViewModels
 
         [Required(ErrorMessage = "El Dni/Cif es obligatorio")]
         public string DniCif { get; set; }
+
+        public decimal GastosEnvio { get; set; }
+        public decimal Subtotal => Carrito?.Items.Sum(i => i.PrecioUnitario * i.Cantidad) ?? 0; // O PrecioPersonalizado
+        public decimal Total => Subtotal + GastosEnvio;
+
+        // Opciones de configuración que vienen de la BD
+        public bool PermitirRecogidaTienda { get; set; }
+        public decimal PrecioEstandar { get; set; }
+        public decimal PrecioUrgente { get; set; }
+        public decimal UmbralEnvioGratis { get; set; }
+
+        // El tipo que el usuario selecciona (puedes usar un string o enum)
+        // Valores: "Estandar", "Urgente", "Recogida"
+        public string TipoEnvioSeleccionado { get; set; } = "Estandar";
     }
 }

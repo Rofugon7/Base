@@ -1,6 +1,8 @@
 ﻿@model BaseConLogin.Models.Pedido
 @{
     ViewData["Title"] = "¡Pedido Confirmado!";
+    // Calculamos el subtotal de los productos para el desglose
+    var subtotalProductos = Model.Items.Sum(i => i.Total);
 }
 
 <div class="container py-5">
@@ -37,23 +39,39 @@
                             <tr>
                                 <th>Producto</th>
                                 <th class="text-center">Cant.</th>
-                                <th class="text-end">Subtotal</th>
+                                <th class="text-end">Precio</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model.Items)
                             {
                                 <tr>
-                                    <td>@item.NombreProducto</td>
+                                    <td>
+                                        <div class="fw-bold">@item.NombreProducto</div>
+                                        @if (!string.IsNullOrEmpty(item.OpcionesSeleccionadas))
+                                        {
+                                            <div class="small text-muted">@item.OpcionesSeleccionadas</div>
+                                        }
+                                    </td>
                                     <td class="text-center">@item.Cantidad</td>
                                     <td class="text-end">@item.Total.ToString("C")</td>
                                 </tr>
                             }
                         </tbody>
-                        <tfoot>
-                            <tr class="border-top">
-                                <td colspan="2" class="fs-5 fw-bold pt-3 text-end">Total Pagado:</td>
-                                <td class="fs-5 fw-bold pt-3 text-end text-success">@Model.Total.ToString("C")</td>
+                        <tfoot class="border-top">
+                            <tr>
+                                <td colspan="2" class="text-end text-muted pt-3">Subtotal:</td>
+                                <td class="text-end pt-3">@subtotalProductos.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="text-end text-muted">Gastos de Envío:</td>
+                                <td class="text-end @(Model.GastosEnvio == 0 ? "text-success fw-bold" : "")">
+                                    @(Model.GastosEnvio == 0 ? "Gratis" : Model.GastosEnvio.ToString("C"))
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="fs-5 fw-bold text-end">Total Pagado:</td>
+                                <td class="fs-5 fw-bold text-end text-success">@Model.Total.ToString("C")</td>
                             </tr>
                         </tfoot>
                     </table>
@@ -73,7 +91,6 @@
 </div>
 
 <style>
-    /* Estilo para que el recibo se vea bien al imprimir */
     @@media print {
         .btn, .navbar, footer {
             display: none !important;

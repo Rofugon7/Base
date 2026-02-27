@@ -1,4 +1,5 @@
-﻿using BaseConLogin.Models;
+﻿using BaseConLogin.Data;
+using BaseConLogin.Models;
 using BaseConLogin.Models.ViewModels;
 using BaseConLogin.Services.Carritos;
 using BaseConLogin.Services.Pedidos;
@@ -6,6 +7,7 @@ using BaseConLogin.Services.Tiendas;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 [Authorize]
 [Route("checkout")]
@@ -15,17 +17,20 @@ public class CheckoutController : Controller
     private readonly ITiendaContext _tiendaContext;
     private readonly IPedidoService _pedidoService;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly ApplicationDbContext _context;
 
     public CheckoutController(
         IPedidoService pedidoService,
         ITiendaContext tiendaContext,
         UserManager<ApplicationUser> userManager,
-        ICarritoService carritoService)
+        ICarritoService carritoService,
+        ApplicationDbContext context)
     {
         _pedidoService = pedidoService;
         _tiendaContext = tiendaContext;
         _userManager = userManager;
         _carritoService = carritoService;
+        _context = context;
     }
 
     [HttpGet("")]
@@ -36,9 +41,18 @@ public class CheckoutController : Controller
 
         var tiendaId = _tiendaContext.ObtenerTiendaIdOpcional() ?? 0;
         var carrito = await _carritoService.ObtenerCarritoAsync(tiendaId);
+        var config = await _context.TiendaConfigs.FirstOrDefaultAsync(); // O por TiendaId
 
         if (carrito == null || !carrito.Items.Any())
             return RedirectToAction("Index", "Carrito");
+
+        // --- LÓGICA DE ENVÍO ---
+        // Aquí puedes consultar tu base de datos. Por ahora, usemos valores de ejemplo:
+        decimal precioEnvio = 5.00m;
+        decimal umbralGratis = 50.00m;
+        decimal subtotal = carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad);
+
+        decimal gastosEnvioFinal = (subtotal >= umbralGratis) ? 0 : precioEnvio;
 
         var model = new CheckoutViewModel
         {
@@ -49,7 +63,14 @@ public class CheckoutController : Controller
             Direccion = user.Direccion,
             Ciudad = user.Ciudad,
             CodigoPostal = user.CodigoPostal,
-            Telefono = user.TelefonoContacto
+            Telefono = user.TelefonoContacto,
+            GastosEnvio = gastosEnvioFinal,
+            PermitirRecogidaTienda = config.PermitirRecogidaTienda,
+            PrecioUrgente = config.EnvioUrgente,
+            UmbralEnvioGratis = config.EnvioGratisDesde,
+            // Lógica de Envío Gratis
+            PrecioEstandar = (subtotal >= config.EnvioGratisDesde) ? 0 : config.EnvioEstandar,
+            TipoEnvioSeleccionado = "Estandar" // Por defecto
         };
         return View(model);
     }
@@ -81,6 +102,12 @@ public class CheckoutController : Controller
         {
             return RedirectToAction("Index", "Carrito");
         }
+
+        // --- RECALCULAR ENVÍO POR SEGURIDAD ---
+        decimal precioEnvio = 5.00m;
+        decimal umbralGratis = 50.00m;
+        decimal subtotal = carrito.Items.Sum(i => i.PrecioUnitario * i.Cantidad);
+        model.GastosEnvio = (subtotal >= umbralGratis) ? 0 : precioEnvio;
 
         // Si el ID del modelo era 0 pero el carrito traía el ID correcto (porque lo recuperamos de sesión)
         if (model.TiendaId == 0 && carrito.TiendaId > 0)

@@ -25,5 +25,7 @@ namespace BaseConLogin.Models
 
         public virtual ICollection<PedidoDetallePropiedad> PropiedadesElegidas { get; set; } = new List<PedidoDetallePropiedad>();
 
+        public string? OpcionesSeleccionadas { get; set; }
+
     }
 }

@@ -45,6 +45,47 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="card shadow-sm border-0 p-4 mt-4">
+                    <h4 class="mb-3"><i class="bi bi-truck me-2"></i>Método de Envío</h4>
+                    <div class="list-group">
+
+                        <label class="list-group-item d-flex justify-content-between align-items-center py-3" style="cursor: pointer;">
+                            <div>
+                                <input class="form-check-input me-2" type="radio" asp-for="TipoEnvioSeleccionado" value="Estandar"
+                                       data-precio="@Model.PrecioEstandar" checked>
+                                <span class="fw-bold">Envío Estándar</span>
+                                <div class="text-muted small ms-4">Entrega en 3-5 días hábiles</div>
+                            </div>
+                            <span class="badge @(Model.PrecioEstandar == 0 ? "bg-success" : "bg-secondary") rounded-pill">
+                                @(Model.PrecioEstandar == 0 ? "Gratis" : Model.PrecioEstandar.ToString("C2"))
+                            </span>
+                        </label>
+
+                        <label class="list-group-item d-flex justify-content-between align-items-center py-3" style="cursor: pointer;">
+                            <div>
+                                <input class="form-check-input me-2" type="radio" asp-for="TipoEnvioSeleccionado" value="Urgente"
+                                       data-precio="@Model.PrecioUrgente">
+                                <span class="fw-bold text-danger"><i class="bi bi-lightning-fill"></i> Envío Urgente</span>
+                                <div class="text-muted small ms-4">Entrega en 24h</div>
+                            </div>
+                            <span class="badge bg-secondary rounded-pill">@Model.PrecioUrgente.ToString("C2")</span>
+                        </label>
+
+                        @if (Model.PermitirRecogidaTienda)
+                        {
+                            <label class="list-group-item d-flex justify-content-between align-items-center py-3" style="cursor: pointer;">
+                                <div>
+                                    <input class="form-check-input me-2" type="radio" asp-for="TipoEnvioSeleccionado" value="Recogida"
+                                           data-precio="0">
+                                    <span class="fw-bold">Recogida en Tienda</span>
+                                    <div class="text-muted small ms-4">Pasa por nuestro local a recogerlo</div>
+                                </div>
+                                <span class="badge bg-success rounded-pill">Gratis</span>
+                            </label>
+                        }
+                    </div>
+                </div>
             </div>
 
             <div class="col-md-5">
@@ -64,11 +105,23 @@
                                 <span class="text-muted">@((item.PrecioUnitario * item.Cantidad).ToString("C"))</span>
                             </li>
                         }
+
+                        <li class="list-group-item d-flex justify-content-between bg-transparent">
+                            <span class="text-muted">Gastos de envío</span>
+                            <span id="displayGastosEnvio" class="@(Model.PrecioEstandar == 0 ? "text-success fw-bold" : "")">
+                                @(Model.PrecioEstandar == 0 ? "Gratis" : Model.PrecioEstandar.ToString("C2"))
+                            </span>
+                        </li>
+
                         <li class="list-group-item d-flex justify-content-between bg-transparent">
                             <strong class="fs-5">Total</strong>
-                            <strong class="fs-5 text-success">@Model.Carrito.Total.ToString("C")</strong>
+                            <strong id="displayTotal" class="fs-5 text-success">
+                                @((Model.Subtotal + Model.PrecioEstandar).ToString("C"))
+                            </strong>
                         </li>
                     </ul>
+
+                    <input type="hidden" name="GastosEnvio" id="inputGastosEnvioHidden" value="@Model.PrecioEstandar.ToString("F2").Replace(",", ".")" />
 
                     <div class="d-grid gap-2">
                         <button class="btn btn-success btn-lg shadow" type="submit">
@@ -84,4 +137,32 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $('input[name="TipoEnvioSeleccionado"]').change(function () {
+                // 1. Obtener datos
+                var precioEnvio = parseFloat($(this).data('precio'));
+                // Forzamos el subtotal a usar punto como decimal para JS
+                var subtotal = parseFloat("@Model.Subtotal.ToString().Replace(",", ".")");
+
+                // 2. Calcular nuevo total
+                var nuevoTotal = subtotal + precioEnvio;
+
+                // 3. Formatear moneda
+                var formatoMoneda = { style: 'currency', currency: 'EUR' };
+
+                // 4. Actualizar Interfaz
+                if (precioEnvio === 0) {
+                    $('#displayGastosEnvio').text("Gratis").addClass("text-success fw-bold");
+                } else {
+                    $('#displayGastosEnvio').text(precioEnvio.toLocaleString('es-ES', formatoMoneda)).removeClass("text-success fw-bold");
+                }
+
+                $('#displayTotal').text(nuevoTotal.toLocaleString('es-ES', formatoMoneda));
+
+                // 5. Actualizar el input hidden para el POST
+                $('#inputGastosEnvioHidden').val(precioEnvio.toFixed(2));
+            });
+        });
+    </script>
 }

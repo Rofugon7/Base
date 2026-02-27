@@ -20,6 +20,15 @@ namespace BaseConLogin.Models
         public virtual ICollection<CarritoPersistenteItem> Items { get; set; } = new List<CarritoPersistenteItem>();
 
         public Tienda Tienda { get; set; } = null!;
+
+        //Gastos de envio
+        public decimal GastosEnvio { get; set; }
+
+        [NotMapped]
+        public decimal Subtotal => Items?.Sum(i => i.PrecioPersonalizado * i.Cantidad) ?? 0;
+
+        [NotMapped]
+        public decimal Total => Subtotal + GastosEnvio;
     }
 
 

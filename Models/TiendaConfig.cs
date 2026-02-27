@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BaseConLogin.Models
 {
@@ -114,5 +115,16 @@ namespace BaseConLogin.Models
         [Required]
         [Display(Name = "Formatos Permitidos (separados por coma)")]
         public string FormatosPermitidos { get; set; } = ".pdf,.jpg,.jpeg,.png";
+
+        public bool PermitirRecogidaTienda { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal EnvioEstandar { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal EnvioUrgente { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal EnvioGratisDesde { get; set; }
     }
 }

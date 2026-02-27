@@ -4,6 +4,7 @@ using BaseConLogin.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BaseConLogin.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260227094128_AddDetallesOpcionesToPedidoItem")]
+    partial class AddDetallesOpcionesToPedidoItem
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -999,15 +1002,6 @@ namespace BaseConLogin.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("EnvioEstandar")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("EnvioGratisDesde")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("EnvioUrgente")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Folio")
                         .HasColumnType("nvarchar(max)");
 
@@ -1045,9 +1039,6 @@ namespace BaseConLogin.Migrations
                     b.Property<string>("NombreEmpresa")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("PermitirRecogidaTienda")
-                        .HasColumnType("bit");
 
                     b.Property<string>("PrefijoFactura")
                         .IsRequired()

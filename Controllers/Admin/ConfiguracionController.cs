@@ -106,6 +106,10 @@ namespace BaseConLogin.Controllers.Admin
 
                     configExistente.MaxFileSizeMB = model.MaxFileSizeMB;
                     configExistente.FormatosPermitidos = model.FormatosPermitidos;
+                    configExistente.PermitirRecogidaTienda = model.PermitirRecogidaTienda;
+                    configExistente.EnvioEstandar = model.EnvioEstandar;
+                    configExistente.EnvioUrgente = model.EnvioUrgente;
+                    configExistente.EnvioGratisDesde = model.EnvioGratisDesde;
 
                     _context.Update(configExistente);
                 }
