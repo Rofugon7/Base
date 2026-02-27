@@ -1,0 +1,43 @@
+﻿@model BaseConLogin.Models.Pedido
+
+<div class="container py-5 text-center">
+    <div class="card shadow border-0 p-4 mx-auto" style="max-width: 700px;">
+        <i class="bi bi-bank fs-1 text-primary mb-3"></i>
+        <h2 class="fw-bold">Pedido #@Model.Id Recibido</h2>
+        <p class="lead text-muted">Para completar tu compra, realiza una transferencia bancaria con los siguientes datos:</p>
+
+        <div class="alert alert-info bg-light border-2 my-4 text-start">
+            <div class="row mb-2">
+                <div class="col-sm-4 fw-bold text-uppercase small">Importe Total:</div>
+                <div class="col-sm-8 fs-5 fw-bold text-success">@Model.Total.ToString("C2")</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-4 fw-bold text-uppercase small">Concepto:</div>
+                <div class="col-sm-8 fw-bold">Pedido #@Model.Id</div>
+            </div>
+            <hr />
+            <div class="row mb-2">
+                <div class="col-sm-4 fw-bold text-uppercase small">Titular:</div>
+                <div class="col-sm-8">@ViewBag.Titular</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-4 fw-bold text-uppercase small">IBAN:</div>
+                <div class="col-sm-8 fw-bold fs-5">@ViewBag.Iban</div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm-4 fw-bold text-uppercase small">Entidad:</div>
+                <div class="col-sm-8">@ViewBag.Banco</div>
+            </div>
+        </div>
+
+        <p class="small text-muted mb-4">
+            <i class="bi bi-info-circle me-1"></i>
+            Tu pedido no será tramitado hasta que el importe haya sido recibido en nuestra cuenta.
+        </p>
+
+        <div class="d-grid gap-2">
+            <a asp-action="MisPedidos" class="btn btn-primary btn-lg">Ir a mis pedidos</a>
+            <button onclick="window.print()" class="btn btn-outline-secondary">Imprimir instrucciones</button>
+        </div>
+    </div>
+</div>

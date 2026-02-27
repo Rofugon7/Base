@@ -32,5 +32,12 @@ namespace BaseConLogin.Models
         public decimal GastosEnvio { get; set; }
         public string TipoEnvioSeleccionado { get; set; }
 
+        public enum MetodoPago
+        {
+            Tarjeta, // Para Redsys
+            PayPal,
+            Transferencia // Ingreso en cuenta
+        }
+
     }
 }

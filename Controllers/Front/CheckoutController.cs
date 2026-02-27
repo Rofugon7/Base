@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using static BaseConLogin.Models.ViewModels.CheckoutViewModel;
 
 [Authorize]
 [Route("checkout")]
@@ -151,7 +152,20 @@ public class CheckoutController : Controller
             int pedidoId = await _pedidoService.CrearPedidoDesdeCarritoAsync(user.Id, model.TiendaId, carrito, model);
 
             await _carritoService.LimpiarCarritoAsync(model.TiendaId);
-            return RedirectToAction("Gracias", new { id = pedidoId });
+            switch (model.MetodoPagoSeleccionado)
+            {
+                case MetodoPago.Tarjeta:
+                    return RedirectToAction("PagarRedsys", new { id = pedidoId });
+
+                case MetodoPago.PayPal:
+                    return RedirectToAction("PagarPayPal", new { id = pedidoId });
+
+                case MetodoPago.Transferencia:
+                    return RedirectToAction("InstruccionesTransferencia", new { id = pedidoId });
+
+                default:
+                    return RedirectToAction("Gracias", new { id = pedidoId });
+            }
         }
         catch (Exception ex)
         {
@@ -159,6 +173,22 @@ public class CheckoutController : Controller
             // El model ya tiene el carrito asignado arriba, así que la vista cargará bien
             return View("Index", model);
         }
+    }
+
+    [HttpGet("pedido/instrucciones-transferencia/{id}")]
+    public async Task<IActionResult> InstruccionesTransferencia(int id)
+    {
+        var pedido = await _context.Pedidos.FirstOrDefaultAsync(p => p.Id == id);
+        var config = await _context.TiendaConfigs.FirstOrDefaultAsync();
+
+        if (pedido == null) return NotFound();
+
+        // Podemos usar un ViewModel o ViewBag para pasar el IBAN
+        ViewBag.Iban = config?.IbanTransferencia;
+        ViewBag.Titular = config?.TitularCuenta;
+        ViewBag.Banco = config?.NombreBanco;
+
+        return View(pedido);
     }
 
     [HttpGet("gracias/{id}")]

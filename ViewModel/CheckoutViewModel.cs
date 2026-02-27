@@ -49,5 +49,14 @@ namespace BaseConLogin.Models.ViewModels
 
         // Propiedad calculada para mostrar siempre la suma real
         public decimal TotalFinal => ((Carrito?.Items?.Sum(i => i.PrecioUnitario * i.Cantidad)) ?? 0) + GastosEnvio;
+
+        public enum MetodoPago
+        {
+            Tarjeta, // Para Redsys
+            PayPal,
+            Transferencia // Ingreso en cuenta
+        }
+
+        public MetodoPago MetodoPagoSeleccionado { get; set; }
     }
 }

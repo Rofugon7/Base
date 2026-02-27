@@ -126,5 +126,9 @@ namespace BaseConLogin.Models
 
         [Column(TypeName = "decimal(18,2)")]
         public decimal EnvioGratisDesde { get; set; }
+
+        public string? IbanTransferencia { get; set; }
+        public string? TitularCuenta { get; set; }
+        public string? NombreBanco { get; set; }
     }
 }

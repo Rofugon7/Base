@@ -111,6 +111,10 @@ namespace BaseConLogin.Controllers.Admin
                     configExistente.EnvioUrgente = model.EnvioUrgente;
                     configExistente.EnvioGratisDesde = model.EnvioGratisDesde;
 
+                    configExistente.IbanTransferencia = model.IbanTransferencia;
+                    configExistente.TitularCuenta = model.TitularCuenta;
+                    configExistente.NombreBanco = model.NombreBanco;
+
                     _context.Update(configExistente);
                 }
 

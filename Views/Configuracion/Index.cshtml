@@ -153,6 +153,34 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="card shadow-sm border-0 mb-4 border-start border-primary border-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0"><i class="bi bi-bank me-2"></i>Configuración de Transferencia Bancaria</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="TitularCuenta" class="form-label fw-bold">Titular de la Cuenta</label>
+                                        <input asp-for="TitularCuenta" class="form-control" placeholder="Nombre de la empresa o persona" />
+                                        <span asp-validation-for="TitularCuenta" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="NombreBanco" class="form-label fw-bold">Entidad Bancaria</label>
+                                        <input asp-for="NombreBanco" class="form-control" placeholder="Ej: Santander, BBVA..." />
+                                        <span asp-validation-for="NombreBanco" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label asp-for="IbanTransferencia" class="form-label fw-bold">Número de Cuenta (IBAN)</label>
+                                        <input asp-for="IbanTransferencia" class="form-control" placeholder="ES00 0000 0000 0000 0000 0000" />
+                                        <span asp-validation-for="IbanTransferencia" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning small">
+                                    <i class="bi bi-info-circle me-1"></i> Estos datos se mostrarán al cliente cuando elija "Transferencia Bancaria" al finalizar su compra.
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     @* COLUMNA DERECHA: CONFIGURACIÓN TÉCNICA Y BRANDING *@

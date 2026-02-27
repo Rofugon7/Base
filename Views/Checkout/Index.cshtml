@@ -130,7 +130,25 @@
                         <a asp-controller="Carrito" asp-action="Index" class="btn btn-link text-muted">Editar carrito</a>
                     </div>
                 </div>
+                <div class="card shadow-sm border-0 bg-light p-4">
+                <h4 class="mb-3">Método de Pago</h4>
+                <div class="my-3">
+                    <div class="form-check">
+                        <input asp-for="MetodoPagoSeleccionado" value="Tarjeta" type="radio" class="form-check-input" checked>
+                        <label class="form-check-label">Tarjeta de Crédito (Redsys)</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="MetodoPagoSeleccionado" value="PayPal" type="radio" class="form-check-input">
+                        <label class="form-check-label">PayPal</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="MetodoPagoSeleccionado" value="Transferencia" type="radio" class="form-check-input">
+                        <label class="form-check-label">Transferencia Bancaria</label>
+                    </div>
+                </div>
             </div>
+            </div>
+            
         </div>
     </form>
 </div>
